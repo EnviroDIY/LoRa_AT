@@ -1,27 +1,27 @@
 /**
- * @file       TinyGsmTime.tpp
+ * @file       TinyLoRaTime.tpp
  * @author     Volodymyr Shymanskyy
  * @license    LGPL-3.0
  * @copyright  Copyright (c) 2016 Volodymyr Shymanskyy
  * @date       Nov 2016
  */
 
-#ifndef SRC_TINYGSMTIME_H_
-#define SRC_TINYGSMTIME_H_
+#ifndef SRC_TinyLoRaTIME_H_
+#define SRC_TinyLoRaTIME_H_
 
-#include "TinyGsmCommon.h"
+#include "TinyLoRaCommon.h"
 
-#define TINY_GSM_MODEM_HAS_TIME
+#define TINY_LORA_HAS_TIME
 
-enum TinyGSMDateTimeFormat { DATE_FULL = 0, DATE_TIME = 1, DATE_DATE = 2 };
+enum TinyLoRaDateTimeFormat { DATE_FULL = 0, DATE_TIME = 1, DATE_DATE = 2 };
 
 template <class modemType>
-class TinyGsmTime {
+class TinyLoRaTime {
  public:
   /*
    * Time functions
    */
-  String getGSMDateTime(TinyGSMDateTimeFormat format) {
+  String getGSMDateTime(TinyLoRaDateTimeFormat format) {
     return thisModem().getGSMDateTimeImpl(format);
   }
   bool getNetworkTime(int* year, int* month, int* day, int* hour, int* minute,
@@ -45,7 +45,7 @@ class TinyGsmTime {
    * Time functions
    */
  protected:
-  String getGSMDateTimeImpl(TinyGSMDateTimeFormat format) {
+  String getGSMDateTimeImpl(TinyLoRaDateTimeFormat format) {
     thisModem().sendAT(GF("+CCLK?"));
     if (thisModem().waitResponse(2000L, GF("+CCLK: \"")) != 1) { return ""; }
 
@@ -103,4 +103,4 @@ class TinyGsmTime {
   }
 };
 
-#endif  // SRC_TINYGSMTIME_H_
+#endif  // SRC_TinyLoRaTIME_H_

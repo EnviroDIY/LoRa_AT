@@ -9,30 +9,10 @@
     "authors": ["Nick O'Leary"]
   },
   {
-    "name": "Blynk",
-    "owner": "blynkkk",
-    "library id": "415",
-    "url": "https://github.com/blynkkk/blynk-library.git",
-    "version": "~0.6.7",
-    "authors": ["Volodymyr Shymanskyy"],
-    "frameworks": "*",
-    "platforms": "*"
-  },
-  {
-    "name": "AceCRC",
-    "owner": "bxparks",
-    "library id": "1202",
-    "url": "https://github.com/bxparks/AceCRC.git",
-    "version": "~1.0.1",
-    "authors": ["Brian T. Park"],
-    "frameworks": "*",
-    "platforms": "*"
-  },
-  {
     "name": "StreamDebugger",
     "owner": "vshymanskyy",
     "library id": "1286",
-    "url": "https://github.com/vshymanskyy/StreamDebugger.git",
+    "url": "https://github.com/EnviroDIY/StreamDebugger.git",
     "version": "~1.0.1",
     "authors": ["Volodymyr Shymanskyy"],
     "frameworks": "*",

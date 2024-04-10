@@ -1,20 +1,20 @@
 /**
- * @file       TinyGsmTemperature.tpp
+ * @file       TinyLoRaTemperature.tpp
  * @author     Volodymyr Shymanskyy
  * @license    LGPL-3.0
  * @copyright  Copyright (c) 2016 Volodymyr Shymanskyy
  * @date       Nov 2016
  */
 
-#ifndef SRC_TINYGSMTEMPERATURE_H_
-#define SRC_TINYGSMTEMPERATURE_H_
+#ifndef SRC_TinyLoRaTEMPERATURE_H_
+#define SRC_TinyLoRaTEMPERATURE_H_
 
-#include "TinyGsmCommon.h"
+#include "TinyLoRaCommon.h"
 
-#define TINY_GSM_MODEM_HAS_TEMPERATURE
+#define TINY_LORA_HAS_TEMPERATURE
 
 template <class modemType>
-class TinyGsmTemperature {
+class TinyLoRaTemperature {
  public:
   /*
    * Temperature functions
@@ -34,7 +34,7 @@ class TinyGsmTemperature {
     return static_cast<modemType&>(*this);
   }
 
-  float getTemperatureImpl() TINY_GSM_ATTR_NOT_IMPLEMENTED;
+  float getTemperatureImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
 };
 
-#endif  // SRC_TINYGSMTEMPERATURE_H_
+#endif  // SRC_TinyLoRaTEMPERATURE_H_

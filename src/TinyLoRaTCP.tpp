@@ -1,48 +1,48 @@
 /**
- * @file       TinyGsmTCP.tpp
+ * @file       TinyLoRaTCP.tpp
  * @author     Volodymyr Shymanskyy
  * @license    LGPL-3.0
  * @copyright  Copyright (c) 2016 Volodymyr Shymanskyy
  * @date       Nov 2016
  */
 
-#ifndef SRC_TINYGSMTCP_H_
-#define SRC_TINYGSMTCP_H_
+#ifndef SRC_TinyLoRaTCP_H_
+#define SRC_TinyLoRaTCP_H_
 
-#include "TinyGsmCommon.h"
+#include "TinyLoRaCommon.h"
 
-#define TINY_GSM_MODEM_HAS_TCP
+#define TINY_LORA_HAS_TCP
 
-#include "TinyGsmFifo.h"
+#include "TinyLoRaFifo.h"
 
-#if !defined(TINY_GSM_RX_BUFFER)
-#define TINY_GSM_RX_BUFFER 64
+#if !defined(TINY_LORA_RX_BUFFER)
+#define TINY_LORA_RX_BUFFER 64
 #endif
 
 // Because of the ordering of resolution of overrides in templates, these need
 // to be written out every time.  This macro is to shorten that.
-#define TINY_GSM_CLIENT_CONNECT_OVERRIDES                             \
-  int connect(IPAddress ip, uint16_t port, int timeout_s) {           \
-    return connect(TinyGsmStringFromIp(ip).c_str(), port, timeout_s); \
-  }                                                                   \
-  int connect(const char* host, uint16_t port) override {             \
-    return connect(host, port, 75);                                   \
-  }                                                                   \
-  int connect(IPAddress ip, uint16_t port) override {                 \
-    return connect(ip, port, 75);                                     \
+#define TINY_LORA_CLIENT_CONNECT_OVERRIDES                             \
+  int connect(IPAddress ip, uint16_t port, int timeout_s) {            \
+    return connect(TinyLoRaStringFromIp(ip).c_str(), port, timeout_s); \
+  }                                                                    \
+  int connect(const char* host, uint16_t port) override {              \
+    return connect(host, port, 75);                                    \
+  }                                                                    \
+  int connect(IPAddress ip, uint16_t port) override {                  \
+    return connect(ip, port, 75);                                      \
   }
 
 // // For modules that do not store incoming data in any sort of buffer
-// #define TINY_GSM_NO_MODEM_BUFFER
+// #define TINY_LORA_NO_MODEM_BUFFER
 // // Data is stored in a buffer, but we can only read from the buffer,
 // // not check how much data is stored in it
-// #define TINY_GSM_BUFFER_READ_NO_CHECK
+// #define TINY_LORA_BUFFER_READ_NO_CHECK
 // // Data is stored in a buffer and we can both read and check the size
 // // of the buffer
-// #define TINY_GSM_BUFFER_READ_AND_CHECK_SIZE
+// #define TINY_LORA_BUFFER_READ_AND_CHECK_SIZE
 
 template <class modemType, uint8_t muxCount>
-class TinyGsmTCP {
+class TinyLoRaTCP {
  public:
   /*
    * Basic functions
@@ -68,8 +68,8 @@ class TinyGsmTCP {
  public:
   class GsmClient : public Client {
     // Make all classes created from the modem template friends
-    friend class TinyGsmTCP<modemType, muxCount>;
-    typedef TinyGsmFifo<uint8_t, TINY_GSM_RX_BUFFER> RxFifo;
+    friend class TinyLoRaTCP<modemType, muxCount>;
+    typedef TinyLoRaFifo<uint8_t, TINY_LORA_RX_BUFFER> RxFifo;
 
    public:
     // bool init(modemType* modem, uint8_t);
@@ -78,7 +78,7 @@ class TinyGsmTCP {
     // Connect to a IP address given as an IPAddress object by
     // converting said IP address to text
     // virtual int connect(IPAddress ip,uint16_t port, int timeout_s) {
-    //   return connect(TinyGsmStringFromIp(ip).c_str(), port,
+    //   return connect(TinyLoRaStringFromIp(ip).c_str(), port,
     //   timeout_s);
     // }
     // int connect(const char* host, uint16_t port) override {
@@ -88,7 +88,7 @@ class TinyGsmTCP {
     //   return connect(ip, port, 75);
     // }
 
-    static inline String TinyGsmStringFromIp(IPAddress ip) {
+    static inline String TinyLoRaStringFromIp(IPAddress ip) {
       String host;
       host.reserve(16);
       host += ip[0];
@@ -108,7 +108,7 @@ class TinyGsmTCP {
 
     // Writes data out on the client using the modem send functionality
     size_t write(const uint8_t* buf, size_t size) override {
-      TINY_GSM_YIELD();
+      TINY_LORA_YIELD();
       at->maintain();
       return at->modemSend(buf, size, mux);
     }
@@ -123,20 +123,20 @@ class TinyGsmTCP {
     }
 
     int available() override {
-      TINY_GSM_YIELD();
-#if defined TINY_GSM_NO_MODEM_BUFFER
-      // Returns the number of characters available in the TinyGSM fifo
+      TINY_LORA_YIELD();
+#if defined TINY_LORA_NO_MODEM_BUFFER
+      // Returns the number of characters available in the TinyLoRa fifo
       if (!rx.size() && sock_connected) { at->maintain(); }
       return rx.size();
 
-#elif defined TINY_GSM_BUFFER_READ_NO_CHECK
-      // Returns the combined number of characters available in the TinyGSM
+#elif defined TINY_LORA_BUFFER_READ_NO_CHECK
+      // Returns the combined number of characters available in the TinyLoRa
       // fifo and the modem chips internal fifo.
       if (!rx.size()) { at->maintain(); }
       return static_cast<uint16_t>(rx.size()) + sock_available;
 
-#elif defined TINY_GSM_BUFFER_READ_AND_CHECK_SIZE
-      // Returns the combined number of characters available in the TinyGSM
+#elif defined TINY_LORA_BUFFER_READ_AND_CHECK_SIZE
+      // Returns the combined number of characters available in the TinyLoRa
       // fifo and the modem chips internal fifo, doing an extra check-in
       // with the modem to see if anything has arrived without a UURC.
       if (!rx.size()) {
@@ -156,15 +156,15 @@ class TinyGsmTCP {
     }
 
     int read(uint8_t* buf, size_t size) override {
-      TINY_GSM_YIELD();
+      TINY_LORA_YIELD();
       size_t cnt = 0;
 
-#if defined TINY_GSM_NO_MODEM_BUFFER
-      // Reads characters out of the TinyGSM fifo, waiting for any URC's
+#if defined TINY_LORA_NO_MODEM_BUFFER
+      // Reads characters out of the TinyLoRa fifo, waiting for any URC's
       // from the modem for new data if there's nothing in the fifo.
       uint32_t _startMillis = millis();
       while (cnt < size && millis() - _startMillis < _timeout) {
-        size_t chunk = TinyGsmMin(size - cnt, rx.size());
+        size_t chunk = TinyLoRaMin(size - cnt, rx.size());
         if (chunk > 0) {
           rx.get(buf, chunk);
           buf += chunk;
@@ -175,12 +175,12 @@ class TinyGsmTCP {
       }
       return cnt;
 
-#elif defined TINY_GSM_BUFFER_READ_NO_CHECK
-      // Reads characters out of the TinyGSM fifo, and from the modem chip's
+#elif defined TINY_LORA_BUFFER_READ_NO_CHECK
+      // Reads characters out of the TinyLoRa fifo, and from the modem chip's
       // internal fifo if avaiable.
       at->maintain();
       while (cnt < size) {
-        size_t chunk = TinyGsmMin(size - cnt, rx.size());
+        size_t chunk = TinyLoRaMin(size - cnt, rx.size());
         if (chunk > 0) {
           rx.get(buf, chunk);
           buf += chunk;
@@ -189,8 +189,8 @@ class TinyGsmTCP {
         } /* TODO: Read directly into user buffer? */
         at->maintain();
         if (sock_available > 0) {
-          int n = at->modemRead(TinyGsmMin((uint16_t)rx.free(), sock_available),
-                                mux);
+          int n = at->modemRead(
+              TinyLoRaMin((uint16_t)rx.free(), sock_available), mux);
           if (n == 0) break;
         } else {
           break;
@@ -198,13 +198,13 @@ class TinyGsmTCP {
       }
       return cnt;
 
-#elif defined TINY_GSM_BUFFER_READ_AND_CHECK_SIZE
-      // Reads characters out of the TinyGSM fifo, and from the modem chips
+#elif defined TINY_LORA_BUFFER_READ_AND_CHECK_SIZE
+      // Reads characters out of the TinyLoRa fifo, and from the modem chips
       // internal fifo if avaiable, also double checking with the modem if
       // data has arrived without issuing a UURC.
       at->maintain();
       while (cnt < size) {
-        size_t chunk = TinyGsmMin(size - cnt, rx.size());
+        size_t chunk = TinyLoRaMin(size - cnt, rx.size());
         if (chunk > 0) {
           rx.get(buf, chunk);
           buf += chunk;
@@ -221,8 +221,8 @@ class TinyGsmTCP {
         // TODO(vshymanskyy): Read directly into user buffer?
         at->maintain();
         if (sock_available > 0) {
-          int n = at->modemRead(TinyGsmMin((uint16_t)rx.free(), sock_available),
-                                mux);
+          int n = at->modemRead(
+              TinyLoRaMin((uint16_t)rx.free(), sock_available), mux);
           if (n == 0) break;
         } else {
           break;
@@ -241,9 +241,9 @@ class TinyGsmTCP {
       return -1;
     }
 
-	int peek() override {
-		return (uint8_t)rx.peek();
-	}
+    int peek() override {
+      return (uint8_t)rx.peek();
+    }
 
     void flush() override {
       at->stream.flush();
@@ -251,7 +251,7 @@ class TinyGsmTCP {
 
     uint8_t connected() override {
       if (available()) { return true; }
-#if defined TINY_GSM_BUFFER_READ_AND_CHECK_SIZE
+#if defined TINY_LORA_BUFFER_READ_AND_CHECK_SIZE
       // If the modem is one where we can read and check the size of the buffer,
       // then the 'available()' function will call a check of the current size
       // of the buffer and state of the connection. [available calls maintain,
@@ -259,7 +259,8 @@ class TinyGsmTCP {
       // modemGetConnected]  This cascade means that the sock_connected value
       // should be correct and all we need
       return sock_connected;
-#elif defined TINY_GSM_NO_MODEM_BUFFER || defined TINY_GSM_BUFFER_READ_NO_CHECK
+#elif defined TINY_LORA_NO_MODEM_BUFFER || \
+    defined   TINY_LORA_BUFFER_READ_NO_CHECK
       // If the modem doesn't have an internal buffer, or if we can't check how
       // many characters are in the buffer then the cascade won't happen.
       // We need to call modemGetConnected to check the sock state.
@@ -276,7 +277,7 @@ class TinyGsmTCP {
      * Extended API
      */
 
-    String remoteIP() TINY_GSM_ATTR_NOT_IMPLEMENTED;
+    String remoteIP() TINY_LORA_ATTR_NOT_IMPLEMENTED;
 
    protected:
     // Read and dump anything remaining in the modem's internal buffer.
@@ -286,18 +287,18 @@ class TinyGsmTCP {
     // Doing it this way allows the external mcu to find and get all of the
     // data that it wants from the socket even if it was closed externally.
     inline void dumpModemBuffer(uint32_t maxWaitMs) {
-#if defined TINY_GSM_BUFFER_READ_AND_CHECK_SIZE || \
-    defined TINY_GSM_BUFFER_READ_NO_CHECK
-      TINY_GSM_YIELD();
+#if defined TINY_LORA_BUFFER_READ_AND_CHECK_SIZE || \
+    defined TINY_LORA_BUFFER_READ_NO_CHECK
+      TINY_LORA_YIELD();
       uint32_t startMillis = millis();
       while (sock_available > 0 && (millis() - startMillis < maxWaitMs)) {
         rx.clear();
-        at->modemRead(TinyGsmMin((uint16_t)rx.free(), sock_available), mux);
+        at->modemRead(TinyLoRaMin((uint16_t)rx.free(), sock_available), mux);
       }
       rx.clear();
       at->streamClear();
 
-#elif defined TINY_GSM_NO_MODEM_BUFFER
+#elif defined TINY_LORA_NO_MODEM_BUFFER
       rx.clear();
       at->streamClear();
 
@@ -320,7 +321,7 @@ class TinyGsmTCP {
    */
  protected:
   void maintainImpl() {
-#if defined TINY_GSM_BUFFER_READ_AND_CHECK_SIZE
+#if defined TINY_LORA_BUFFER_READ_AND_CHECK_SIZE
     // Keep listening for modem URC's and proactively iterate through
     // sockets asking if any data is avaiable
     for (int mux = 0; mux < muxCount; mux++) {
@@ -334,7 +335,8 @@ class TinyGsmTCP {
       thisModem().waitResponse(15, NULL, NULL);
     }
 
-#elif defined TINY_GSM_NO_MODEM_BUFFER || defined TINY_GSM_BUFFER_READ_NO_CHECK
+#elif defined TINY_LORA_NO_MODEM_BUFFER || \
+    defined   TINY_LORA_BUFFER_READ_NO_CHECK
     // Just listen for any URC's
     thisModem().waitResponse(100, NULL, NULL);
 
@@ -354,11 +356,11 @@ class TinyGsmTCP {
     uint32_t startMillis = millis();
     while (!thisModem().stream.available() &&
            (millis() - startMillis < thisModem().sockets[mux]->_timeout)) {
-      TINY_GSM_YIELD();
+      TINY_LORA_YIELD();
     }
     char c = thisModem().stream.read();
     thisModem().sockets[mux]->rx.put(c);
   }
 };
 
-#endif  // SRC_TINYGSMTCP_H_
+#endif  // SRC_TinyLoRaTCP_H_

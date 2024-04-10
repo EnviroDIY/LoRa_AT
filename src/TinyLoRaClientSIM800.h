@@ -1,38 +1,38 @@
 /**
- * @file       TinyGsmClientSIM800.h
+ * @file       TinyLoRaClientSIM800.h
  * @author     Volodymyr Shymanskyy
  * @license    LGPL-3.0
  * @copyright  Copyright (c) 2016 Volodymyr Shymanskyy
  * @date       Nov 2016
  */
 
-#ifndef SRC_TINYGSMCLIENTSIM800_H_
-#define SRC_TINYGSMCLIENTSIM800_H_
-// #pragma message("TinyGSM:  TinyGsmClientSIM800")
+#ifndef SRC_TinyLoRaCLIENTSIM800_H_
+#define SRC_TinyLoRaCLIENTSIM800_H_
+// #pragma message("TinyLoRa:  TinyLoRaClientSIM800")
 
-// #define TINY_GSM_DEBUG Serial
-// #define TINY_GSM_USE_HEX
+// #define TINY_LORA_DEBUG Serial
+// #define TINY_LORA_USE_HEX
 
-#define TINY_GSM_MUX_COUNT 5
-#define TINY_GSM_BUFFER_READ_AND_CHECK_SIZE
+#define TINY_LORA_MUX_COUNT 5
+#define TINY_LORA_BUFFER_READ_AND_CHECK_SIZE
 
-#include "TinyGsmBattery.tpp"
-#include "TinyGsmCalling.tpp"
-#include "TinyGsmGPRS.tpp"
-#include "TinyGsmGSMLocation.tpp"
-#include "TinyGsmModem.tpp"
-#include "TinyGsmSMS.tpp"
-#include "TinyGsmSSL.tpp"
-#include "TinyGsmTCP.tpp"
-#include "TinyGsmTime.tpp"
-#include "TinyGsmNTP.tpp"
+#include "TinyLoRaBattery.tpp"
+#include "TinyLoRaCalling.tpp"
+#include "TinyLoRaGPRS.tpp"
+#include "TinyLoRaGSMLocation.tpp"
+#include "TinyLoRaModem.tpp"
+#include "TinyLoRaSMS.tpp"
+#include "TinyLoRaSSL.tpp"
+#include "TinyLoRaTCP.tpp"
+#include "TinyLoRaTime.tpp"
+#include "TinyLoRaNTP.tpp"
 
 #define GSM_NL "\r\n"
-static const char GSM_OK[] TINY_GSM_PROGMEM    = "OK" GSM_NL;
-static const char GSM_ERROR[] TINY_GSM_PROGMEM = "ERROR" GSM_NL;
-#if defined       TINY_GSM_DEBUG
-static const char GSM_CME_ERROR[] TINY_GSM_PROGMEM = GSM_NL "+CME ERROR:";
-static const char GSM_CMS_ERROR[] TINY_GSM_PROGMEM = GSM_NL "+CMS ERROR:";
+static const char GSM_OK[] TINY_LORA_PROGMEM    = "OK" GSM_NL;
+static const char GSM_ERROR[] TINY_LORA_PROGMEM = "ERROR" GSM_NL;
+#if defined       TINY_LORA_DEBUG
+static const char GSM_CME_ERROR[] TINY_LORA_PROGMEM = GSM_NL "+CME ERROR:";
+static const char GSM_CMS_ERROR[] TINY_LORA_PROGMEM = GSM_NL "+CMS ERROR:";
 #endif
 
 enum RegStatus {
@@ -44,52 +44,52 @@ enum RegStatus {
   REG_OK_ROAMING   = 5,
   REG_UNKNOWN      = 4,
 };
-class TinyGsmSim800 : public TinyGsmModem<TinyGsmSim800>,
-                      public TinyGsmGPRS<TinyGsmSim800>,
-                      public TinyGsmTCP<TinyGsmSim800, TINY_GSM_MUX_COUNT>,
-                      public TinyGsmSSL<TinyGsmSim800>,
-                      public TinyGsmCalling<TinyGsmSim800>,
-                      public TinyGsmSMS<TinyGsmSim800>,
-                      public TinyGsmGSMLocation<TinyGsmSim800>,
-                      public TinyGsmTime<TinyGsmSim800>,
-                      public TinyGsmNTP<TinyGsmSim800>,
-                      public TinyGsmBattery<TinyGsmSim800> {
-  friend class TinyGsmModem<TinyGsmSim800>;
-  friend class TinyGsmGPRS<TinyGsmSim800>;
-  friend class TinyGsmTCP<TinyGsmSim800, TINY_GSM_MUX_COUNT>;
-  friend class TinyGsmSSL<TinyGsmSim800>;
-  friend class TinyGsmCalling<TinyGsmSim800>;
-  friend class TinyGsmSMS<TinyGsmSim800>;
-  friend class TinyGsmGSMLocation<TinyGsmSim800>;
-  friend class TinyGsmTime<TinyGsmSim800>;
-  friend class TinyGsmNTP<TinyGsmSim800>;
-  friend class TinyGsmBattery<TinyGsmSim800>;
+class TinyLoRaSim800 : public TinyLoRaModem<TinyLoRaSim800>,
+                       public TinyLoRaGPRS<TinyLoRaSim800>,
+                       public TinyLoRaTCP<TinyLoRaSim800, TINY_LORA_MUX_COUNT>,
+                       public TinyLoRaSSL<TinyLoRaSim800>,
+                       public TinyLoRaCalling<TinyLoRaSim800>,
+                       public TinyLoRaSMS<TinyLoRaSim800>,
+                       public TinyLoRaGSMLocation<TinyLoRaSim800>,
+                       public TinyLoRaTime<TinyLoRaSim800>,
+                       public TinyLoRaNTP<TinyLoRaSim800>,
+                       public TinyLoRaBattery<TinyLoRaSim800> {
+  friend class TinyLoRaModem<TinyLoRaSim800>;
+  friend class TinyLoRaGPRS<TinyLoRaSim800>;
+  friend class TinyLoRaTCP<TinyLoRaSim800, TINY_LORA_MUX_COUNT>;
+  friend class TinyLoRaSSL<TinyLoRaSim800>;
+  friend class TinyLoRaCalling<TinyLoRaSim800>;
+  friend class TinyLoRaSMS<TinyLoRaSim800>;
+  friend class TinyLoRaGSMLocation<TinyLoRaSim800>;
+  friend class TinyLoRaTime<TinyLoRaSim800>;
+  friend class TinyLoRaNTP<TinyLoRaSim800>;
+  friend class TinyLoRaBattery<TinyLoRaSim800>;
 
   /*
    * Inner Client
    */
  public:
   class GsmClientSim800 : public GsmClient {
-    friend class TinyGsmSim800;
+    friend class TinyLoRaSim800;
 
    public:
     GsmClientSim800() {}
 
-    explicit GsmClientSim800(TinyGsmSim800& modem, uint8_t mux = 0) {
+    explicit GsmClientSim800(TinyLoRaSim800& modem, uint8_t mux = 0) {
       init(&modem, mux);
     }
 
-    bool init(TinyGsmSim800* modem, uint8_t mux = 0) {
+    bool init(TinyLoRaSim800* modem, uint8_t mux = 0) {
       this->at       = modem;
       sock_available = 0;
       prev_check     = 0;
       sock_connected = false;
       got_data       = false;
 
-      if (mux < TINY_GSM_MUX_COUNT) {
+      if (mux < TINY_LORA_MUX_COUNT) {
         this->mux = mux;
       } else {
-        this->mux = (mux % TINY_GSM_MUX_COUNT);
+        this->mux = (mux % TINY_LORA_MUX_COUNT);
       }
       at->sockets[this->mux] = this;
 
@@ -99,12 +99,12 @@ class TinyGsmSim800 : public TinyGsmModem<TinyGsmSim800>,
    public:
     virtual int connect(const char* host, uint16_t port, int timeout_s) {
       stop();
-      TINY_GSM_YIELD();
+      TINY_LORA_YIELD();
       rx.clear();
       sock_connected = at->modemConnect(host, port, mux, false, timeout_s);
       return sock_connected;
     }
-    TINY_GSM_CLIENT_CONNECT_OVERRIDES
+    TINY_LORA_CLIENT_CONNECT_OVERRIDES
 
     void stop(uint32_t maxWaitMs) {
       dumpModemBuffer(maxWaitMs);
@@ -120,7 +120,7 @@ class TinyGsmSim800 : public TinyGsmModem<TinyGsmSim800>,
      * Extended API
      */
 
-    String remoteIP() TINY_GSM_ATTR_NOT_IMPLEMENTED;
+    String remoteIP() TINY_LORA_ATTR_NOT_IMPLEMENTED;
   };
 
   /*
@@ -131,25 +131,25 @@ class TinyGsmSim800 : public TinyGsmModem<TinyGsmSim800>,
    public:
     GsmClientSecureSim800() {}
 
-    explicit GsmClientSecureSim800(TinyGsmSim800& modem, uint8_t mux = 0)
+    explicit GsmClientSecureSim800(TinyLoRaSim800& modem, uint8_t mux = 0)
         : GsmClientSim800(modem, mux) {}
 
    public:
     int connect(const char* host, uint16_t port, int timeout_s) override {
       stop();
-      TINY_GSM_YIELD();
+      TINY_LORA_YIELD();
       rx.clear();
       sock_connected = at->modemConnect(host, port, mux, true, timeout_s);
       return sock_connected;
     }
-    TINY_GSM_CLIENT_CONNECT_OVERRIDES
+    TINY_LORA_CLIENT_CONNECT_OVERRIDES
   };
 
   /*
    * Constructor
    */
  public:
-  explicit TinyGsmSim800(Stream& stream) : stream(stream) {
+  explicit TinyLoRaSim800(Stream& stream) : stream(stream) {
     memset(sockets, 0, sizeof(sockets));
   }
 
@@ -158,8 +158,8 @@ class TinyGsmSim800 : public TinyGsmModem<TinyGsmSim800>,
    */
  protected:
   bool initImpl(const char* pin = NULL) {
-    DBG(GF("### TinyGSM Version:"), TINYGSM_VERSION);
-    DBG(GF("### TinyGSM Compiled Module:  TinyGsmClientSIM800"));
+    DBG(GF("### TinyLoRa Version:"), TINY_LORA_VERSION);
+    DBG(GF("### TinyLoRa Compiled Module:  TinyLoRaClientSIM800"));
 
     if (!testAT()) { return false; }
 
@@ -169,7 +169,7 @@ class TinyGsmSim800 : public TinyGsmModem<TinyGsmSim800>,
     sendAT(GF("E0"));  // Echo Off
     if (waitResponse() != 1) { return false; }
 
-#ifdef TINY_GSM_DEBUG
+#ifdef TINY_LORA_DEBUG
     sendAT(GF("+CMEE=2"));  // turn on verbose error codes
 #else
     sendAT(GF("+CMEE=0"));  // turn off error codes
@@ -200,13 +200,13 @@ class TinyGsmSim800 : public TinyGsmModem<TinyGsmSim800>,
 
   String getModemNameImpl() {
     String name = "";
-#if defined(TINY_GSM_MODEM_SIM800)
+#if defined(TINY_LORA_MDOT)
     name = "SIMCom SIM800";
-#elif defined(TINY_GSM_MODEM_SIM808)
+#elif defined(TINY_LORA_SIM808)
     name = "SIMCom SIM808";
-#elif defined(TINY_GSM_MODEM_SIM868)
+#elif defined(TINY_LORA_SIM868)
     name = "SIMCom SIM868";
-#elif defined(TINY_GSM_MODEM_SIM900)
+#elif defined(TINY_LORA_SIM900)
     name = "SIMCom SIM900";
 #endif
 
@@ -239,7 +239,7 @@ class TinyGsmSim800 : public TinyGsmModem<TinyGsmSim800>,
 
   /*
     bool thisHasSSL() {
-  #if defined(TINY_GSM_MODEM_SIM900)
+  #if defined(TINY_LORA_SIM900)
       return false;
   #else
       sendAT(GF("+CIPSSL=?"));
@@ -514,11 +514,11 @@ class TinyGsmSim800 : public TinyGsmModem<TinyGsmSim800>,
                     bool ssl = false, int timeout_s = 75) {
     int8_t   rsp;
     uint32_t timeout_ms = ((uint32_t)timeout_s) * 1000;
-#if !defined(TINY_GSM_MODEM_SIM900)
+#if !defined(TINY_LORA_SIM900)
     sendAT(GF("+CIPSSL="), ssl);
     rsp = waitResponse();
     if (ssl && rsp != 1) { return false; }
-#ifdef TINY_GSM_SSL_CLIENT_AUTHENTICATION
+#ifdef TINY_LORA_SSL_CLIENT_AUTHENTICATION
     // set SSL options
     // +SSLOPT=<opt>,<enable>
     // <opt>
@@ -552,7 +552,7 @@ class TinyGsmSim800 : public TinyGsmModem<TinyGsmSim800>,
 
   size_t modemRead(size_t size, uint8_t mux) {
     if (!sockets[mux]) return 0;
-#ifdef TINY_GSM_USE_HEX
+#ifdef TINY_LORA_USE_HEX
     sendAT(GF("+CIPRXGET=3,"), mux, ',', (uint16_t)size);
     if (waitResponse(GF("+CIPRXGET:")) != 1) { return 0; }
 #else
@@ -571,10 +571,10 @@ class TinyGsmSim800 : public TinyGsmModem<TinyGsmSim800>,
     // buffer after the read.
     for (int i = 0; i < len_requested; i++) {
       uint32_t startMillis = millis();
-#ifdef TINY_GSM_USE_HEX
+#ifdef TINY_LORA_USE_HEX
       while (stream.available() < 2 &&
              (millis() - startMillis < sockets[mux]->_timeout)) {
-        TINY_GSM_YIELD();
+        TINY_LORA_YIELD();
       }
       char buf[4] = {
           0,
@@ -585,7 +585,7 @@ class TinyGsmSim800 : public TinyGsmModem<TinyGsmSim800>,
 #else
       while (!stream.available() &&
              (millis() - startMillis < sockets[mux]->_timeout)) {
-        TINY_GSM_YIELD();
+        TINY_LORA_YIELD();
       }
       char c = stream.read();
 #endif
@@ -631,7 +631,7 @@ class TinyGsmSim800 : public TinyGsmModem<TinyGsmSim800>,
   int8_t waitResponse(uint32_t timeout_ms, String& data,
                       GsmConstStr r1 = GFP(GSM_OK),
                       GsmConstStr r2 = GFP(GSM_ERROR),
-#if defined TINY_GSM_DEBUG
+#if defined TINY_LORA_DEBUG
                       GsmConstStr r3 = GFP(GSM_CME_ERROR),
                       GsmConstStr r4 = GFP(GSM_CMS_ERROR),
 #else
@@ -648,9 +648,9 @@ class TinyGsmSim800 : public TinyGsmModem<TinyGsmSim800>,
     uint8_t  index       = 0;
     uint32_t startMillis = millis();
     do {
-      TINY_GSM_YIELD();
+      TINY_LORA_YIELD();
       while (stream.available() > 0) {
-        TINY_GSM_YIELD();
+        TINY_LORA_YIELD();
         int8_t a = stream.read();
         if (a <= 0) continue;  // Skip 0x00 bytes, just in case
         data += static_cast<char>(a);
@@ -661,7 +661,7 @@ class TinyGsmSim800 : public TinyGsmModem<TinyGsmSim800>,
           index = 2;
           goto finish;
         } else if (r3 && data.endsWith(r3)) {
-#if defined TINY_GSM_DEBUG
+#if defined TINY_LORA_DEBUG
           if (r3 == GFP(GSM_CME_ERROR)) {
             streamSkipUntil('\n');  // Read out the error
           }
@@ -678,7 +678,7 @@ class TinyGsmSim800 : public TinyGsmModem<TinyGsmSim800>,
           int8_t mode = streamGetIntBefore(',');
           if (mode == 1) {
             int8_t mux = streamGetIntBefore('\n');
-            if (mux >= 0 && mux < TINY_GSM_MUX_COUNT && sockets[mux]) {
+            if (mux >= 0 && mux < TINY_LORA_MUX_COUNT && sockets[mux]) {
               sockets[mux]->got_data = true;
             }
             data = "";
@@ -689,7 +689,7 @@ class TinyGsmSim800 : public TinyGsmModem<TinyGsmSim800>,
         } else if (data.endsWith(GF(GSM_NL "+RECEIVE:"))) {
           int8_t  mux = streamGetIntBefore(',');
           int16_t len = streamGetIntBefore('\n');
-          if (mux >= 0 && mux < TINY_GSM_MUX_COUNT && sockets[mux]) {
+          if (mux >= 0 && mux < TINY_LORA_MUX_COUNT && sockets[mux]) {
             sockets[mux]->got_data = true;
             if (len >= 0 && len <= 1024) { sockets[mux]->sock_available = len; }
           }
@@ -699,7 +699,7 @@ class TinyGsmSim800 : public TinyGsmModem<TinyGsmSim800>,
           int8_t nl   = data.lastIndexOf(GSM_NL, data.length() - 8);
           int8_t coma = data.indexOf(',', nl + 2);
           int8_t mux  = data.substring(nl + 2, coma).toInt();
-          if (mux >= 0 && mux < TINY_GSM_MUX_COUNT && sockets[mux]) {
+          if (mux >= 0 && mux < TINY_LORA_MUX_COUNT && sockets[mux]) {
             sockets[mux]->sock_connected = false;
           }
           data = "";
@@ -737,7 +737,7 @@ class TinyGsmSim800 : public TinyGsmModem<TinyGsmSim800>,
 
   int8_t waitResponse(uint32_t timeout_ms, GsmConstStr r1 = GFP(GSM_OK),
                       GsmConstStr r2 = GFP(GSM_ERROR),
-#if defined TINY_GSM_DEBUG
+#if defined TINY_LORA_DEBUG
                       GsmConstStr r3 = GFP(GSM_CME_ERROR),
                       GsmConstStr r4 = GFP(GSM_CMS_ERROR),
 #else
@@ -750,7 +750,7 @@ class TinyGsmSim800 : public TinyGsmModem<TinyGsmSim800>,
 
   int8_t waitResponse(GsmConstStr r1 = GFP(GSM_OK),
                       GsmConstStr r2 = GFP(GSM_ERROR),
-#if defined TINY_GSM_DEBUG
+#if defined TINY_LORA_DEBUG
                       GsmConstStr r3 = GFP(GSM_CME_ERROR),
                       GsmConstStr r4 = GFP(GSM_CMS_ERROR),
 #else
@@ -764,8 +764,8 @@ class TinyGsmSim800 : public TinyGsmModem<TinyGsmSim800>,
   Stream& stream;
 
  protected:
-  GsmClientSim800* sockets[TINY_GSM_MUX_COUNT];
+  GsmClientSim800* sockets[TINY_LORA_MUX_COUNT];
   const char*      gsmNL = GSM_NL;
 };
 
-#endif  // SRC_TINYGSMCLIENTSIM800_H_
+#endif  // SRC_TinyLoRaCLIENTSIM800_H_

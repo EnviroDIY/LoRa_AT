@@ -1,31 +1,31 @@
 /**************************************************************
  *
  * To run this tool you need StreamDebugger library:
- *   https://github.com/vshymanskyy/StreamDebugger
+ *   https://github.com/EnviroDIY/StreamDebugger
  *   or from http://librarymanager/all#StreamDebugger
  *
- * TinyGSM Getting Started guide:
- *   https://tiny.cc/tinygsm-readme
+ * TinyLoRa Getting Started guide:
+ *   https://tiny.cc/TinyLoRa-readme
  *
  **************************************************************/
 
 // Select your modem:
-#define TINY_GSM_MODEM_SIM800
-// #define TINY_GSM_MODEM_SIM900
-// #define TINY_GSM_MODEM_SIM808
-// #define TINY_GSM_MODEM_SIM868
-// #define TINY_GSM_MODEM_UBLOX
-// #define TINY_GSM_MODEM_M95
-// #define TINY_GSM_MODEM_BG96
-// #define TINY_GSM_MODEM_A6
-// #define TINY_GSM_MODEM_A7
-// #define TINY_GSM_MODEM_M590
-// #define TINY_GSM_MODEM_MC60
-// #define TINY_GSM_MODEM_MC60E
-// #define TINY_GSM_MODEM_ESP8266
-// #define TINY_GSM_MODEM_XBEE
+#define TINY_LORA_MDOT
+// #define TINY_LORA_SIM900
+// #define TINY_LORA_SIM808
+// #define TINY_LORA_SIM868
+// #define TINY_LORA_UBLOX
+// #define TINY_LORA_M95
+// #define TINY_LORA_BG96
+// #define TINY_LORA_A6
+// #define TINY_LORA_A7
+// #define TINY_LORA_M590
+// #define TINY_LORA_MC60
+// #define TINY_LORA_MC60E
+// #define TINY_LORA_ESP8266
+// #define TINY_LORA_XBEE
 
-#include <TinyGsmClient.h>
+#include <TinyLoRaClient.h>
 
 // Set serial for debug console (to the Serial Monitor, speed 115200)
 #define SerialMon Serial
@@ -43,7 +43,7 @@ SoftwareSerial SerialAT(2, 3);  // RX, TX
 
 #include <StreamDebugger.h>
 StreamDebugger debugger(SerialAT, SerialMon);
-TinyGsm modem(debugger);
+TinyLoRa       modem(debugger);
 
 void setup() {
   // Set console baud rate
@@ -55,22 +55,25 @@ void setup() {
   delay(6000);
 
   if (!modem.init()) {
-    SerialMon.println(F("***********************************************************"));
+    SerialMon.println(
+        F("***********************************************************"));
     SerialMon.println(F(" Cannot initialize modem!"));
-    SerialMon.println(F("   Use File -> Examples -> TinyGSM -> tools -> AT_Debug"));
+    SerialMon.println(
+        F("   Use File -> Examples -> TinyLoRa -> tools -> AT_Debug"));
     SerialMon.println(F("   to find correct configuration"));
-    SerialMon.println(F("***********************************************************"));
+    SerialMon.println(
+        F("***********************************************************"));
     return;
   }
 
   bool ret = modem.factoryDefault();
 
-  SerialMon.println(F("***********************************************************"));
-  SerialMon.print  (F(" Return settings to Factory Defaults: "));
+  SerialMon.println(
+      F("***********************************************************"));
+  SerialMon.print(F(" Return settings to Factory Defaults: "));
   SerialMon.println((ret) ? "OK" : "FAIL");
-  SerialMon.println(F("***********************************************************"));
+  SerialMon.println(
+      F("***********************************************************"));
 }
 
-void loop() {
-
-}
+void loop() {}

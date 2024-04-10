@@ -1,7 +1,7 @@
 /**************************************************************
  *
- * TinyGSM Getting Started guide:
- *   https://tiny.cc/tinygsm-readme
+ * TinyLoRa Getting Started guide:
+ *   https://tiny.cc/TinyLoRa-readme
  *
  * NOTE:
  * Some of the functions may be unavailable for your modem.
@@ -10,27 +10,7 @@
  **************************************************************/
 
 // Select your modem:
-#define TINY_GSM_MODEM_SIM800
-// #define TINY_GSM_MODEM_SIM808
-// #define TINY_GSM_MODEM_SIM868
-// #define TINY_GSM_MODEM_SIM900
-// #define TINY_GSM_MODEM_SIM7000
-// #define TINY_GSM_MODEM_SIM7000SSL
-// #define TINY_GSM_MODEM_SIM7080
-// #define TINY_GSM_MODEM_SIM5360
-// #define TINY_GSM_MODEM_SIM7600
-// #define TINY_GSM_MODEM_UBLOX
-// #define TINY_GSM_MODEM_SARAR4
-// #define TINY_GSM_MODEM_M95
-// #define TINY_GSM_MODEM_BG96
-// #define TINY_GSM_MODEM_A6
-// #define TINY_GSM_MODEM_A7
-// #define TINY_GSM_MODEM_M590
-// #define TINY_GSM_MODEM_MC60
-// #define TINY_GSM_MODEM_MC60E
-// #define TINY_GSM_MODEM_ESP8266
-// #define TINY_GSM_MODEM_XBEE
-// #define TINY_GSM_MODEM_SEQUANS_MONARCH
+#define TINY_LORA_MDOT
 
 // Set serial for debug console (to the Serial Monitor, default speed 115200)
 #define SerialMon Serial
@@ -50,7 +30,7 @@ SoftwareSerial SerialAT(2, 3);  // RX, TX
 // #define DUMP_AT_COMMANDS
 
 // Define the serial console for debug prints, if needed
-#define TINY_GSM_DEBUG SerialMon
+#define TINY_LORA_DEBUG SerialMon
 
 // Range to attempt to autobaud
 // NOTE:  DO NOT AUTOBAUD in production code.  Once you've established
@@ -60,26 +40,26 @@ SoftwareSerial SerialAT(2, 3);  // RX, TX
 
 // Add a reception delay, if needed.
 // This may be needed for a fast processor at a slow baud rate.
-// #define TINY_GSM_YIELD() { delay(2); }
+// #define TINY_LORA_YIELD() { delay(2); }
 
 /*
  * Tests enabled
  */
-#define TINY_GSM_TEST_GPRS true
-#define TINY_GSM_TEST_WIFI false
-#define TINY_GSM_TEST_TCP true
-#define TINY_GSM_TEST_SSL true
-#define TINY_GSM_TEST_CALL false
-#define TINY_GSM_TEST_SMS false
-#define TINY_GSM_TEST_USSD false
-#define TINY_GSM_TEST_BATTERY true
-#define TINY_GSM_TEST_TEMPERATURE true
-#define TINY_GSM_TEST_GSM_LOCATION false
-#define TINY_GSM_TEST_NTP false
-#define TINY_GSM_TEST_TIME false
-#define TINY_GSM_TEST_GPS false
+#define TINY_LORA_TEST_GPRS true
+#define TINY_LORA_TEST_WIFI false
+#define TINY_LORA_TEST_TCP true
+#define TINY_LORA_TEST_SSL true
+#define TINY_LORA_TEST_CALL false
+#define TINY_LORA_TEST_SMS false
+#define TINY_LORA_TEST_USSD false
+#define TINY_LORA_TEST_BATTERY true
+#define TINY_LORA_TEST_TEMPERATURE true
+#define TINY_LORA_TEST_GSM_LOCATION false
+#define TINY_LORA_TEST_NTP false
+#define TINY_LORA_TEST_TIME false
+#define TINY_LORA_TEST_GPS false
 // disconnect and power down modem after tests
-#define TINY_GSM_POWERDOWN false
+#define TINY_LORA_POWERDOWN false
 
 // set GSM PIN, if any
 #define GSM_PIN ""
@@ -100,29 +80,29 @@ const char wifiPass[] = "YourWiFiPass";
 
 // Server details to test TCP/SSL
 const char server[]   = "vsh.pp.ua";
-const char resource[] = "/TinyGSM/logo.txt";
+const char resource[] = "/TinyLoRa/logo.txt";
 
-#include <TinyGsmClient.h>
+#include <TinyLoRaClient.h>
 
-#if TINY_GSM_TEST_GPRS && not defined TINY_GSM_MODEM_HAS_GPRS
-#undef TINY_GSM_TEST_GPRS
-#undef TINY_GSM_TEST_WIFI
-#define TINY_GSM_TEST_GPRS false
-#define TINY_GSM_TEST_WIFI true
+#if TINY_LORA_TEST_GPRS && not defined TINY_LORA_HAS_GPRS
+#undef TINY_LORA_TEST_GPRS
+#undef TINY_LORA_TEST_WIFI
+#define TINY_LORA_TEST_GPRS false
+#define TINY_LORA_TEST_WIFI true
 #endif
-#if TINY_GSM_TEST_WIFI && not defined TINY_GSM_MODEM_HAS_WIFI
-#undef TINY_GSM_USE_GPRS
-#undef TINY_GSM_USE_WIFI
-#define TINY_GSM_USE_GPRS true
-#define TINY_GSM_USE_WIFI false
+#if TINY_LORA_TEST_WIFI && not defined TINY_LORA_HAS_WIFI
+#undef TINY_LORA_USE_GPRS
+#undef TINY_LORA_USE_WIFI
+#define TINY_LORA_USE_GPRS true
+#define TINY_LORA_USE_WIFI false
 #endif
 
 #ifdef DUMP_AT_COMMANDS
 #include <StreamDebugger.h>
 StreamDebugger debugger(SerialAT, SerialMon);
-TinyGsm        modem(debugger);
+TinyLoRa       modem(debugger);
 #else
-TinyGsm        modem(SerialAT);
+TinyLoRa       modem(SerialAT);
 #endif
 
 void setup() {
@@ -138,7 +118,7 @@ void setup() {
   delay(6000);
 
   // Set GSM module baud rate
-  TinyGsmAutoBaud(SerialAT, GSM_AUTOBAUD_MIN, GSM_AUTOBAUD_MAX);
+  TinyLoRaAutoBaud(SerialAT, GSM_AUTOBAUD_MIN, GSM_AUTOBAUD_MAX);
   // SerialAT.begin(9600);
 }
 
@@ -150,7 +130,7 @@ void loop() {
     // if (!modem.init()) {
     DBG("Failed to restart modem, delaying 10s and retrying");
     // restart autobaud in case GSM just rebooted
-    // TinyGsmAutoBaud(SerialAT, GSM_AUTOBAUD_MIN, GSM_AUTOBAUD_MAX);
+    // TinyLoRaAutoBaud(SerialAT, GSM_AUTOBAUD_MIN, GSM_AUTOBAUD_MAX);
     return;
   }
 
@@ -160,12 +140,12 @@ void loop() {
   String modemInfo = modem.getModemInfo();
   DBG("Modem Info:", modemInfo);
 
-#if TINY_GSM_TEST_GPRS
+#if TINY_LORA_TEST_GPRS
   // Unlock your SIM card with a PIN if needed
   if (GSM_PIN && modem.getSimStatus() != 3) { modem.simUnlock(GSM_PIN); }
 #endif
 
-#if TINY_GSM_TEST_WIFI
+#if TINY_LORA_TEST_WIFI
   DBG("Setting SSID/password...");
   if (!modem.networkConnect(wifiSSID, wifiPass)) {
     DBG(" fail");
@@ -175,7 +155,7 @@ void loop() {
   SerialMon.println(" success");
 #endif
 
-#if TINY_GSM_TEST_GPRS && defined TINY_GSM_MODEM_XBEE
+#if TINY_LORA_TEST_GPRS && defined TINY_LORA_XBEE
   // The XBee must run the gprsConnect function BEFORE waiting for network!
   modem.gprsConnect(apn, gprsUser, gprsPass);
 #endif
@@ -188,7 +168,7 @@ void loop() {
 
   if (modem.isNetworkConnected()) { DBG("Network connected"); }
 
-#if TINY_GSM_TEST_GPRS
+#if TINY_LORA_TEST_GPRS
   DBG("Connecting to", apn);
   if (!modem.gprsConnect(apn, gprsUser, gprsPass)) {
     delay(10000);
@@ -217,7 +197,7 @@ void loop() {
   DBG("Signal quality:", csq);
 #endif
 
-#if TINY_GSM_TEST_USSD && defined TINY_GSM_MODEM_HAS_SMS
+#if TINY_LORA_TEST_USSD && defined TINY_LORA_HAS_SMS
   String ussd_balance = modem.sendUSSD("*111#");
   DBG("Balance (USSD):", ussd_balance);
 
@@ -225,9 +205,9 @@ void loop() {
   DBG("Phone number (USSD):", ussd_phone_num);
 #endif
 
-#if TINY_GSM_TEST_TCP && defined TINY_GSM_MODEM_HAS_TCP
-  TinyGsmClient client(modem, 0);
-  const int     port = 80;
+#if TINY_LORA_TEST_TCP && defined TINY_LORA_HAS_TCP
+  TinyLoRaClient client(modem, 0);
+  const int      port = 80;
   DBG("Connecting to", server);
   if (!client.connect(server, port)) {
     DBG("... failed");
@@ -264,9 +244,9 @@ void loop() {
   }
 #endif
 
-#if TINY_GSM_TEST_SSL && defined TINY_GSM_MODEM_HAS_SSL
-  TinyGsmClientSecure secureClient(modem, 1);
-  const int           securePort = 443;
+#if TINY_LORA_TEST_SSL && defined TINY_LORA_HAS_SSL
+  TinyLoRaClientSecure secureClient(modem, 1);
+  const int            securePort = 443;
   DBG("Connecting securely to", server);
   if (!secureClient.connect(server, securePort)) {
     DBG("... failed");
@@ -303,8 +283,7 @@ void loop() {
   }
 #endif
 
-#if TINY_GSM_TEST_CALL && defined TINY_GSM_MODEM_HAS_CALLING && \
-    defined                       CALL_TARGET
+#if TINY_LORA_TEST_CALL && defined TINY_LORA_HAS_CALLING && defined CALL_TARGET
   DBG("Calling:", CALL_TARGET);
 
   // This is NOT supported on M590
@@ -327,7 +306,7 @@ void loop() {
   }
 #endif
 
-#if TINY_GSM_TEST_SMS && defined TINY_GSM_MODEM_HAS_SMS && defined SMS_TARGET
+#if TINY_LORA_TEST_SMS && defined TINY_LORA_HAS_SMS && defined SMS_TARGET
   res = modem.sendSMS(SMS_TARGET, String("Hello from ") + imei);
   DBG("SMS:", res ? "OK" : "fail");
 
@@ -343,7 +322,7 @@ void loop() {
 
 #endif
 
-#if TINY_GSM_TEST_GSM_LOCATION && defined TINY_GSM_MODEM_HAS_GSM_LOCATION
+#if TINY_LORA_TEST_GSM_LOCATION && defined TINY_LORA_HAS_GSM_LOCATION
   float lat      = 0;
   float lon      = 0;
   float accuracy = 0;
@@ -372,7 +351,7 @@ void loop() {
   DBG("GSM Based Location String:", location);
 #endif
 
-#if TINY_GSM_TEST_GPS && defined TINY_GSM_MODEM_HAS_GPS
+#if TINY_LORA_TEST_GPS && defined TINY_LORA_HAS_GPS
   DBG("Enabling GPS/GNSS/GLONASS and waiting 15s for warm-up");
   modem.enableGPS();
   delay(15000L);
@@ -412,12 +391,12 @@ void loop() {
   modem.disableGPS();
 #endif
 
-#if TINY_GSM_TEST_NTP && defined TINY_GSM_MODEM_HAS_NTP
+#if TINY_LORA_TEST_NTP && defined TINY_LORA_HAS_NTP
   DBG("Asking modem to sync with NTP");
   modem.NTPServerSync("132.163.96.5", 20);
 #endif
 
-#if TINY_GSM_TEST_TIME && defined TINY_GSM_MODEM_HAS_TIME
+#if TINY_LORA_TEST_TIME && defined TINY_LORA_HAS_TIME
   int   year3    = 0;
   int   month3   = 0;
   int   day3     = 0;
@@ -443,7 +422,7 @@ void loop() {
   DBG("Current Network Time:", time);
 #endif
 
-#if TINY_GSM_TEST_BATTERY && defined TINY_GSM_MODEM_HAS_BATTERY
+#if TINY_LORA_TEST_BATTERY && defined TINY_LORA_HAS_BATTERY
   uint8_t  chargeState = -99;
   int8_t   percent     = -99;
   uint16_t milliVolts  = -9999;
@@ -453,14 +432,14 @@ void loop() {
   DBG("Battery voltage:", milliVolts / 1000.0F);
 #endif
 
-#if TINY_GSM_TEST_TEMPERATURE && defined TINY_GSM_MODEM_HAS_TEMPERATURE
+#if TINY_LORA_TEST_TEMPERATURE && defined TINY_LORA_HAS_TEMPERATURE
   float temp = modem.getTemperature();
   DBG("Chip temperature:", temp);
 #endif
 
-#if TINY_GSM_POWERDOWN
+#if TINY_LORA_POWERDOWN
 
-#if TINY_GSM_TEST_GPRS
+#if TINY_LORA_TEST_GPRS
   modem.gprsDisconnect();
   delay(5000L);
   if (!modem.isGprsConnected()) {
@@ -470,7 +449,7 @@ void loop() {
   }
 #endif
 
-#if TINY_GSM_TEST_WIFI
+#if TINY_LORA_TEST_WIFI
   modem.networkDisconnect();
   DBG("WiFi disconnected");
 #endif

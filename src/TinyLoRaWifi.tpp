@@ -1,20 +1,20 @@
 /**
- * @file       TinyGsmWifi.tpp
+ * @file       TinyLoRaWifi.tpp
  * @author     Volodymyr Shymanskyy
  * @license    LGPL-3.0
  * @copyright  Copyright (c) 2016 Volodymyr Shymanskyy
  * @date       Nov 2016
  */
 
-#ifndef SRC_TINYGSMWIFI_H_
-#define SRC_TINYGSMWIFI_H_
+#ifndef SRC_TinyLoRaWIFI_H_
+#define SRC_TinyLoRaWIFI_H_
 
-#include "TinyGsmCommon.h"
+#include "TinyLoRaCommon.h"
 
-#define TINY_GSM_MODEM_HAS_WIFI
+#define TINY_LORA_HAS_WIFI
 
 template <class modemType>
-class TinyGsmWifi {
+class TinyLoRaWifi {
  public:
   /*
    * WiFi functions
@@ -42,8 +42,8 @@ class TinyGsmWifi {
    */
 
   bool networkConnectImpl(const char* ssid,
-                          const char* pwd) TINY_GSM_ATTR_NOT_IMPLEMENTED;
-  bool networkDisconnectImpl() TINY_GSM_ATTR_NOT_IMPLEMENTED;
+                          const char* pwd) TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  bool networkDisconnectImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
 };
 
-#endif  // SRC_TINYGSMWIFI_H_
+#endif  // SRC_TinyLoRaWIFI_H_

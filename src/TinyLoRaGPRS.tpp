@@ -1,17 +1,17 @@
 /**
- * @file       TinyGsmGPRS.tpp
+ * @file       TinyLoRaGPRS.tpp
  * @author     Volodymyr Shymanskyy
  * @license    LGPL-3.0
  * @copyright  Copyright (c) 2016 Volodymyr Shymanskyy
  * @date       Nov 2016
  */
 
-#ifndef SRC_TINYGSMGPRS_H_
-#define SRC_TINYGSMGPRS_H_
+#ifndef SRC_TinyLoRaGPRS_H_
+#define SRC_TinyLoRaGPRS_H_
 
-#include "TinyGsmCommon.h"
+#include "TinyLoRaCommon.h"
 
-#define TINY_GSM_MODEM_HAS_GPRS
+#define TINY_LORA_HAS_GPRS
 
 enum SimStatus {
   SIM_ERROR            = 0,
@@ -21,7 +21,7 @@ enum SimStatus {
 };
 
 template <class modemType>
-class TinyGsmGPRS {
+class TinyLoRaGPRS {
  public:
   /*
    * SIM card functions
@@ -168,4 +168,4 @@ class TinyGsmGPRS {
   }
 };
 
-#endif  // SRC_TINYGSMGPRS_H_
+#endif  // SRC_TinyLoRaGPRS_H_

@@ -1,20 +1,20 @@
 /**
- * @file       TinyGsmGPS.tpp
+ * @file       TinyLoRaGPS.tpp
  * @author     Volodymyr Shymanskyy
  * @license    LGPL-3.0
  * @copyright  Copyright (c) 2016 Volodymyr Shymanskyy
  * @date       Nov 2016
  */
 
-#ifndef SRC_TINYGSMGPS_H_
-#define SRC_TINYGSMGPS_H_
+#ifndef SRC_TinyLoRaGPS_H_
+#define SRC_TinyLoRaGPS_H_
 
-#include "TinyGsmCommon.h"
+#include "TinyLoRaCommon.h"
 
-#define TINY_GSM_MODEM_HAS_GPS
+#define TINY_LORA_HAS_GPS
 
 template <class modemType>
-class TinyGsmGPS {
+class TinyLoRaGPS {
  public:
   /*
    * GPS/GNSS/GLONASS location functions
@@ -66,17 +66,17 @@ class TinyGsmGPS {
    * GPS/GNSS/GLONASS location functions
    */
 
-  bool    enableGPSImpl() TINY_GSM_ATTR_NOT_IMPLEMENTED;
-  bool    disableGPSImpl() TINY_GSM_ATTR_NOT_IMPLEMENTED;
-  String  getGPSrawImpl() TINY_GSM_ATTR_NOT_IMPLEMENTED;
-  bool    getGPSImpl(float* lat, float* lon, float* speed = 0, float* alt = 0,
-                     int* vsat = 0, int* usat = 0, float* accuracy = 0,
-                     int* year = 0, int* month = 0, int* day = 0, int* hour = 0,
-                     int* minute = 0,
-                     int* second = 0) TINY_GSM_ATTR_NOT_IMPLEMENTED;
-  String  setGNSSModeImpl(uint8_t mode, bool dpo) TINY_GSM_ATTR_NOT_IMPLEMENTED;
-  uint8_t getGNSSModeImpl() TINY_GSM_ATTR_NOT_IMPLEMENTED;
+  bool   enableGPSImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  bool   disableGPSImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  String getGPSrawImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  bool   getGPSImpl(float* lat, float* lon, float* speed = 0, float* alt = 0,
+                    int* vsat = 0, int* usat = 0, float* accuracy = 0,
+                    int* year = 0, int* month = 0, int* day = 0, int* hour = 0,
+                    int* minute = 0,
+                    int* second = 0) TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  String setGNSSModeImpl(uint8_t mode, bool dpo) TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  uint8_t getGNSSModeImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
 };
 
 
-#endif  // SRC_TINYGSMGPS_H_
+#endif  // SRC_TinyLoRaGPS_H_

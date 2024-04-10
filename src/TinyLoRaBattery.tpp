@@ -1,20 +1,20 @@
 /**
- * @file       TinyGsmBattery.tpp
+ * @file       TinyLoRaBattery.tpp
  * @author     Volodymyr Shymanskyy
  * @license    LGPL-3.0
  * @copyright  Copyright (c) 2016 Volodymyr Shymanskyy
  * @date       Nov 2016
  */
 
-#ifndef SRC_TINYGSMBATTERY_H_
-#define SRC_TINYGSMBATTERY_H_
+#ifndef SRC_TinyLoRaBATTERY_H_
+#define SRC_TinyLoRaBATTERY_H_
 
-#include "TinyGsmCommon.h"
+#include "TinyLoRaCommon.h"
 
-#define TINY_GSM_MODEM_HAS_BATTERY
+#define TINY_LORA_HAS_BATTERY
 
 template <class modemType>
-class TinyGsmBattery {
+class TinyLoRaBattery {
  public:
   /*
    * Battery functions
@@ -95,4 +95,4 @@ class TinyGsmBattery {
   }
 };
 
-#endif  // SRC_TINYGSMBATTERY_H_
+#endif  // SRC_TinyLoRaBATTERY_H_

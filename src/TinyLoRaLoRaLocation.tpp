@@ -1,20 +1,20 @@
 /**
- * @file       TinyGsmGSMLocation.h
+ * @file       TinyLoRaGSMLocation.h
  * @author     Volodymyr Shymanskyy
  * @license    LGPL-3.0
  * @copyright  Copyright (c) 2016 Volodymyr Shymanskyy
  * @date       Nov 2016
  */
 
-#ifndef SRC_TINYGSMGSMLOCATION_H_
-#define SRC_TINYGSMGSMLOCATION_H_
+#ifndef SRC_TinyLoRaGSMLOCATION_H_
+#define SRC_TinyLoRaGSMLOCATION_H_
 
-#include "TinyGsmCommon.h"
+#include "TinyLoRaCommon.h"
 
-#define TINY_GSM_MODEM_HAS_GSM_LOCATION
+#define TINY_LORA_HAS_GSM_LOCATION
 
 template <class modemType>
-class TinyGsmGSMLocation {
+class TinyLoRaGSMLocation {
  public:
   /*
    * GSM Location functions
@@ -146,4 +146,4 @@ class TinyGsmGSMLocation {
   }
 };
 
-#endif  // SRC_TINYGSMGSMLOCATION_H_
+#endif  // SRC_TinyLoRaGSMLOCATION_H_

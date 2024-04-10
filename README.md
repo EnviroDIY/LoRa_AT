@@ -1,23 +1,23 @@
 [![SWUbanner](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/banner-direct.svg)](https://vshymanskyy.github.io/StandWithUkraine)
 
-![TinyGSM logo](https://cdn.rawgit.com/vshymanskyy/TinyGSM/d18e93dc51fe988a0b175aac647185457ef640b5/extras/logo.svg)
+![TinyLoRa logo](https://cdn.rawgit.com/vshymanskyy/TinyLoRa/d18e93dc51fe988a0b175aac647185457ef640b5/extras/logo.svg)
 
 A small Arduino library for GSM modules, that just works.
 <!---
-[![GitHub download](https://img.shields.io/github/downloads/vshymanskyy/TinyGSM/total.svg)](https://github.com/vshymanskyy/TinyGSM/releases/latest)--->
-[![GitHub version](https://img.shields.io/github/release/vshymanskyy/TinyGSM.svg)](https://github.com/vshymanskyy/TinyGSM/releases/latest)
-[![Build status](https://img.shields.io/travis/vshymanskyy/TinyGSM.svg)](https://travis-ci.org/vshymanskyy/TinyGSM)
-[![GitHub issues](https://img.shields.io/github/issues/vshymanskyy/TinyGSM.svg)](https://github.com/vshymanskyy/TinyGSM/issues)
-[![GitHub wiki](https://img.shields.io/badge/Wiki-available-brightgreen.svg)](https://github.com/vshymanskyy/TinyGSM/wiki)
-[![GitHub stars](https://img.shields.io/github/stars/vshymanskyy/TinyGSM.svg)](https://github.com/vshymanskyy/TinyGSM/stargazers)
-[![License](https://img.shields.io/badge/license-LGPL3-blue.svg)](https://github.com/vshymanskyy/TinyGSM/blob/master/LICENSE)
+[![GitHub download](https://img.shields.io/github/downloads/vshymanskyy/TinyLoRa/total.svg)](https://github.com/EnviroDIY/TinyLoRa/releases/latest)--->
+[![GitHub version](https://img.shields.io/github/release/vshymanskyy/TinyLoRa.svg)](https://github.com/EnviroDIY/TinyLoRa/releases/latest)
+[![Build status](https://img.shields.io/travis/vshymanskyy/TinyLoRa.svg)](https://travis-ci.org/vshymanskyy/TinyLoRa)
+[![GitHub issues](https://img.shields.io/github/issues/vshymanskyy/TinyLoRa.svg)](https://github.com/EnviroDIY/TinyLoRa/issues)
+[![GitHub wiki](https://img.shields.io/badge/Wiki-available-brightgreen.svg)](https://github.com/EnviroDIY/TinyLoRa/wiki)
+[![GitHub stars](https://img.shields.io/github/stars/vshymanskyy/TinyLoRa.svg)](https://github.com/EnviroDIY/TinyLoRa/stargazers)
+[![License](https://img.shields.io/badge/license-LGPL3-blue.svg)](https://github.com/EnviroDIY/TinyLoRa/blob/master/LICENSE)
 
-If you like **TinyGSM** - give it a star, or fork it and contribute!
-[![GitHub stars](https://img.shields.io/github/stars/vshymanskyy/TinyGSM.svg?style=social&label=Star)](https://github.com/vshymanskyy/TinyGSM/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/vshymanskyy/TinyGSM.svg?style=social&label=Fork)](https://github.com/vshymanskyy/TinyGSM/network)
+If you like **TinyLoRa** - give it a star, or fork it and contribute!
+[![GitHub stars](https://img.shields.io/github/stars/vshymanskyy/TinyLoRa.svg?style=social&label=Star)](https://github.com/EnviroDIY/TinyLoRa/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/vshymanskyy/TinyLoRa.svg?style=social&label=Fork)](https://github.com/EnviroDIY/TinyLoRa/network)
 
 You can also join our chat:
-[![Gitter](https://img.shields.io/gitter/room/vshymanskyy/TinyGSM.svg)](https://gitter.im/tinygsm)
+[![Gitter](https://img.shields.io/gitter/room/vshymanskyy/TinyLoRa.svg)](https://gitter.im/TinyLoRa)
 
 - [Supported modems](#supported-modems)
   - [Supported boards/modules](#supported-boardsmodules)
@@ -51,14 +51,14 @@ This library is easy to integrate with lots of sketches which use Ethernet or Wi
 
 ![examples](/extras/examples.png)
 
-### TinyGSM is tiny
+### TinyLoRa is tiny
 The complete WebClient example for Arduino Uno (via Software Serial) takes little resources:
 ```
 Sketch uses 15022 bytes (46%) of program storage space. Maximum is 32256 bytes.
 Global variables use 574 bytes (28%) of dynamic memory, leaving 1474 bytes for local variables. Maximum is 2048 bytes.
 ```
 Arduino GSM library uses 15868 bytes (49%) of Flash and 1113 bytes (54%) of RAM in a similar scenario.
-TinyGSM also pulls data gently from the modem (whenever possible), so it can operate on very little RAM.
+TinyLoRa also pulls data gently from the modem (whenever possible), so it can operate on very little RAM.
 **Now, you have more space for your experiments.**
 
 
@@ -89,7 +89,7 @@ TinyGSM also pulls data gently from the modem (whenever possible), so it can ope
 - Adafruit FONA 800/808 Shield
 - Industruino GSM
 - RAK WisLTE ***(alpha)***
-- ... other modules, based on supported modems. Some boards require [**special configuration**](https://github.com/vshymanskyy/TinyGSM/wiki/Board-configuration).
+- ... other modules, based on supported modems. Some boards require [**special configuration**](https://github.com/EnviroDIY/TinyLoRa/wiki/Board-configuration).
 
 More modems may be supported later:
 - [ ] Quectel M10, UG95
@@ -165,7 +165,7 @@ Watch this repo for new updates! And of course, contributions are welcome ;)
 
 **Credits**
 - Primary Authors/Contributors:
-    - [vshymanskyy](https://github.com/vshymanskyy)
+    - [vshymanskyy](https://github.com/EnviroDIY)
     - [SRGDamia1](https://github.com/SRGDamia1/)
 - SIM7000:
     - [captFuture](https://github.com/captFuture/)
@@ -177,7 +177,7 @@ Watch this repo for new updates! And of course, contributions are welcome ;)
 - Quectel M95
     - [replicadeltd](https://github.com/replicadeltd)
 - Other Contributors:
-    - https://github.com/vshymanskyy/TinyGSM/graphs/contributors
+    - https://github.com/EnviroDIY/TinyLoRa/graphs/contributors
 
 ## Getting Started
 
@@ -192,26 +192,26 @@ Watch this repo for new updates! And of course, contributions are welcome ;)
   4. Ensure that you have a stable power supply to the module of at least **2A**.
   5. Check if serial connection is working (Hardware Serial is recommended)
      Send an ```AT``` command using [this sketch](tools/AT_Debug/AT_Debug.ino)
-  6. Try out the [WebClient](https://github.com/vshymanskyy/TinyGSM/blob/master/examples/WebClient/WebClient.ino) example
+  6. Try out the [WebClient](https://github.com/EnviroDIY/TinyLoRa/blob/master/examples/WebClient/WebClient.ino) example
 
 #### Writing your own code
 
 The general flow of your code should be:
 - Define the module that you are using (choose one and only one)
-    - ie, ```#define TINY_GSM_MODEM_SIM800```
-- Included TinyGSM
-    - ```#include <TinyGsmClient.h>```
-- Create a TinyGSM modem instance
-    - ```TinyGsm modem(SerialAT);```
-- Create one or more TinyGSM client instances
+    - ie, ```#define TINY_LORA_MDOT```
+- Included TinyLoRa
+    - ```#include <TinyLoRaClient.h>```
+- Create a TinyLoRa modem instance
+    - ```TinyLoRa modem(SerialAT);```
+- Create one or more TinyLoRa client instances
     - For a single connection, use
-        - ```TinyGsmClient client(modem);```
+        - ```TinyLoRaClient client(modem);```
         or
-        ```TinyGsmClientSecure client(modem);``` (on supported modules)
+        ```TinyLoRaClientSecure client(modem);``` (on supported modules)
     - For multiple connections (on supported modules) use:
-        - ```TinyGsmClient clientX(modem, 0);```, ```TinyGsmClient clientY(modem, 1);```, etc
+        - ```TinyLoRaClient clientX(modem, 0);```, ```TinyLoRaClient clientY(modem, 1);```, etc
           or
-        - ```TinyGsmClientSecure clientX(modem, 0);```, ```TinyGsmClientSecure clientY(modem, 1);```, etc
+        - ```TinyLoRaClientSecure clientX(modem, 0);```, ```TinyLoRaClientSecure clientY(modem, 1);```, etc
     - Secure and insecure clients can usually be mixed when using multiple connections.
     - The total number of connections possible varies by module
 - Begin your serial communication and set all your pins as required to power your module and bring it to full functionality.
@@ -239,15 +239,15 @@ The general flow of your code should be:
 #### If you have any issues
 
   1. Read the whole README (you're looking at it!), particularly the troubleshooting section below.
-  2. Some boards require [**special configuration**](https://github.com/vshymanskyy/TinyGSM/wiki/Board-configuration).
+  2. Some boards require [**special configuration**](https://github.com/EnviroDIY/TinyLoRa/wiki/Board-configuration).
   3. Try running the Diagnostics sketch
-  4. Check for [**highlighted topics here**](https://github.com/vshymanskyy/TinyGSM/issues?utf8=%E2%9C%93&q=is%3Aissue+label%3A%22for+reference%22+)
-  5. If you have a question, please post it in our [Gitter chat](https://gitter.im/tinygsm)
+  4. Check for [**highlighted topics here**](https://github.com/EnviroDIY/TinyLoRa/issues?utf8=%E2%9C%93&q=is%3Aissue+label%3A%22for+reference%22+)
+  5. If you have a question, please post it in our [Gitter chat](https://gitter.im/TinyLoRa)
 
 ## How does it work?
 
 Many GSM modems, WiFi and radio modules can be controlled by sending AT commands over Serial.
-TinyGSM knows which commands to send, and how to handle AT responses, and wraps that into standard Arduino Client interface.
+TinyLoRa knows which commands to send, and how to handle AT responses, and wraps that into standard Arduino Client interface.
 
 This library is "blocking" in all of its communication.
 Depending on the function, your code may be blocked for a long time waiting for the module responses.
@@ -270,7 +270,7 @@ For additional functions, please refer to [this example sketch](examples/AllFunc
 Most modules require _**as much as 2A**_ to properly connect to the network.
 This is 4x what a "standard" USB will supply!
 Improving the power supply actually solves stability problems in **many** cases!
-- Read about [**powering your module**](https://github.com/vshymanskyy/TinyGSM/wiki/Powering-GSM-module).
+- Read about [**powering your module**](https://github.com/EnviroDIY/TinyLoRa/wiki/Powering-GSM-module).
 - Keep your wires as short as possible
 - Consider soldering them for a stable connection
 - Do not put your wires next to noisy signal sources (buck converters, antennas, oscillators etc.)
@@ -279,7 +279,7 @@ Improving the power supply actually solves stability problems in **many** cases!
 ### Baud rates
 
 Most modules support some sort of "auto-bauding" feature where the module will attempt to adjust it's baud rate to match what it is receiving.
-TinyGSM also implements its own auto bauding function (`TinyGsmAutoBaud(SerialAT, GSM_AUTOBAUD_MIN, GSM_AUTOBAUD_MAX);`).
+TinyLoRa also implements its own auto bauding function (`TinyLoRaAutoBaud(SerialAT, GSM_AUTOBAUD_MIN, GSM_AUTOBAUD_MAX);`).
 While very useful when initially connecting to a module and doing tests, these should **NOT** be used in any sort of production code.
 Once you've established communication with the module, set the baud rate using the `setBaud(#)` function and stick with that rate.
 
@@ -294,7 +294,7 @@ This may result in problems such as:
  * etc.
 
 To return module to **Factory Defaults**, use this sketch:
-  File -> Examples -> TinyGSM -> tools -> [FactoryReset](https://github.com/vshymanskyy/TinyGSM/blob/master/tools/FactoryReset/FactoryReset.ino)
+  File -> Examples -> TinyLoRa -> tools -> [FactoryReset](https://github.com/EnviroDIY/TinyLoRa/blob/master/tools/FactoryReset/FactoryReset.ino)
 
 In some cases, you may need to set an initial APN to connect to the cellular network.
 Try using the ```gprsConnect(APN)``` function to set an initial APN if you are unable to register on the network.
@@ -313,15 +313,15 @@ When using MQTT, to keep a continuous connection you may need to reduce your kee
 ### Diagnostics sketch
 
 Use this sketch to help diagnose SIM card and GPRS connection issues:
-  File -> Examples -> TinyGSM -> tools -> [Diagnostics](https://github.com/vshymanskyy/TinyGSM/blob/master/tools/Diagnostics/Diagnostics.ino)
+  File -> Examples -> TinyLoRa -> tools -> [Diagnostics](https://github.com/EnviroDIY/TinyLoRa/blob/master/tools/Diagnostics/Diagnostics.ino)
 
 If the diagnostics fail, uncomment this line to output some debugging comments from the library:
 ```cpp
-#define TINY_GSM_DEBUG SerialMon
+#define TINY_LORA_DEBUG SerialMon
 ```
-In any custom code, ```TINY_GSM_DEBUG``` must be defined before including the TinyGSM library.
+In any custom code, ```TINY_LORA_DEBUG``` must be defined before including the TinyLoRa library.
 
-If you are unable to see any obvious errors in the library debugging, use [StreamDebugger](https://github.com/vshymanskyy/StreamDebugger) to copy the entire AT command sequence to the main serial port.
+If you are unable to see any obvious errors in the library debugging, use [StreamDebugger](https://github.com/EnviroDIY/StreamDebugger) to copy the entire AT command sequence to the main serial port.
 In the diagnostics example, simply uncomment the line:
 ```cpp
 #define DUMP_AT_COMMANDS
@@ -331,9 +331,9 @@ In custom code, you can add this snippit:
 #ifdef DUMP_AT_COMMANDS
   #include <StreamDebugger.h>
   StreamDebugger debugger(SerialAT, SerialMon);
-  TinyGsm modem(debugger);
+  TinyLoRa modem(debugger);
 #else
-  TinyGsm modem(SerialAT);
+  TinyLoRa modem(SerialAT);
 #endif
 ```
 
@@ -343,7 +343,7 @@ This library opens a TCP (or SSL) connection to a server.
 In the [OSI model](https://en.wikipedia.org/wiki/OSI_model), that's [layer 4](http://www.tcpipguide.com/free/t_TransportLayerLayer4.htm) (or 5 for SSL).
 HTTP (GET/POST), MQTT, and most of the other functions you probably want to use live up at [layer 7](http://www.tcpipguide.com/free/t_ApplicationLayerLayer7.htm).
 This means that you need to either manually code the top layer or use another library (like [HTTPClient](https://github.com/arduino-libraries/ArduinoHttpClient) or [PubSubClient](https://pubsubclient.knolleary.net/)) to do it for you.
-Tools like [PostMan](https://www.postman.com/) also show layer 7, not layer 4/5 like TinyGSM.
+Tools like [PostMan](https://www.postman.com/) also show layer 7, not layer 4/5 like TinyLoRa.
 If you are successfully connecting to a server, but getting responses of "bad request" (or no response), the issue is probably your formatting.
 Here are some tips for writing layer 7 (particularly HTTP request) manually:
 - Look at the "WebClient" example
@@ -378,7 +378,7 @@ Be sure to set correct TX/RX pins in the sketch. Please note that not every Ardu
 #### HardwareSerial
 
 When using ESP32 `HardwareSerial`, you may need to specify additional parameters to the `.begin()` call.
-Please [refer to this comment](https://github.com/vshymanskyy/TinyGSM/issues/91#issuecomment-356024747).
+Please [refer to this comment](https://github.com/EnviroDIY/TinyLoRa/issues/91#issuecomment-356024747).
 
 #### HttpClient
 You will not be able to compile the HttpClient or HttpsClient examples with ESP32 core 1.0.2.  Upgrade to 1.0.3, downgrade to version 1.0.1 or use the WebClient example.
@@ -386,11 +386,11 @@ You will not be able to compile the HttpClient or HttpsClient examples with ESP3
 ### SAMD21
 
 When using SAMD21-based boards, you may need to use a sercom uart port instead of `Serial1`.
-Please [refer to this comment](https://github.com/vshymanskyy/TinyGSM/issues/102#issuecomment-345548941).
+Please [refer to this comment](https://github.com/EnviroDIY/TinyLoRa/issues/102#issuecomment-345548941).
 
 ### Goouuu Tech IOT-GA6 vs AI-Thinker A6 confusion
 
-It turns out that **Goouuu Tech IOT-GA6** is not the same as **AI-Thinker A6**. Unfortunately IOT-GA6 is not supported out of the box yet. There are some hints that IOT-GA6 firmware may be updated to match A6... See [this topic](https://github.com/vshymanskyy/TinyGSM/issues/164).
+It turns out that **Goouuu Tech IOT-GA6** is not the same as **AI-Thinker A6**. Unfortunately IOT-GA6 is not supported out of the box yet. There are some hints that IOT-GA6 firmware may be updated to match A6... See [this topic](https://github.com/EnviroDIY/TinyLoRa/issues/164).
 
 ### SIM800 and SSL
 
@@ -401,14 +401,14 @@ If you need SSL and it does not appear to be working on your SIM800, try a diffe
 
 ### Which version of the SIM7000 code to use
 
-There are two versions of the SIM7000 code, one using `TINY_GSM_MODEM_SIM7000` and another with `TINY_GSM_MODEM_SIM7000SSL`.
-The `TINY_GSM_MODEM_SIM7000` version *does not support SSL* but supports up to 8 simultaneous connections.
-The `TINY_GSM_MODEM_SIM7000SSL` version supports both SSL *and unsecured connections* with up to 2 simultaneous connections.
+There are two versions of the SIM7000 code, one using `TINY_LORA_SIM7000` and another with `TINY_LORA_SIM7000SSL`.
+The `TINY_LORA_SIM7000` version *does not support SSL* but supports up to 8 simultaneous connections.
+The `TINY_LORA_SIM7000SSL` version supports both SSL *and unsecured connections* with up to 2 simultaneous connections.
 So why are there two versions?
 The "SSL" version uses the SIM7000's "application" commands while the other uses the "TCP-IP toolkit".
 Depending on your region/firmware, one or the other may not work for you.
 Try both and use whichever is more stable.
-If you do not need SSL, I recommend starting with `TINY_GSM_MODEM_SIM7000`.
+If you do not need SSL, I recommend starting with `TINY_LORA_SIM7000`.
 
 __________
 

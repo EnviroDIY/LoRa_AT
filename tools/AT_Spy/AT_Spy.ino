@@ -3,8 +3,8 @@
  * This script just listens in on the communication
  * between an Arduino and the modem.
  *
- * TinyGSM Getting Started guide:
- *   https://tiny.cc/tinygsm-readme
+ * TinyLoRa Getting Started guide:
+ *   https://tiny.cc/TinyLoRa-readme
  *
  **************************************************************/
 
@@ -35,12 +35,7 @@ void setup() {
   delay(6000);
 }
 
-void loop()
-{
-  while (MODEM_TX.available()) {
-    SPY.write(MODEM_TX.read());
-  }
-  while (BOARD_TX.available()) {
-    SPY.write(BOARD_TX.read());
-  }
+void loop() {
+  while (MODEM_TX.available()) { SPY.write(MODEM_TX.read()); }
+  while (BOARD_TX.available()) { SPY.write(BOARD_TX.read()); }
 }
