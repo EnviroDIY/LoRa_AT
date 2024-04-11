@@ -22,12 +22,6 @@
 #endif
 #endif
 
-#if defined(ARDUINO_DASH)
-#include <ArduinoCompat/Client.h>
-#else
-#include <Client.h>
-#endif
-
 #ifndef TINY_LORA_YIELD_MS
 #define TINY_LORA_YIELD_MS 0
 #endif

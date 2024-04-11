@@ -65,9 +65,6 @@ class TinyLoRaModem {
   bool sleepEnable(bool enable = true) {
     return thisModem().sleepEnableImpl(enable);
   }
-  bool setPhoneFunctionality(uint8_t fun, bool reset = false) {
-    return thisModem().setPhoneFunctionalityImpl(fun, reset);
-  }
 
   /*
    * Generic network functions
@@ -83,12 +80,6 @@ class TinyLoRaModem {
   // Gets signal quality report
   int16_t getSignalQuality() {
     return thisModem().getSignalQualityImpl();
-  }
-  String getLocalIP() {
-    return thisModem().getLocalIPImpl();
-  }
-  IPAddress localIP() {
-    return thisModem().TinyLoRaIpFromString(thisModem().getLocalIP());
   }
 
   /*
@@ -166,16 +157,9 @@ class TinyLoRaModem {
    * Power functions
    */
  protected:
-  bool radioOffImpl() {
-    if (!thisModem().setPhoneFunctionality(0)) { return false; }
-    delay(3000);
-    return true;
-  }
+  bool radioOffImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
 
   bool sleepEnableImpl(bool enable = true) TINY_LORA_ATTR_NOT_IMPLEMENTED;
-
-  bool setPhoneFunctionalityImpl(uint8_t fun, bool reset = false)
-      TINY_LORA_ATTR_NOT_IMPLEMENTED;
 
   /*
    * Generic network functions
@@ -223,27 +207,6 @@ class TinyLoRaModem {
     String res = thisModem().stream.readStringUntil('\r');
     if (thisModem().waitResponse() != 1) { return ""; }
     return res;
-  }
-
-  static inline IPAddress TinyLoRaIpFromString(const String& strIP) {
-    int Parts[4] = {
-        0,
-    };
-    int Part = 0;
-    for (uint8_t i = 0; i < strIP.length(); i++) {
-      char c = strIP[i];
-      if (c == '.') {
-        Part++;
-        if (Part > 3) { return IPAddress(0, 0, 0, 0); }
-        continue;
-      } else if (c >= '0' && c <= '9') {
-        Parts[Part] *= 10;
-        Parts[Part] += c - '0';
-      } else {
-        if (Part == 3) break;
-      }
-    }
-    return IPAddress(Parts[0], Parts[1], Parts[2], Parts[3]);
   }
 
   /*
