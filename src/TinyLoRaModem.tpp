@@ -97,18 +97,17 @@ class TinyLoRaModem {
   /**
    * @brief Sets up the LoRa module
    *
-   * @param pin A pin used to wake up the module, if needed
    * @return *true* The module was set up as expected
    * @return *false* Something failed in module set up
    */
-  bool begin(const char* pin = NULL) {
-    return thisModem().initImpl(pin);
+  bool begin() {
+    return thisModem().initImpl();
   }
   /**
    * @copydoc TinyLoRaModem::begin()
    */
-  bool init(const char* pin = NULL) {
-    return thisModem().initImpl(pin);
+  bool init() {
+    return thisModem().initImpl();
   }
 
   /**
@@ -254,15 +253,6 @@ class TinyLoRaModem {
   }
 
   /**
-   * @brief Get the LoRa module name (as it calls itself)
-   *
-   * @return *String* The module name
-   */
-  String getModuleName() {
-    return thisModem().getModuleNameImpl();
-  }
-
-  /**
    * @brief Reset the module to factory defaults.
    *
    * This generally restarts the module as well.
@@ -272,6 +262,52 @@ class TinyLoRaModem {
    */
   bool factoryDefault() {
     return thisModem().factoryDefaultImpl();
+  }
+  /**@}*/
+
+  /**
+   * @anchor power_functions
+   * @name Power functions
+   */
+  /**@{*/
+
+  /**
+   * @brief Restart the module
+   *
+   * @return *true* The module was successfully restarted.
+   * @return *false* There was an error in restarting the module.
+   */
+  bool restart() {
+    return thisModem().restartImpl();
+  }
+  /**
+   * @brief Power off the module
+   *
+   * @return *true* The module was successfully powered down.
+   * @return *false* There was an error in powering down module.
+   */
+  bool poweroff() {
+    return thisModem().powerOffImpl();
+  }
+  /**
+   * @brief Turn off the module radio
+   *
+   * @return *true* The module radio was successfully turned off.
+   * @return *false* There was an error in turning off the radio.
+   */
+  bool radioOff() {
+    return thisModem().radioOffImpl();
+  }
+  /**
+   * @brief Enable or disable sleep mode for the module.  What "sleep" means
+   * varies by module; check your documentation.
+   *
+   * @param enable True to enable sleep mode, false to disable it.
+   * @return *true* The module accepted the sleep mode setting.
+   * @return *false* There was an error in setting the sleep mode.
+   */
+  bool sleepEnable(bool enable = true) {
+    return thisModem().sleepEnableImpl(enable);
   }
   /**@}*/
 
@@ -301,6 +337,31 @@ class TinyLoRaModem {
    */
   bool getPublicNetwork() {
     return thisModem().getPublicNetworkImpl();
+  }
+
+  /**
+   * @brief Enable or disable send confirmation ("ACK").
+   *
+   * @note Requireing acknowledgement of every send can significantly slow down
+   * the send time.
+   *
+   * @param isAckRequired True to require acknowledgement of every send, false
+   * to not
+   * @return *true* The module accepting the acknowledgement setting.
+   * @return *false* There was an error in setting the acknowledgement setting.
+   */
+  bool setSendConfirmation(bool isAckRequired) {
+    return thisModem().setSendConfirmationImpl(isAckRequired);
+  }
+  /**
+   * @brief Check whether send confirmation ("ACK") is required in every
+   * message.
+   *
+   * @return *true* Send confirmation is required.
+   * @return *false* Send confirmation is not required.
+   */
+  bool getSendConfirmation() {
+    return thisModem().getSendConfirmationImpl();
   }
 
   /**
@@ -649,53 +710,6 @@ class TinyLoRaModem {
   /**@}*/
 
   /**
-   * @anchor power_functions
-   * @name Power functions
-   */
-  /**@{*/
-
-  /**
-   * @brief Restart the module
-   *
-   * @param pin A pin to use to wake/restart the module
-   * @return *true* The module was successfully restarted.
-   * @return *false* There was an error in restarting the module.
-   */
-  bool restart(const char* pin = NULL) {
-    return thisModem().restartImpl(pin);
-  }
-  /**
-   * @brief Power off the module
-   *
-   * @return *true* The module was successfully powered down.
-   * @return *false* There was an error in powering down module.
-   */
-  bool poweroff() {
-    return thisModem().powerOffImpl();
-  }
-  /**
-   * @brief Turn off the module radio
-   *
-   * @return *true* The module radio was successfully turned off.
-   * @return *false* There was an error in turning off the radio.
-   */
-  bool radioOff() {
-    return thisModem().radioOffImpl();
-  }
-  /**
-   * @brief Enable or disable sleep mode for the module.  What "sleep" means
-   * varies by module; check your documentation.
-   *
-   * @param enable True to enable sleep mode, false to disable it.
-   * @return *true* The module accepted the sleep mode setting.
-   * @return *false* There was an error in setting the sleep mode.
-   */
-  bool sleepEnable(bool enable = true) {
-    return thisModem().sleepEnableImpl(enable);
-  }
-  /**@}*/
-
-  /**
    * @anchor crtp_helper
    * @name CRTP Helper
    */
@@ -713,6 +727,8 @@ class TinyLoRaModem {
    * Basic functions
    */
  protected:
+  bool initImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
+
   void setBaudImpl(uint32_t baud) {
     thisModem().sendAT(GF("+IPR="), baud);
     thisModem().waitResponse();
@@ -726,7 +742,6 @@ class TinyLoRaModem {
     }
     return false;
   }
-
 
   // TODO(vshymanskyy): Optimize this!
   int8_t waitResponseImpl(uint32_t timeout_ms, String& data,
@@ -792,7 +807,7 @@ class TinyLoRaModem {
     return index;
   }
 
-  String getDevEUI() TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  String getDevEUIImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
 
   String getModuleInfoImpl() {
     thisModem().sendAT(GF("I"));
@@ -807,26 +822,6 @@ class TinyLoRaModem {
     return res;
   }
 
-  String getModuleNameImpl() {
-    thisModem().sendAT(GF("+CGMI"));
-    String res1;
-    if (thisModem().waitResponse(1000L, res1) != 1) { return "unknown"; }
-    res1.replace("\r\nOK\r\n", "");
-    res1.replace("\rOK\r", "");
-    res1.trim();
-
-    thisModem().sendAT(GF("+GMM"));
-    String res2;
-    if (thisModem().waitResponse(1000L, res2) != 1) { return "unknown"; }
-    res2.replace("\r\nOK\r\n", "");
-    res2.replace("\rOK\r", "");
-    res2.trim();
-
-    String name = res1 + String(' ') + res2;
-    DBG("### LoRa Module:", name);
-    return name;
-  }
-
   bool factoryDefaultImpl() {
     thisModem().sendAT(GF("&FZE0&W"));  // Factory + Reset + Echo Off + Write
     thisModem().waitResponse();
@@ -837,11 +832,24 @@ class TinyLoRaModem {
   }
 
   /*
+   * Power functions
+   */
+ protected:
+  bool restart() TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  bool poweroff() TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  bool radioOffImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  bool sleepEnableImpl(bool enable = true) TINY_LORA_ATTR_NOT_IMPLEMENTED;
+
+
+  /*
    * Generic network functions
    */
  protected:
   bool setPublicNetwork(bool isPublic) TINY_LORA_ATTR_NOT_IMPLEMENTED;
   bool getPublicNetwork() TINY_LORA_ATTR_NOT_IMPLEMENTED;
+
+  bool setSendConfirmation(bool isAckRequired) TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  bool getSendConfirmation() TINY_LORA_ATTR_NOT_IMPLEMENTED;
 
   bool joinOTAA(const char* appEui, const char* appKey, const char* devEui,
                 uint32_t timeout) TINY_LORA_ATTR_NOT_IMPLEMENTED;
@@ -989,15 +997,6 @@ class TinyLoRaModem {
   String getAppKeyImp() TINY_LORA_ATTR_NOT_IMPLEMENTED;
 
   /*
-   * Power functions
-   */
- protected:
-  bool radioOffImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
-
-  bool sleepEnableImpl(bool enable = true) TINY_LORA_ATTR_NOT_IMPLEMENTED;
-
-
-  /*
    Utilities
    */
  public:
@@ -1100,6 +1099,8 @@ class TinyLoRaModem {
     }
     return false;
   }
+
+  bool _requireAck;
 };
 
 #endif  // SRC_TINYLORAMODEM_H_
