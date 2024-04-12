@@ -6,16 +6,16 @@
  * @date       Nov 2016
  */
 
-#ifndef SRC_TinyLoRaCLIENT_H_
-#define SRC_TinyLoRaCLIENT_H_
+#ifndef SRC_TINYLORACLIENT_H_
+#define SRC_TINYLORACLIENT_H_
 
 #if defined(TINY_LORA_MDOT)
-#include "TinyLoRaClientSIM800.h"
-typedef TinyLoRaSim800                  TinyLoRa;
-typedef TinyLoRaSim800::GsmClientSim800 TinyLoRaClient;
+#include "TinyLoRaClientMDOT.h"
+typedef TinyLoRamDOT                 TinyLoRa;
+typedef TinyLoRamDOT::LoRaStreammDOT TinyLoRaClient;
 
 #else
 #error "Please define LoRa Radio model"
 #endif
 
-#endif  // SRC_TinyLoRaCLIENT_H_
+#endif  // SRC_TINYLORACLIENT_H_

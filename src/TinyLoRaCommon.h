@@ -6,8 +6,8 @@
  * @date       Nov 2016
  */
 
-#ifndef SRC_TinyLoRaCOMMON_H_
-#define SRC_TinyLoRaCOMMON_H_
+#ifndef SRC_TINYLORACOMMON_H_
+#define SRC_TINYLORACOMMON_H_
 
 // The current library version number
 #define TINY_LORA_VERSION "0.11.7"
@@ -110,4 +110,4 @@ uint32_t TinyLoRaAutoBaud(T& SerialAT, uint32_t minimum = 9600,
   return 0;
 }
 
-#endif  // SRC_TinyLoRaCOMMON_H_
+#endif  // SRC_TINYLORACOMMON_H_

@@ -6,8 +6,8 @@
  * @date       Nov 2016
  */
 
-#ifndef SRC_TinyLoRaTIME_H_
-#define SRC_TinyLoRaTIME_H_
+#ifndef SRC_TINYLORATIME_H_
+#define SRC_TINYLORATIME_H_
 
 #include "TinyLoRaCommon.h"
 
@@ -103,4 +103,4 @@ class TinyLoRaTime {
   }
 };
 
-#endif  // SRC_TinyLoRaTIME_H_
+#endif  // SRC_TINYLORATIME_H_

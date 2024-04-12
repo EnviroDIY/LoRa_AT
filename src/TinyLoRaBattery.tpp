@@ -6,8 +6,8 @@
  * @date       Nov 2016
  */
 
-#ifndef SRC_TinyLoRaBATTERY_H_
-#define SRC_TinyLoRaBATTERY_H_
+#ifndef SRC_TINYLORABATTERY_H_
+#define SRC_TINYLORABATTERY_H_
 
 #include "TinyLoRaCommon.h"
 
@@ -95,4 +95,4 @@ class TinyLoRaBattery {
   }
 };
 
-#endif  // SRC_TinyLoRaBATTERY_H_
+#endif  // SRC_TINYLORABATTERY_H_

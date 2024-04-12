@@ -6,8 +6,8 @@
  * @date       Nov 2016
  */
 
-#ifndef SRC_TinyLoRaTEMPERATURE_H_
-#define SRC_TinyLoRaTEMPERATURE_H_
+#ifndef SRC_TINYLORATEMPERATURE_H_
+#define SRC_TINYLORATEMPERATURE_H_
 
 #include "TinyLoRaCommon.h"
 
@@ -37,4 +37,4 @@ class TinyLoRaTemperature {
   float getTemperatureImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
 };
 
-#endif  // SRC_TinyLoRaTEMPERATURE_H_
+#endif  // SRC_TINYLORATEMPERATURE_H_
