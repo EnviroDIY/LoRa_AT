@@ -11,41 +11,23 @@
 
 #include "TinyLoRaCommon.h"
 
-#ifndef GSM_NL
-#define GSM_NL "\r\n"
+#ifndef AT_NL
+#define AT_NL "\r\n"
 #endif
 
 #ifndef DEFAULT_JOIN_TIMEOUT
 #define DEFAULT_JOIN_TIMEOUT 60000L
 #endif
 
-static const char GSM_OK[] TINY_LORA_PROGMEM    = "OK" GSM_NL;
-static const char GSM_ERROR[] TINY_LORA_PROGMEM = "ERROR" GSM_NL;
+static const char GSM_OK[] TINY_LORA_PROGMEM    = "OK" AT_NL;
+static const char GSM_ERROR[] TINY_LORA_PROGMEM = "ERROR" AT_NL;
 
 #if defined       TINY_GSM_DEBUG
-static const char GSM_CME_ERROR[] TINY_LORA_PROGMEM = GSM_NL "+CME ERROR:";
-static const char GSM_CMS_ERROR[] TINY_LORA_PROGMEM = GSM_NL "+CMS ERROR:";
+static const char GSM_CME_ERROR[] TINY_LORA_PROGMEM = AT_NL "+CME ERROR:";
+static const char GSM_CMS_ERROR[] TINY_LORA_PROGMEM = AT_NL "+CMS ERROR:";
 #endif
 
-// Enums taken from:
-
-/**
- * @brief LoRa Frequency bands - use the correct one for your module and country
- *
- * @enum _lora_band
- */
-typedef enum {
-  AS923 = 0,
-  AU915,
-  CN470,
-  CN779,
-  EU433,
-  EU868 = 5,
-  KR920,
-  IN865,
-  US915,
-  US915_HYBRID,
-} _lora_band;
+// Enums taken from: https://github.com/arduino-libraries/MKRWAN
 
 /**
  * @brief LoRa activation modes
@@ -118,7 +100,7 @@ class TinyLoRaModem {
    */
   template <typename... Args>
   inline void sendAT(Args... cmd) {
-    thisModem().streamWrite("AT", cmd..., GSM_NL);
+    thisModem().streamWrite("AT", cmd..., AT_NL);
     thisModem().stream.flush();
     TINY_LORA_YIELD(); /* DBG("### AT:", cmd...); */
   }
@@ -340,57 +322,72 @@ class TinyLoRaModem {
   }
 
   /**
-   * @brief Enable or disable send confirmation ("ACK").
+   * @brief Set the number of times to retry sending a message while waiting for
+   * an ACK from the recipient.
    *
    * @note Requireing acknowledgement of every send can significantly slow down
    * the send time.
    *
-   * @param isAckRequired True to require acknowledgement of every send, false
-   * to not
+   * @param numAckRetries The number of retries to attempt to
+   * get acknowledgement [0-15].
    * @return *true* The module accepting the acknowledgement setting.
    * @return *false* There was an error in setting the acknowledgement setting.
    */
-  bool setSendConfirmation(bool isAckRequired) {
-    return thisModem().setSendConfirmationImpl(isAckRequired);
+  bool setConfirmationRetries(int8_t numAckRetries) {
+    return thisModem().setConfirmationRetriesImpl(numAckRetries);
   }
   /**
-   * @brief Check whether send confirmation ("ACK") is required in every
-   * message.
+   * @brief Check the number of retries to attempt when sending a message and
+   * waiting for an ACK from the recipient.
    *
-   * @return *true* Send confirmation is required.
-   * @return *false* Send confirmation is not required.
+   * @return The number of retries to attempt to get acknowledgement
+   * [0-15].
    */
-  bool getSendConfirmation() {
-    return thisModem().getSendConfirmationImpl();
+  int8_t getConfirmationRetries() {
+    return thisModem().getConfirmationRetriesImpl();
   }
 
   /**
    * @brief Join a network using OTAA (Over The Air Activation)
    *
-   * @param appEui The app EUI (Network ID)
-   * @param appKey The app key (Network key)
-   * @param devEui The device EUI
+   * @note The useHex parameter applies to both the appEUI and the appKey.
+   * Either both or neither should be hex.
+   *
+   * @param appEui The app EUI (Network ID). If using a string, set useHex to
+   * false. If using 8 bytes of hex data, set useHex to true.
+   * @param appKey The app key (Network key). If using a string, set useHex to
+   * false. If using 8 bytes of hex data, set useHex to true.
+   * @param devEui The device EUI. This must be 16 bytes of hex data.
+   * @param useHex True if the appKey and appEUI are in hex; false for standard
+   * strings
    * @param timeout A timeout to wait for successful join
    * @return *true* The network join was successful
    * @return *false* The network join failed
    */
   bool joinOTAA(const char* appEui, const char* appKey, const char* devEui,
-                uint32_t timeout) {
-    return thisModem().joinOTAAImpl();
+                bool useHex = false, uint32_t timeout = DEFAULT_JOIN_TIMEOUT) {
+    return thisModem().joinOTAAImpl(appEui, appKey, devEui, useHex, timeout);
   }
 
   /**
    * @brief Join a network using OTAA (Over The Air Activation)
    *
-   * @param appEui The app EUI (Network ID)
-   * @param appKey The app key (Network key)
+   * @note The useHex parameter applies to both the appEUI and the appKey.
+   * Either both or neither should be hex.
+   *
+   * @param appEui The app EUI (Network ID). If using a string, set useHex to
+   * false. If using 8 bytes of hex data, set useHex to true.
+   * @param appKey The app key (Network key). If using a string, set useHex to
+   * false. If using 8 bytes of hex data, set useHex to true.
+   * @param useHex True if the appKey and appEUI are in hex; false for standard
+   * strings
    * @param timeout A timeout to wait for successful join
    * @return *true* The network join was successful
    * @return *false* The network join failed
    */
-  bool joinOTAA(String appEui, String appKey,
+  bool joinOTAA(String appEui, String appKey, bool useHex = false,
                 uint32_t timeout = DEFAULT_JOIN_TIMEOUT) {
-    return joinOTAA(appEui.c_str(), appKey.c_str(), NULL, timeout);
+    return joinOTAA(appEui.c_str(), appKey.c_str(), NULL, useHex, timeout);
   }
 
 
@@ -404,32 +401,37 @@ class TinyLoRaModem {
    * @return *false* The network join failed
    */
   bool joinOTAA(String appEui, String appKey, String devEui,
-                uint32_t timeout = DEFAULT_JOIN_TIMEOUT) {
-    return joinOTAA(appEui.c_str(), appKey.c_str(), devEui.c_str(), timeout);
+                bool useHex = false, uint32_t timeout = DEFAULT_JOIN_TIMEOUT) {
+    return joinOTAA(appEui.c_str(), appKey.c_str(), devEui.c_str(), useHex,
+                    timeout);
   }
 
   /**
    * @brief Join a network using ABP (Activation By Personalization)
    *
-   * @param devAddr The device address (network address)
-   * @param nwkSKey The network session key
-   * @param appSKey The app session key (data session key)
+   * @param devAddr The device address (network address). This must be 4 bytes
+   * of hex data.
+   * @param nwkSKey The network session key. This must be 16 bytes of hex data.
+   * @param appSKey The app session key (data session key). This must be 16
+   * bytes of hex data.
    * @param timeout A timeout to wait for successful join
    * @return *true* The network join was successful
    * @return *false* The network join failed
    */
   bool joinABP(const char* devAddr, const char* nwkSKey, const char* appSKey,
                uint32_t timeout = DEFAULT_JOIN_TIMEOUT) {
-    return thisModem().joinABPImpl();
+    return thisModem().joinABPImpl(devAddr, nwkSKey, appSKey, timeout);
   }
 
   /**
    * @brief Join a network using ABP (Activation By Personalization), waiting
    * the default timeout.
    *
-   * @param devAddr The device address (network address)
-   * @param nwkSKey The network session key
-   * @param appSKey The app session key (data session key)
+   * @param devAddr The device address (network address). This must be 4 bytes
+   * of hex data.
+   * @param nwkSKey The network session key. This must be 16 bytes of hex data.
+   * @param appSKey The app session key (data session key). This must be 16
+   * bytes of hex data.
    * @return *true* The network join was successful
    * @return *false* The network join failed
    */
@@ -444,7 +446,9 @@ class TinyLoRaModem {
    * @return *false* The module is not connected to the network
    */
   bool isNetworkConnected() {
-    return thisModem().isNetworkConnectedImpl();
+    bool isConnected  = thisModem().isNetworkConnectedImpl();
+    _networkConnected = isConnected;
+    return isConnected;
   }
 
   /**
@@ -464,7 +468,7 @@ class TinyLoRaModem {
   /**@{*/
 
   /**
-   * @brief Configure the LoRaWAN device class
+   * @brief Set the LoRaWAN device class
    *
    * @see https://lora.readthedocs.io/en/latest/#lorawan-device-classes
    *
@@ -472,20 +476,49 @@ class TinyLoRaModem {
    * @return *true* The device class was successfully configured
    * @return *false* The module did not accept the device class
    */
-  bool configureClass(_lora_class _class) {
-    return thisModem().configureClassImpl(_class);
+  bool setClass(_lora_class _class) {
+    return thisModem().setClassImpl(_class);
+  }
+  /**
+   * @brief Get the modules current LoRaWAN device class
+   *
+   * @return *_lora_class* The device class from the ::_lora_class enum
+   */
+  _lora_class getClass() {
+    return thisModem().getClassImpl();
   }
 
   /**
-   * @brief Configure the LoRa band.  The band should be appropriate to your
-   * module and your location.
+   * @brief Set the LoRa band. The band should be appropriate to your
+   * module and your location. This is not configurable on all modules.
    *
-   * @param band The band to use, must be one of ::_lora_band
+   * @param band The band to use, must be one of the bands available for your
+   * module. Check your datasheet.
    * @return *true* The device band was successfully configured
    * @return *false* The module did not accept the device band
    */
-  bool configureBand(_lora_band band) {
-    return thisModem().configureBandImpl(band);
+  bool setBand(const char* band) {
+    return thisModem().setBandImpl(band);
+  }
+  /**
+   * @brief Set the LoRa band. The band should be appropriate to your
+   * module and your location. This is not configurable on all modules.
+   *
+   * @param band The band to use, must be one of the bands available for your
+   * module. Check your datasheet.
+   * @return *true* The device band was successfully configured
+   * @return *false* The module did not accept the device band
+   */
+  bool setBand(String band) {
+    return setBand(band.c_str());
+  }
+  /**
+   * @brief Get the current LoRa frequency band.
+   *
+   * @return The current LoRa frequency band the module is using.
+   */
+  String getBand() {
+    return thisModem().getBandImpl();
   }
 
   /**
@@ -497,8 +530,9 @@ class TinyLoRaModem {
    * @return *true* The device sub-band was successfully configured
    * @return *false* The module did not accept the device sub-band
    */
-  bool setFrequencySubBand(int8_t subBand);
-  { return thisModem().setFrequencySubBandImpl(subBand); }
+  bool setFrequencySubBand(int8_t subBand) {
+    return thisModem().setFrequencySubBandImpl(subBand);
+  }
   /**
    * @brief Get the  frequency sub-band the module is operating on. This only
    * appolies to US 915 MHz modules.
@@ -506,8 +540,9 @@ class TinyLoRaModem {
    * @return *int8_t* An int representing the sub-band, per the module
    * documentation
    */
-  int8_t getFrequencySubBand();
-  { return thisModem().getFrequencySubBandImpl(); }
+  int8_t getFrequencySubBand() {
+    return thisModem().getFrequencySubBandImpl();
+  }
 
   /**
    * @brief Get the 16 or 72 bit channel mask
@@ -515,7 +550,7 @@ class TinyLoRaModem {
    * @return *String* The 16 or 72 bit channel mask
    */
   String getChannelMask() {
-    return thisModem().getChannelMaskl();
+    return thisModem().getChannelMaskImpl();
   }
 
   /**
@@ -557,8 +592,18 @@ class TinyLoRaModem {
    * @return *true* The module accepted the new channel mask.
    * @return *false* There was an error in changing the channel mask.
    */
-  bool sendMask(String newMask) {
-    return thisModem().sendMaskImpl(newMask);
+  bool setChannelMask(const char* newMask) {
+    return thisModem().setChannelMaskImpl(newMask);
+  }
+  /**
+   * @brief Sends a new channel mask to the device
+   *
+   * @param newMask A full new channel mask
+   * @return *true* The module accepted the new channel mask.
+   * @return *false* There was an error in changing the channel mask.
+   */
+  bool setChannelMask(String newMask) {
+    return setChannelMask(newMask.c_str());
   }
   /**@}*/
 
@@ -594,9 +639,9 @@ class TinyLoRaModem {
   }
 
   /**
-   * @brief Set the LoRa data rate
+   * @brief Set the Tx LoRa data rate
    *
-   * @param dataRateAn int representing the data rate, per the module
+   * @param dataRate An int representing the Tx data rate, per the module
    * documentation
    * @return *true* The module accepted the new data rate.
    * @return *false* There was an error in changing the data rate.
@@ -605,9 +650,9 @@ class TinyLoRaModem {
     return thisModem().setDataRateImpl(dataRate);
   }
   /**
-   * @brief Get the current data rate for the LoRa module
+   * @brief Get the current Tx data rate for the LoRa module
    *
-   * @return *int8_t* int representing the data rate, per the module
+   * @return *int8_t* int representing the Tx data rate, per the module
    * documentation
    */
   int8_t getDataRate() {
@@ -677,8 +722,8 @@ class TinyLoRaModem {
    *
    * @return *String* The App Session Key (data session key)
    */
-  String AppSKey() {
-    return thisModem().AppSKeyImpl();
+  String getAppSKey() {
+    return thisModem().getAppSKeyImpl();
   }
   /**@}*/
 
@@ -695,7 +740,7 @@ class TinyLoRaModem {
    * @return *String* The App EUI
    */
   String getAppEUI() {
-    return thisModem().getAppKeyImpl();
+    return thisModem().getAppEUIImpl();
   }
   /**
    * @brief Get the App Key (network key)
@@ -755,13 +800,13 @@ class TinyLoRaModem {
 #endif
                           GsmConstStr r5 = NULL, GsmConstStr r6 = NULL,
                           GsmConstStr r7 = NULL) {
-    data.reserve(64);
+    data.reserve(TINY_LORA_RX_BUFFER);
     uint8_t  index       = 0;
     uint32_t startMillis = millis();
     do {
-      TINY_GSM_YIELD();
+      TINY_LORA_YIELD();
       while (thisModem().stream.available() > 0) {
-        TINY_GSM_YIELD();
+        TINY_LORA_YIELD();
         int8_t a = thisModem().stream.read();
         if (a <= 0) continue;  // Skip 0x00 bytes, just in case
         data += static_cast<char>(a);
@@ -802,7 +847,8 @@ class TinyLoRaModem {
       if (data.length()) { DBG("### Unhandled:", data); }
       data = "";
     }
-    // data.replace(AT_NL, "/");
+    // data.replace("\r", "←");
+    // data.replace("\n", "↓");
     // DBG('<', index, '>', data);
     return index;
   }
@@ -835,8 +881,8 @@ class TinyLoRaModem {
    * Power functions
    */
  protected:
-  bool restart() TINY_LORA_ATTR_NOT_IMPLEMENTED;
-  bool poweroff() TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  bool restartImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  bool poweroffImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
   bool radioOffImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
   bool sleepEnableImpl(bool enable = true) TINY_LORA_ATTR_NOT_IMPLEMENTED;
 
@@ -845,17 +891,18 @@ class TinyLoRaModem {
    * Generic network functions
    */
  protected:
-  bool setPublicNetwork(bool isPublic) TINY_LORA_ATTR_NOT_IMPLEMENTED;
-  bool getPublicNetwork() TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  bool setPublicNetworkImpl(bool isPublic) TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  bool getPublicNetworkImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
 
-  bool setSendConfirmation(bool isAckRequired) TINY_LORA_ATTR_NOT_IMPLEMENTED;
-  bool getSendConfirmation() TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  bool
+  setConfirmationRetriesImpl(bool isAckRequired) TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  bool getConfirmationRetriesImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
 
-  bool joinOTAA(const char* appEui, const char* appKey, const char* devEui,
-                uint32_t timeout) TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  bool joinOTAAImpl(const char* appEui, const char* appKey, const char* devEui,
+                    uint32_t timeout) TINY_LORA_ATTR_NOT_IMPLEMENTED;
 
-  bool joinABP(const char* devAddr, const char* nwkSKey, const char* appSKey,
-               uint32_t timeout = DEFAULT_JOIN_TIMEOUT)
+  bool joinABPImpl(const char* devAddr, const char* nwkSKey,
+                   const char* appSKey, uint32_t timeout = DEFAULT_JOIN_TIMEOUT)
       TINY_LORA_ATTR_NOT_IMPLEMENTED;
   bool isNetworkConnectedImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
 
@@ -866,40 +913,32 @@ class TinyLoRaModem {
    * LoRa Class and Band functions
    */
 
-  bool configureClassImp(_lora_class _class) TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  bool        setClassImpl(_lora_class _class) TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  _lora_class getClassImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
 
-  bool configureBandImp(_lora_band band) TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  bool   setBandImpl(const char* band) TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  String getBandImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
 
-  bool   setFrequencySubBand(int8_t subBand) TINY_LORA_ATTR_NOT_IMPLEMENTED;
-  int8_t getFrequencySubBand() TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  bool   setFrequencySubBandImpl(int8_t subBand) TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  int8_t getFrequencySubBandImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
 
-  int getChannelMaskSize(_lora_band band) {
-    switch (band) {
-      case AS923:
-      case CN779:
-      case EU433:
-      case EU868:
-      case KR920:
-      case IN865: mask_size = 1; break;
-      case AU915:
-      case CN470:
-      case US915:
-      case US915_HYBRID: mask_size = 6; break;
-      default: break;
-    }
-    return mask_size;
-  }
+  String getChannelMaskImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
 
-  String getChannelMaskImp() TINY_LORA_ATTR_NOT_IMPLEMENTED;
-
-  int isChannelEnabledImp(int pos) {
+  int isChannelEnabledImpl(int pos) {
     // Populate channelsMask array
-    int max_retry = 3;
-    int retry     = 0;
+    int    max_retry        = 3;
+    int    retry            = 0;
+    String channel_mask_str = "";
     while (retry < max_retry) {
-      String mask = thisModem().getChannelMask();
-      if (mask != "0") { break; }
+      channel_mask_str = thisModem().getChannelMask();
+      if (channel_mask_str != "0") { break; }
       retry++;
+    }
+    uint16_t channelsMask[6];
+    if (channel_mask_str.length() > 0) {
+      sscanf(channel_mask_str.c_str(), "%04hx%04hx%04hx%04hx%04hx%04hx",
+             &channelsMask[0], &channelsMask[1], &channelsMask[2],
+             &channelsMask[3], &channelsMask[4], &channelsMask[5]);
     }
 
     int      row     = pos / 16;
@@ -911,14 +950,21 @@ class TinyLoRaModem {
     return channel;
   }
 
-  bool disableChannelImp(int pos) {
+  bool disableChannelImpl(int pos) {
     // Populate channelsMask array
-    int max_retry = 3;
-    int retry     = 0;
+    int    max_retry        = 3;
+    int    retry            = 0;
+    String channel_mask_str = "";
     while (retry < max_retry) {
-      String mask = thisModem().getChannelMask();
-      if (mask != "0") { break; }
+      channel_mask_str = thisModem().getChannelMask();
+      if (channel_mask_str != "0") { break; }
       retry++;
+    }
+    uint16_t channelsMask[6];
+    if (channel_mask_str.length() > 0) {
+      sscanf(channel_mask_str.c_str(), "%04hx%04hx%04hx%04hx%04hx%04hx",
+             &channelsMask[0], &channelsMask[1], &channelsMask[2],
+             &channelsMask[3], &channelsMask[4], &channelsMask[5]);
     }
 
     int      row  = pos / 16;
@@ -927,17 +973,24 @@ class TinyLoRaModem {
 
     channelsMask[row] = channelsMask[row] & mask;
 
-    return thisModem().sendMask();
+    return thisModem().setChannelMask();
   }
 
-  bool enableChannelImp(int pos) {
+  bool enableChannelImpl(int pos) {
     // Populate channelsMask array
-    int max_retry = 3;
-    int retry     = 0;
+    int    max_retry        = 3;
+    int    retry            = 0;
+    String channel_mask_str = "";
     while (retry < max_retry) {
-      String mask = thisModem().getChannelMask();
-      if (mask != "0") { break; }
+      channel_mask_str = thisModem().getChannelMask();
+      if (channel_mask_str != "0") { break; }
       retry++;
+    }
+    uint16_t channelsMask[6];
+    if (channel_mask_str.length() > 0) {
+      sscanf(channel_mask_str.c_str(), "%04hx%04hx%04hx%04hx%04hx%04hx",
+             &channelsMask[0], &channelsMask[1], &channelsMask[2],
+             &channelsMask[3], &channelsMask[4], &channelsMask[5]);
     }
 
     int      row  = pos / 16;
@@ -946,11 +999,12 @@ class TinyLoRaModem {
 
     channelsMask[row] = channelsMask[row] | mask;
 
-    return thisModem().sendMask();
+    return thisModem().setChannelMask();
   }
 
-  bool sendMaskImp() {
-    String newMask;
+  bool setChannelMaskImpl() {
+    String   newMask;
+    uint16_t channelsMask[6];
 
     /* Convert channel mask into string */
     for (int i = 0; i < 6; i++) {
@@ -961,40 +1015,40 @@ class TinyLoRaModem {
 
     DBG("Newmask: ", newMask);
 
-    return thisModem().sendMask(newMask);
+    return thisModem().setChannelMask(newMask);
   }
 
-  bool sendMaskImp(String newMask) TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  bool setChannelMaskImpl(const char* newMask) TINY_LORA_ATTR_NOT_IMPLEMENTED;
 
   /*
    * LoRa Data Rate and Duty Cycle functions
    */
-  bool   setDutyCycleImp(int8_t dutyCycle) TINY_LORA_ATTR_NOT_IMPLEMENTED;
-  int8_t getDutyCycleImp() TINY_LORA_ATTR_NOT_IMPLEMENTED;
-  bool   setDataRateImp(uint8_t dataRate) TINY_LORA_ATTR_NOT_IMPLEMENTED;
-  int8_t getDataRateImp() TINY_LORA_ATTR_NOT_IMPLEMENTED;
-  bool   setAdaptiveDataRateImp(bool useADR) TINY_LORA_ATTR_NOT_IMPLEMENTED;
-  bool   getAdaptiveDataRateImp() TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  bool   setDutyCycleImpl(int8_t dutyCycle) TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  int8_t getDutyCycleImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  bool   setDataRateImpl(uint8_t dataRate) TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  int8_t getDataRateImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  bool   setAdaptiveDataRateImpl(bool useADR) TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  bool   getAdaptiveDataRateImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
 
 
   /*
    * LoRa ABP Session Properties
    */
   // aka network address
-  String getDevAddrImp() TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  String getDevAddrImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
   // network session key
-  String getNwkSKeyImp() TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  String getNwkSKeyImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
   // aka data session key
-  String AppSKeyImp() TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  String getAppSKeyImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
 
 
   /*
    * LoRa OTAA Session Properties
    */
   // aka network id
-  String getAppEUIImp() TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  String getAppEUIImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
   // aka network key
-  String getAppKeyImp() TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  String getAppKeyImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
 
   /*
    Utilities
@@ -1101,6 +1155,7 @@ class TinyLoRaModem {
   }
 
   bool _requireAck;
+  bool _networkConnected;
 };
 
 #endif  // SRC_TINYLORAMODEM_H_

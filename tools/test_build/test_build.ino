@@ -4,7 +4,7 @@
  *  This is NOT an example for use of this library!
  *
  **************************************************************/
-#include <TinyLoRaClient.h>
+#include <TinyLoRa.h>
 
 TinyLoRa modem(Serial);
 
@@ -194,7 +194,7 @@ void loop() {
 
 // Test the Network time function
 #if defined(TINY_LORA_HAS_TIME) && not defined(__AVR_ATmega32U4__)
-  modem.getGSMDateTime(DATE_FULL);
+  modem.getDateTimeString(DATE_FULL);
   int   year3    = 0;
   int   month3   = 0;
   int   day3     = 0;
@@ -202,7 +202,8 @@ void loop() {
   int   min3     = 0;
   int   sec3     = 0;
   float timezone = 0;
-  modem.getNetworkTime(&year3, &month3, &day3, &hour3, &min3, &sec3, &timezone);
+  modem.getDateTimeParts(&year3, &month3, &day3, &hour3, &min3, &sec3,
+                         &timezone);
 #endif
 
 // Test Battery functions

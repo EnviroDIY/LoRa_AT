@@ -91,7 +91,7 @@ const char wifiPass[] = "YourWiFiPass";
 const char server[]   = "vsh.pp.ua";
 const char resource[] = "/TinyLoRa/logo.txt";
 
-#include <TinyLoRaClient.h>
+#include <TinyLoRa.h>
 
 // Just in case someone defined the wrong thing..
 #if TINY_LORA_USE_GPRS && not defined TINY_LORA_HAS_GPRS

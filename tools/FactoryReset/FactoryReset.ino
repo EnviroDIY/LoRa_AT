@@ -25,7 +25,7 @@
 // #define TINY_LORA_ESP8266
 // #define TINY_LORA_XBEE
 
-#include <TinyLoRaClient.h>
+#include <TinyLoRa.h>
 
 // Set serial for debug console (to the Serial Monitor, speed 115200)
 #define SerialMon Serial

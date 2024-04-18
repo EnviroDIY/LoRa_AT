@@ -28,8 +28,7 @@ class TinyLoRaBattery {
   uint8_t getBattChargeState() {
     return thisModem().getBattChargeStateImpl();
   }
-  bool getBattStats(uint8_t& chargeState, int8_t& percent,
-                    uint16_t& milliVolts) {
+  bool getBattStats(int8_t& chargeState, int8_t& percent, int16_t& milliVolts) {
     return thisModem().getBattStatsImpl(chargeState, percent, milliVolts);
   }
 
@@ -49,50 +48,14 @@ class TinyLoRaBattery {
    */
  protected:
   // Use: float vBatt = modem.getBattVoltage() / 1000.0;
-  uint16_t getBattVoltageImpl() {
-    thisModem().sendAT(GF("+CBC"));
-    if (thisModem().waitResponse(GF("+CBC:")) != 1) { return 0; }
-    thisModem().streamSkipUntil(',');  // Skip battery charge status
-    thisModem().streamSkipUntil(',');  // Skip battery charge level
-    // return voltage in mV
-    uint16_t res = thisModem().streamGetIntBefore('\n');
-    // Wait for final OK
-    thisModem().waitResponse();
-    return res;
-  }
+  uint16_t getBattVoltageImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
 
-  int8_t getBattPercentImpl() {
-    thisModem().sendAT(GF("+CBC"));
-    if (thisModem().waitResponse(GF("+CBC:")) != 1) { return false; }
-    thisModem().streamSkipUntil(',');  // Skip battery charge status
-    // Read battery charge level
-    int8_t res = thisModem().streamGetIntBefore(',');
-    // Wait for final OK
-    thisModem().waitResponse();
-    return res;
-  }
+  int8_t getBattPercentImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
 
-  uint8_t getBattChargeStateImpl() {
-    thisModem().sendAT(GF("+CBC"));
-    if (thisModem().waitResponse(GF("+CBC:")) != 1) { return false; }
-    // Read battery charge status
-    int8_t res = thisModem().streamGetIntBefore(',');
-    // Wait for final OK
-    thisModem().waitResponse();
-    return res;
-  }
+  uint8_t getBattChargeStateImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
 
-  bool getBattStatsImpl(uint8_t& chargeState, int8_t& percent,
-                        uint16_t& milliVolts) {
-    thisModem().sendAT(GF("+CBC"));
-    if (thisModem().waitResponse(GF("+CBC:")) != 1) { return false; }
-    chargeState = thisModem().streamGetIntBefore(',');
-    percent     = thisModem().streamGetIntBefore(',');
-    milliVolts  = thisModem().streamGetIntBefore('\n');
-    // Wait for final OK
-    thisModem().waitResponse();
-    return true;
-  }
+  bool getBattStatsImpl(int8_t& chargeState, int8_t& percent,
+                        int16_t& milliVolts) TINY_LORA_ATTR_NOT_IMPLEMENTED;
 };
 
 #endif  // SRC_TINYLORABATTERY_H_

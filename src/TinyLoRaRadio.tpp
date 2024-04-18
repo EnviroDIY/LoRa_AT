@@ -1,26 +1,22 @@
 /**
- * @file       TinyLoRaStream.tpp
+ * @file       TinyLoRaRadio.tpp
  * @author     Volodymyr Shymanskyy
  * @license    LGPL-3.0
  * @copyright  Copyright (c) 2016 Volodymyr Shymanskyy
  * @date       Nov 2016
  */
 
-#ifndef SRC_TINYLORASTREAM_H_
-#define SRC_TINYLORASTREAM_H_
+#ifndef SRC_TINYLORARADIO_H_
+#define SRC_TINYLORARADIO_H_
 
 #include "TinyLoRaCommon.h"
 
-#define TINY_LORA_HAS_TCP
+#define TINY_LORA_HAS_RADIO
 
-#include "TinyLoRaFifo.h"
+#include "TinyGsmFifo.h"
 
-#if !defined(TINY_LORA_RX_BUFFER)
-#define TINY_LORA_RX_BUFFER 64
-#endif
-
-template <class modemType, uint8_t muxCount>
-class TinyLoRaStream {
+template <class modemType>
+class TinyLoRaRadio {
  public:
   /*
    * Basic functions
@@ -48,8 +44,8 @@ class TinyLoRaStream {
  public:
   class LoRaStream : public Stream {
     // Make all classes created from the modem template friends
-    friend class TinyLoRaStream<modemType, muxCount>;
-    typedef TinyLoRaFifo<uint8_t, TINY_LORA_RX_BUFFER> RxFifo;
+    friend class TinyLoRaRadio<modemType>;
+    typedef TinyGsmFifo<uint8_t, TINY_LORA_RX_BUFFER> RxFifo;
 
    public:
     // bool init(modemType* modem, uint8_t);
@@ -58,7 +54,7 @@ class TinyLoRaStream {
     size_t write(const uint8_t* buf, size_t size) override {
       TINY_LORA_YIELD();
       at->maintain();
-      return at->modemSend(buf, size, mux);
+      return at->modemSend(buf, size);
     }
 
     size_t write(uint8_t c) override {
@@ -73,53 +69,30 @@ class TinyLoRaStream {
     int available() override {
       TINY_LORA_YIELD();
       // Returns the combined number of characters available in the TinyLoRa
-      // fifo and the modem chip's internal fifo, doing an extra check-in
-      // with the modem to see if anything has arrived that wasn't presented
-      // immediately after the last uplink.
-      if (!rx.size()) {
-        if (millis() - prev_check > 500) {
-          // setting got_data to true will tell maintain to run
-          // modemGetAvailable(mux)
-          got_data   = true;
-          prev_check = millis();
-        }
-        at->maintain();
-      }
-      return static_cast<uint16_t>(rx.size()) + sock_available;
+      // fifo, doing an extra check-in with the modem to see if anything has
+      // arrived that wasn't presented immediately after the last uplink.
+      if (!rx.size()) { at->maintain(); }
+      return static_cast<uint16_t>(rx.size());
     }
 
-    int read(uint8_t* buf, size_t size) override {
+    int read(uint8_t* buf, size_t size) {
       TINY_LORA_YIELD();
       size_t cnt = 0;
-
-      // Reads characters out of the TinyLoRa fifo, and from the modem chip's
-      // internal fifo if avaiable, also double checking with the modem if
-      // data has arrived that wasn't presented immediately after the last
-      // uplink.
-      at->maintain();
-      while (cnt < size) {
+      // Reads characters out of the TinyGSM fifo
+      uint32_t _startMillis = millis();
+      while (cnt < size && millis() - _startMillis < _timeout) {
         size_t chunk = TinyLoRaMin(size - cnt, rx.size());
         if (chunk > 0) {
           rx.get(buf, chunk);
           buf += chunk;
           cnt += chunk;
           continue;
-        }
-        // Workaround: Some modules "forget" to notify about data arrival
-        if (millis() - prev_check > 500) {
-          // setting got_data to true will tell maintain to run
-          // modemGetAvailable()
-          got_data   = true;
-          prev_check = millis();
-        }
-        // TODO(vshymanskyy): Read directly into user buffer?
-        at->maintain();
-        if (sock_available > 0) {
-          int n = at->modemRead(
-              TinyLoRaMin((uint16_t)rx.free(), sock_available), mux);
-          if (n == 0) break;
-        } else {
-          break;
+        } /* TODO: Read directly into user buffer? */
+        if (!rx.size() && at->_networkConnected) {
+          // this will check for new downlinks if it's been too long since the
+          // last downlink check, the network has been joined, and we haven't
+          // received and 'not joined' Errors/URCs.
+          at->maintain();
         }
       }
       return cnt;
@@ -139,20 +112,6 @@ class TinyLoRaStream {
       at->stream.flush();
     }
 
-    uint8_t connected() override {
-      if (available()) { return true; }
-      // If the modem is one where we can read and check the size of the buffer,
-      // then the 'available()' function will call a check of the current size
-      // of the buffer and state of the connection. [available calls maintain,
-      // maintain calls modemGetAvailable, modemGetAvailable calls
-      // modemGetConnected]  This cascade means that the sock_connected value
-      // should be correct and all we need
-      return sock_connected;
-    }
-    operator bool() override {
-      return connected();
-    }
-
     /*
      * Extended API
      */
@@ -170,18 +129,14 @@ class TinyLoRaStream {
       uint32_t startMillis = millis();
       while (sock_available > 0 && (millis() - startMillis < maxWaitMs)) {
         rx.clear();
-        at->modemRead(TinyLoRaMin((uint16_t)rx.free(), sock_available), mux);
+        at->modemRead();
       }
       rx.clear();
       at->streamClear();
     }
 
     modemType* at;
-    uint8_t    mux;
     uint16_t   sock_available;
-    uint32_t   prev_check;
-    bool       sock_connected;
-    bool       got_data;
     RxFifo     rx;
   };
 
@@ -190,15 +145,13 @@ class TinyLoRaStream {
    */
  protected:
   void maintainImpl() {
-    // Keep listening for downlinks and proactively iterate through
-    // sockets asking if any data is avaiable
-    for (int mux = 0; mux < muxCount; mux++) {
-      LoRaStream* sock = thisModem().sockets[mux];
-      if (sock && sock->got_data) {
-        sock->got_data       = false;
-        sock->sock_available = thisModem().modemGetAvailable(mux);
-      }
+    // Check for any new downlinks
+    if (millis() - prev_dl_check > TINY_LORA_DL_CHECK &&
+        thisModem()._networkConnected) {
+      thisModem().modemRead();
+      prev_dl_check = millis();
     }
+    // listen for URCs
     while (thisModem().stream.available()) {
       thisModem().waitResponse(15, NULL, NULL);
     }
@@ -206,16 +159,18 @@ class TinyLoRaStream {
 
   // Yields up to a time-out period and then reads a character from the stream
   // into the multicast FIFO
-  inline void moveCharFromStreamToFifo(uint8_t mux) {
-    if (!thisModem().sockets[mux]) return;
+  inline void moveCharFromStreamToFifo() {
+    if (!thisModem().loraStream) return;
     uint32_t startMillis = millis();
     while (!thisModem().stream.available() &&
-           (millis() - startMillis < thisModem().sockets[mux]->_timeout)) {
+           (millis() - startMillis < thisModem().loraStream->_timeout)) {
       TINY_LORA_YIELD();
     }
     char c = thisModem().stream.read();
-    thisModem().sockets[mux]->rx.put(c);
+    thisModem().loraStream->rx.put(c);
   }
+
+  uint32_t prev_dl_check;
 };
 
-#endif  // SRC_TINYLORASTREAM_H_
+#endif  // SRC_TINYLORARADIO_H_

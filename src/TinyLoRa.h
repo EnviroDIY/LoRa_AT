@@ -1,21 +1,21 @@
 /**
- * @file       TinyLoRaClient.h
+ * @file       TinyLoRa.h
  * @author     Volodymyr Shymanskyy
  * @license    LGPL-3.0
  * @copyright  Copyright (c) 2016 Volodymyr Shymanskyy
  * @date       Nov 2016
  */
 
-#ifndef SRC_TINYLORACLIENT_H_
-#define SRC_TINYLORACLIENT_H_
+#ifndef SRC_TINYLORA_H_
+#define SRC_TINYLORA_H_
 
 #if defined(TINY_LORA_MDOT)
-#include "TinyLoRaClientMDOT.h"
-typedef TinyLoRamDOT                 TinyLoRa;
-typedef TinyLoRamDOT::LoRaStreammDOT TinyLoRaClient;
+#include "TinyLoRa_MDOT.h"
+typedef TinyLoRa_mDOT                  TinyLoRa;
+typedef TinyLoRa_mDOT::LoRaStream_mDOT TinyLoRaStream;
 
 #else
 #error "Please define LoRa Radio model"
 #endif
 
-#endif  // SRC_TINYLORACLIENT_H_
+#endif  // SRC_TINYLORA_H_

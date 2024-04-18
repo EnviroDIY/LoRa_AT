@@ -12,6 +12,16 @@
 // The current library version number
 #define TINY_LORA_VERSION "0.11.7"
 
+#ifndef EPOCH_TIME_OFF
+/**
+ * @brief January 1, 2000 00:00:00 in unix "epoch" time
+ *
+ * Some Arduino devices like to use an epoch starting 1/1/2000 instead of on
+ * 1/1/1970.
+ */
+#define EPOCH_TIME_OFF 946684800
+#endif
+
 #if defined(SPARK) || defined(PARTICLE)
 #include "Particle.h"
 #elif defined(ARDUINO)
@@ -29,6 +39,14 @@
 #ifndef TINY_LORA_YIELD
 #define TINY_LORA_YIELD() \
   { delay(TINY_LORA_YIELD_MS); }
+#endif
+
+#if !defined(TINY_LORA_RX_BUFFER)
+#define TINY_LORA_RX_BUFFER 256
+#endif
+
+#if !defined(TINY_LORA_DL_CHECK)
+#define TINY_LORA_DL_CHECK 5000L
 #endif
 
 #define TINY_LORA_ATTR_NOT_AVAILABLE \

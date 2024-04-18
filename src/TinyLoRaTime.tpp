@@ -21,14 +21,49 @@ class TinyLoRaTime {
   /*
    * Time functions
    */
-  String getGSMDateTime(TinyLoRaDateTimeFormat format) {
-    return thisModem().getGSMDateTimeImpl(format);
+
+  /**
+   * @brief Get the Date Time as a String
+   *
+   * @param format The date or time part to get: DATE_FULL, DATE_TIME, or
+   * DATE_DATE
+   * @return *String*  The date and/or time from the module
+   */
+  String getDateTimeString(TinyLoRaDateTimeFormat format) {
+    return thisModem().getDateTimeStringImpl(format);
   }
-  bool getNetworkTime(int* year, int* month, int* day, int* hour, int* minute,
-                      int* second, float* timezone) {
-    return thisModem().getNetworkTimeImpl(year, month, day, hour, minute,
-                                          second, timezone);
+
+  /**
+   * @brief Get the date and time as parts
+   *
+   * @param year Reference to an int for the year
+   * @param month Reference to an int for the month
+   * @param day Reference to an int for the day
+   * @param hour Reference to an int for the hour
+   * @param minute Reference to an int for the minute
+   * @param second Reference to an int for the second
+   * @param timezone Reference to a float for the timezone
+   * @return *true*  The references have been filled with valid values from the
+   * LoRa module.
+   * @return *false*  There was a problem getting the time from the module.
+   */
+  bool getDateTimeParts(int* year, int* month, int* day, int* hour, int* minute,
+                        int* second, float* timezone) {
+    return thisModem().getDateTimePartsImpl(year, month, day, hour, minute,
+                                            second, timezone);
   }
+
+  /**
+   * @brief Get the Date Time as an epoch value
+   * @param use2000Epoch True to use the epoch starting from January 1, 2000 (as
+   * used by some Arduino devices). False to return the standard Unix epoch
+   * starting from January 1, 1970.
+   * @return *uint32_t* The offset from the start of the epoch
+   */
+  uint32_t getDateTimeEpoch(bool use2000Epoch = false) {
+    return thisModem().getDateTimeEpochImpl(use2000Epoch);
+  }
+
 
   /*
    * CRTP Helper
@@ -45,62 +80,15 @@ class TinyLoRaTime {
    * Time functions
    */
  protected:
-  String getGSMDateTimeImpl(TinyLoRaDateTimeFormat format) {
-    thisModem().sendAT(GF("+CCLK?"));
-    if (thisModem().waitResponse(2000L, GF("+CCLK: \"")) != 1) { return ""; }
+  String getDateTimeStringImpl(TinyLoRaDateTimeFormat format)
+      TINY_LORA_ATTR_NOT_IMPLEMENTED;
 
-    String res;
+  bool getDateTimePartsImpl(int* year, int* month, int* day, int* hour,
+                            int* minute, int* second,
+                            float* timezone) TINY_LORA_ATTR_NOT_IMPLEMENTED;
 
-    switch (format) {
-      case DATE_FULL: res = thisModem().stream.readStringUntil('"'); break;
-      case DATE_TIME:
-        thisModem().streamSkipUntil(',');
-        res = thisModem().stream.readStringUntil('"');
-        break;
-      case DATE_DATE: res = thisModem().stream.readStringUntil(','); break;
-    }
-    thisModem().waitResponse();  // Ends with OK
-    return res;
-  }
-
-  bool getNetworkTimeImpl(int* year, int* month, int* day, int* hour,
-                          int* minute, int* second, float* timezone) {
-    thisModem().sendAT(GF("+CCLK?"));
-    if (thisModem().waitResponse(2000L, GF("+CCLK: \"")) != 1) { return false; }
-
-    int iyear     = 0;
-    int imonth    = 0;
-    int iday      = 0;
-    int ihour     = 0;
-    int imin      = 0;
-    int isec      = 0;
-    int itimezone = 0;
-
-    // Date & Time
-    iyear       = thisModem().streamGetIntBefore('/');
-    imonth      = thisModem().streamGetIntBefore('/');
-    iday        = thisModem().streamGetIntBefore(',');
-    ihour       = thisModem().streamGetIntBefore(':');
-    imin        = thisModem().streamGetIntBefore(':');
-    isec        = thisModem().streamGetIntLength(2);
-    char tzSign = thisModem().stream.read();
-    itimezone   = thisModem().streamGetIntBefore('\n');
-    if (tzSign == '-') { itimezone = itimezone * -1; }
-
-    // Set pointers
-    if (iyear < 2000) iyear += 2000;
-    if (year != NULL) *year = iyear;
-    if (month != NULL) *month = imonth;
-    if (day != NULL) *day = iday;
-    if (hour != NULL) *hour = ihour;
-    if (minute != NULL) *minute = imin;
-    if (second != NULL) *second = isec;
-    if (timezone != NULL) *timezone = static_cast<float>(itimezone) / 4.0;
-
-    // Final OK
-    thisModem().waitResponse();
-    return true;
-  }
+  uint32_t getDateTimeEpochImpl(bool use2000Epoch = false)
+      TINY_LORA_ATTR_NOT_IMPLEMENTED;
 };
 
 #endif  // SRC_TINYLORATIME_H_

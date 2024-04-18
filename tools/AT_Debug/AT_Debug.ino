@@ -40,7 +40,7 @@ SoftwareSerial SerialAT(2, 3);  // RX, TX
 
 #define TINY_LORA_DEBUG SerialMon
 
-#include <TinyLoRaClient.h>
+#include <TinyLoRa.h>
 
 // Module baud rate
 uint32_t rate = 0;  // Set to 0 for Auto-Detect
