@@ -10,16 +10,8 @@ jobs:
 
     strategy:
       matrix:
-        example:
-          [
-            examples/BlynkClient,
-            examples/FileDownload,
-            examples/MqttClient,
-            examples/WebClient,
-            tools/test_build,
-            tools/Diagnostics,
-          ]
-        modem: [TINY_LORA_MDOT]
+        example: [examples/AllFunctions]
+        modem: [TINY_LORA_MDOT, TINY_LORA_LORAE5]
 
     steps:
       - uses: actions/checkout@v3

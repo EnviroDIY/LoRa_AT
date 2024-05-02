@@ -11,19 +11,7 @@
 
 // Select your modem:
 #define TINY_LORA_MDOT
-// #define TINY_LORA_SIM900
-// #define TINY_LORA_SIM808
-// #define TINY_LORA_SIM868
-// #define TINY_LORA_UBLOX
-// #define TINY_LORA_M95
-// #define TINY_LORA_BG96
-// #define TINY_LORA_A6
-// #define TINY_LORA_A7
-// #define TINY_LORA_M590
-// #define TINY_LORA_MC60
-// #define TINY_LORA_MC60E
-// #define TINY_LORA_ESP8266
-// #define TINY_LORA_XBEE
+// #define TINY_LORA_LORAE5
 
 #include <TinyLoRa.h>
 
