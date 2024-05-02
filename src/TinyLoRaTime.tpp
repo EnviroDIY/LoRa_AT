@@ -14,6 +14,17 @@
 #define TINY_LORA_HAS_TIME
 
 enum TinyLoRaDateTimeFormat { DATE_FULL = 0, DATE_TIME = 1, DATE_DATE = 2 };
+/**
+ * @brief Set the epoch start value.
+ */
+enum TinyLoRaEpochStart {
+  UNIX = 0,  ///< Use a Unix epoch, starting 1/1/1970 (946684800s behind of Y2K
+             ///< epoch, 315878400ss behind of GPS epoch)
+  Y2K = 1,   ///< Use an epoch starting 1/1/2000, as some RTC's and Arduinos do
+            ///< (946684800s ahead of UNIX epoch, 630806400s ahead of GPS epoch)
+  GPS = 2  ///< Use the GPS epoch starting Jan 5, 1980 (315878400s ahead of UNIX
+           ///< epoch, 630806400s behind of GPS epoch)
+};
 
 template <class modemType>
 class TinyLoRaTime {
@@ -25,8 +36,8 @@ class TinyLoRaTime {
   /**
    * @brief Get the Date Time as a String
    *
-   * @param format The date or time part to get: DATE_FULL, DATE_TIME, or
-   * DATE_DATE
+   * @param format The date or time part to get: DATE_FULL,
+   * DATE_TIME, or DATE_DATE
    * @return *String*  The date and/or time from the module
    */
   String getDateTimeString(TinyLoRaDateTimeFormat format) {
@@ -55,15 +66,12 @@ class TinyLoRaTime {
 
   /**
    * @brief Get the Date Time as an epoch value
-   * @param use2000Epoch True to use the epoch starting from January 1, 2000 (as
-   * used by some Arduino devices). False to return the standard Unix epoch
-   * starting from January 1, 1970.
+   * @param epoch The epoch start to use.
    * @return *uint32_t* The offset from the start of the epoch
    */
-  uint32_t getDateTimeEpoch(bool use2000Epoch = false) {
-    return thisModem().getDateTimeEpochImpl(use2000Epoch);
+  uint32_t getDateTimeEpoch(TinyLoRaEpochStart epoch = UNIX) {
+    return thisModem().getDateTimeEpochImpl(epoch);
   }
-
 
   /*
    * CRTP Helper
@@ -87,7 +95,7 @@ class TinyLoRaTime {
                             int* minute, int* second,
                             float* timezone) TINY_LORA_ATTR_NOT_IMPLEMENTED;
 
-  uint32_t getDateTimeEpochImpl(bool use2000Epoch = false)
+  uint32_t getDateTimeEpochImpl(TinyLoRaEpochStart epoch = UNIX)
       TINY_LORA_ATTR_NOT_IMPLEMENTED;
 };
 

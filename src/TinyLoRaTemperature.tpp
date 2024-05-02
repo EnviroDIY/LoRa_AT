@@ -19,6 +19,12 @@ class TinyLoRaTemperature {
   /*
    * Temperature functions
    */
+
+  /**
+   * @brief Get the modem chip temperature in degrees celsius.
+   *
+   * @return *float* The modem chip temperature in degrees celsius.
+   */
   float getTemperature() {
     return thisModem().getTemperatureImpl();
   }

@@ -52,8 +52,6 @@ class TinyLoRaRadio {
 
     // Writes data out on the client using the modem send functionality
     size_t write(const uint8_t* buf, size_t size) override {
-      TINY_LORA_YIELD();
-      at->maintain();
       return at->modemSend(buf, size);
     }
 
@@ -143,13 +141,38 @@ class TinyLoRaRadio {
   /*
    * Basic functions
    */
+ public:
+  /**
+   * @brief Set the LoRa module to require confirmation (ACK) or messages, or
+   * not.
+   *
+   * @note Requiring acknowledgement of every send can significantly slow down
+   * the send time.
+   *
+   * @param requireConfirmation True to require that uplink messages be
+   * confirmed
+   */
+  void requireConfirmation(bool requireConfirmation) {
+    _requireConfirmation = requireConfirmation;
+  }
+
+  /**
+   * @brief Check whether the module is asking for confirmation of uplink
+   * messages or not.
+   *
+   * @return *true* Confirmation is being requested for all uplinks.
+   * @return *false* Confirmation is NOT being requested for all uplinks.
+   */
+  bool isConfrirmationRequired() {
+    return _requireConfirmation;
+  }
+
  protected:
   void maintainImpl() {
     // Check for any new downlinks
     if (millis() - prev_dl_check > TINY_LORA_DL_CHECK &&
         thisModem()._networkConnected) {
-      thisModem().modemRead();
-      prev_dl_check = millis();
+      thisModem().modemRead();  // modemRead should set prev_dl_check
     }
     // listen for URCs
     while (thisModem().stream.available()) {
@@ -171,6 +194,7 @@ class TinyLoRaRadio {
   }
 
   uint32_t prev_dl_check;
+  bool     _requireConfirmation;
 };
 
 #endif  // SRC_TINYLORARADIO_H_

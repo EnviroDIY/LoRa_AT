@@ -14,6 +14,11 @@
 typedef TinyLoRa_mDOT                  TinyLoRa;
 typedef TinyLoRa_mDOT::LoRaStream_mDOT TinyLoRaStream;
 
+#elif defined(TINY_LORA_LORAE5)
+#include "TinyLoRa_LoRaE5.h"
+typedef TinyLoRa_LoRaE5                    TinyLoRa;
+typedef TinyLoRa_LoRaE5::LoRaStream_LoRaE5 TinyLoRaStream;
+
 #else
 #error "Please define LoRa Radio model"
 #endif

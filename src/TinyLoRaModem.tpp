@@ -11,20 +11,45 @@
 
 #include "TinyLoRaCommon.h"
 
-#ifndef AT_NL
-#define AT_NL "\r\n"
-#endif
-
 #ifndef DEFAULT_JOIN_TIMEOUT
 #define DEFAULT_JOIN_TIMEOUT 60000L
 #endif
 
-static const char GSM_OK[] TINY_LORA_PROGMEM    = "OK" AT_NL;
-static const char GSM_ERROR[] TINY_LORA_PROGMEM = "ERROR" AT_NL;
+#ifndef DEFAULT_MESSAGE_TIMEOUT
+#define DEFAULT_MESSAGE_TIMEOUT 10000L
+#endif
 
-#if defined       TINY_GSM_DEBUG
-static const char GSM_CME_ERROR[] TINY_LORA_PROGMEM = AT_NL "+CME ERROR:";
-static const char GSM_CMS_ERROR[] TINY_LORA_PROGMEM = AT_NL "+CMS ERROR:";
+#ifndef DEFAULT_ACKMESSAGE_TIMEOUT
+#define DEFAULT_ACKMESSAGE_TIMEOUT 60000L
+#endif
+
+#define MAX_LORA_CHANNELS 72
+#define LORA_CHANNEL_BYTES 72 / 8
+
+#ifndef AT_NL
+#define AT_NL "\r\n"
+#endif
+
+#ifndef AT_OK
+#define AT_OK "OK"
+#endif
+
+#ifndef AT_ERROR
+#define AT_ERROR "ERROR"
+#endif
+
+#ifndef AT_VERBOSE
+#define AT_VERBOSE "+LOG"
+#endif
+
+static char const hex_chars[16] = {'0', '1', '2', '3', '4', '5', '6', '7',
+                                   '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+
+static const char LORA_OK[] TINY_LORA_PROGMEM    = AT_OK AT_NL;
+static const char LORA_ERROR[] TINY_LORA_PROGMEM = AT_ERROR AT_NL;
+
+#if defined       TINY_LORA_DEBUG
+static const char LORA_VERBOSE[] TINY_LORA_PROGMEM = AT_VERBOSE;
 #endif
 
 // Enums taken from: https://github.com/arduino-libraries/MKRWAN
@@ -113,8 +138,8 @@ class TinyLoRaModem {
    * @note After setting and applying the new baud rate, you will have to end()
    * and begin() the serial object.
    */
-  void setBaud(uint32_t baud) {
-    thisModem().setBaudImpl(baud);
+  bool setBaud(uint32_t baud) {
+    return thisModem().setBaudImpl(baud);
   }
 
   /**
@@ -151,8 +176,8 @@ class TinyLoRaModem {
    * @return *int8_t* the index of the response input
    */
   int8_t waitResponse(uint32_t timeout_ms, String& data,
-                      GsmConstStr r1 = GFP(GSM_OK),
-                      GsmConstStr r2 = GFP(GSM_ERROR), GsmConstStr r3 = NULL,
+                      GsmConstStr r1 = GFP(LORA_OK),
+                      GsmConstStr r2 = GFP(LORA_ERROR), GsmConstStr r3 = NULL,
                       GsmConstStr r4 = NULL, GsmConstStr r5 = NULL,
                       GsmConstStr r6 = NULL, GsmConstStr r7 = NULL) {
     return thisModem().waitResponseImpl(timeout_ms, data, r1, r2, r3, r4, r5,
@@ -179,8 +204,8 @@ class TinyLoRaModem {
    * of NULL
    * @return *int8_t* the index of the response input
    */
-  int8_t waitResponse(uint32_t timeout_ms, GsmConstStr r1 = GFP(GSM_OK),
-                      GsmConstStr r2 = GFP(GSM_ERROR), GsmConstStr r3 = NULL,
+  int8_t waitResponse(uint32_t timeout_ms, GsmConstStr r1 = GFP(LORA_OK),
+                      GsmConstStr r2 = GFP(LORA_ERROR), GsmConstStr r3 = NULL,
                       GsmConstStr r4 = NULL, GsmConstStr r5 = NULL,
                       GsmConstStr r6 = NULL, GsmConstStr r7 = NULL) {
     String data;
@@ -207,8 +232,8 @@ class TinyLoRaModem {
    * of NULL
    * @return *int8_t* the index of the response input
    */
-  int8_t waitResponse(GsmConstStr r1 = GFP(GSM_OK),
-                      GsmConstStr r2 = GFP(GSM_ERROR), GsmConstStr r3 = NULL,
+  int8_t waitResponse(GsmConstStr r1 = GFP(LORA_OK),
+                      GsmConstStr r2 = GFP(LORA_ERROR), GsmConstStr r3 = NULL,
                       GsmConstStr r4 = NULL, GsmConstStr r5 = NULL,
                       GsmConstStr r6 = NULL, GsmConstStr r7 = NULL) {
     return waitResponse(1000L, r1, r2, r3, r4, r5, r6, r7);
@@ -280,17 +305,6 @@ class TinyLoRaModem {
   bool radioOff() {
     return thisModem().radioOffImpl();
   }
-  /**
-   * @brief Enable or disable sleep mode for the module.  What "sleep" means
-   * varies by module; check your documentation.
-   *
-   * @param enable True to enable sleep mode, false to disable it.
-   * @return *true* The module accepted the sleep mode setting.
-   * @return *false* There was an error in setting the sleep mode.
-   */
-  bool sleepEnable(bool enable = true) {
-    return thisModem().sleepEnableImpl(enable);
-  }
   /**@}*/
 
   /**
@@ -325,7 +339,7 @@ class TinyLoRaModem {
    * @brief Set the number of times to retry sending a message while waiting for
    * an ACK from the recipient.
    *
-   * @note Requireing acknowledgement of every send can significantly slow down
+   * @note Requiring acknowledgement of every send can significantly slow down
    * the send time.
    *
    * @param numAckRetries The number of retries to attempt to
@@ -353,8 +367,9 @@ class TinyLoRaModem {
    * @note The useHex parameter applies to both the appEUI and the appKey.
    * Either both or neither should be hex.
    *
-   * @param appEui The app EUI (Network ID). If using a string, set useHex to
-   * false. If using 8 bytes of hex data, set useHex to true.
+   * @param appEui The App EUI (aka JoinEUI or Network ID). If using a string -
+   * and supported by the module - set useHex to false. If using 8 bytes of hex
+   * data, set useHex to true.
    * @param appKey The app key (Network key). If using a string, set useHex to
    * false. If using 8 bytes of hex data, set useHex to true.
    * @param devEui The device EUI. This must be 16 bytes of hex data.
@@ -365,8 +380,8 @@ class TinyLoRaModem {
    * @return *false* The network join failed
    */
   bool joinOTAA(const char* appEui, const char* appKey, const char* devEui,
-                bool useHex = false, uint32_t timeout = DEFAULT_JOIN_TIMEOUT) {
-    return thisModem().joinOTAAImpl(appEui, appKey, devEui, useHex, timeout);
+                uint32_t timeout = DEFAULT_JOIN_TIMEOUT, bool useHex = true) {
+    return thisModem().joinOTAAImpl(appEui, appKey, devEui, timeout, useHex);
   }
 
   /**
@@ -385,9 +400,9 @@ class TinyLoRaModem {
    * @return *true* The network join was successful
    * @return *false* The network join failed
    */
-  bool joinOTAA(String appEui, String appKey, bool useHex = false,
-                uint32_t timeout = DEFAULT_JOIN_TIMEOUT) {
-    return joinOTAA(appEui.c_str(), appKey.c_str(), NULL, useHex, timeout);
+  bool joinOTAA(String appEui, String appKey,
+                uint32_t timeout = DEFAULT_JOIN_TIMEOUT, bool useHex = true) {
+    return joinOTAA(appEui.c_str(), appKey.c_str(), NULL, timeout, useHex);
   }
 
 
@@ -401,9 +416,9 @@ class TinyLoRaModem {
    * @return *false* The network join failed
    */
   bool joinOTAA(String appEui, String appKey, String devEui,
-                bool useHex = false, uint32_t timeout = DEFAULT_JOIN_TIMEOUT) {
-    return joinOTAA(appEui.c_str(), appKey.c_str(), devEui.c_str(), useHex,
-                    timeout);
+                uint32_t timeout = DEFAULT_JOIN_TIMEOUT, bool useHex = false) {
+    return joinOTAA(appEui.c_str(), appKey.c_str(), devEui.c_str(), timeout,
+                    useHex);
   }
 
   /**
@@ -489,6 +504,28 @@ class TinyLoRaModem {
   }
 
   /**
+   * @brief Set the LoRaWAN outgoing application port
+   *
+   *  Port 0 is reserved for MAC commands, ports 1-223 are available for
+   * application use, and port 233-255 are reserved for future LoRaWAN use.
+   *
+   * @param uint8_t The outgoing application port, must be a number from 1-255
+   * @return *true* The port was successfully configured
+   * @return *false* The module did not accept the port
+   */
+  bool setPort(uint8_t _port) {
+    return thisModem().setPortImpl(_port);
+  }
+  /**
+   * @brief Get the LoRaWAN outgoing application port
+   *
+   * @return *uint8_t* The outgoing application port
+   */
+  uint8_t getPort() {
+    return thisModem().getPortImpl();
+  }
+
+  /**
    * @brief Set the LoRa band. The band should be appropriate to your
    * module and your location. This is not configurable on all modules.
    *
@@ -547,7 +584,8 @@ class TinyLoRaModem {
   /**
    * @brief Get the 16 or 72 bit channel mask
    *
-   * @return *String* The 16 or 72 bit channel mask
+   * @return *String* The 16 or 72 bit channel mask - most significant byte
+   * first (MSB)
    */
   String getChannelMask() {
     return thisModem().getChannelMaskImpl();
@@ -556,39 +594,40 @@ class TinyLoRaModem {
   /**
    * @brief Check if a particular channel is enabled
    *
-   * @param pos The position of the channel in the 16 or 72 bit channel mask.
-   * @return The position of the channel checked, if it is enabled.
+   * @param pos The channel number
+   * @return *true* The channel was successfully enabled.
+   * @return *false* The channel was not enabled.
    */
-  int isChannelEnabled(int pos) {
+  bool isChannelEnabled(int pos) {
     return thisModem().isChannelEnabledImpl(pos);
+  }
+
+  /**
+   * @brief Enables or disables a channel
+   *
+   * @param pos The channel number
+   * @return *true* The channel was successfully enabled.
+   * @return *false* The channel was not enabled.
+   */
+  bool enableChannel(int pos, bool enable = true) {
+    return thisModem().enableChannelImpl(pos, enable);
   }
 
   /**
    * @brief Disables a channel
    *
-   * @param pos The position of the channel in the 16 or 72 bit channel mask.
+   * @param pos The channel number
    * @return *true* The channel was successfully disabled.
    * @return *false* The channel was not disabled.
    */
   bool disableChannel(int pos) {
-    return thisModem().disableChannelImpl(pos);
-  }
-
-  /**
-   * @brief Enables a channel
-   *
-   * @param pos The position of the channel in the 16 or 72 bit channel mask.
-   * @return *true* The channel was successfully enabled.
-   * @return *false* The channel was not enabled.
-   */
-  bool enableChannel(int pos) {
-    return thisModem().enableChannelImpl(pos);
+    return thisModem().enableChannelImpl(pos, false);
   }
 
   /**
    * @brief Sends a new channel mask to the device
    *
-   * @param newMask A full new channel mask
+   * @param newMask A full new channel mask; most significant byte first (MSB)
    * @return *true* The module accepted the new channel mask.
    * @return *false* There was an error in changing the channel mask.
    */
@@ -614,17 +653,44 @@ class TinyLoRaModem {
   /**@{*/
 
   /**
-   * @brief Set the LoRa module's duty cycle
+   * @brief Enables duty cycle limitations.
+   *
+   * Set the maximum duty cycle using the setMaxDutyCycle(int8_t maxDutyCycle)
+   * function.
+   *
+   * @param dutyCycle True to enable duty cycle limitations; false to disable
+   * @return *true* The module successfully enabled or disabled duty cycle
+   * limitations.
+   * @return *false* There was an error in enabling or disabling the duty cycle.
+   */
+  bool enableDutyCycle(bool dutyCycle) {
+    return thisModem().enableDutyCycleImpl(dutyCycle);
+  }
+  /**
+   * @brief Checks if duty cycle limitations are enabled
+   *
+   * @return *true* Duty cycle limitations are enabled
+   * @return *false* Duty cycle limitations are not enabled
+   */
+  bool isDutyCycleEnabled() {
+    return thisModem().isDutyCycleEnabledImpl();
+  }
+
+  /**
+   * @brief Set the LoRa module's maximum duty cycle
+   *
+   * This only sets the maximum duty cycle. To actually enable (or disable) the
+   * duty cycle limits, call enableDutyCycle(bool dutyCycle).
    *
    * @see https://lora.readthedocs.io/en/latest/#duty-cycle-time-on-air-toa
    *
-   * @param dutyCycle An int representing the duty cycle, per the module
+   * @param dutyCycle An int representing the maximum duty cycle, per the module
    * documentation
-   * @return *true* The module accepted the new duty cycle.
-   * @return *false* There was an error in changing the duty cycle.
+   * @return *true* The module accepted the new maximum duty cycle.
+   * @return *false* There was an error in changing the maxiumum duty cycle.
    */
-  bool setDutyCycle(int8_t dutyCycle) {
-    return thisModem().setDutyCycleImpl(dutyCycle);
+  bool setMaxDutyCycle(int8_t maxDutyCycle) {
+    return thisModem().setMaxDutyCycleImpl(maxDutyCycle);
   }
   /**
    * @brief Get the current duty cycle for the LoRa module
@@ -634,8 +700,8 @@ class TinyLoRaModem {
    * @return *int8_t* An int representing the duty cycle, per the module
    * documentation
    */
-  int8_t getDutyCycle() {
-    return thisModem().getDutyCycleImpl();
+  int8_t getMaxDutyCycle() {
+    return thisModem().getMaxDutyCycleImpl();
   }
 
   /**
@@ -774,9 +840,9 @@ class TinyLoRaModem {
  protected:
   bool initImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
 
-  void setBaudImpl(uint32_t baud) {
+  bool setBaudImpl(uint32_t baud) {
     thisModem().sendAT(GF("+IPR="), baud);
-    thisModem().waitResponse();
+    return thisModem().waitResponse() == 1;
   }
 
   bool testATImpl(uint32_t timeout_ms = 10000L) {
@@ -790,17 +856,16 @@ class TinyLoRaModem {
 
   // TODO(vshymanskyy): Optimize this!
   int8_t waitResponseImpl(uint32_t timeout_ms, String& data,
-                          GsmConstStr r1 = GFP(GSM_OK),
-                          GsmConstStr r2 = GFP(GSM_ERROR),
-#if defined TINY_GSM_DEBUG
-                          GsmConstStr r3 = GFP(GSM_CME_ERROR),
-                          GsmConstStr r4 = GFP(GSM_CMS_ERROR),
-#else
+                          GsmConstStr r1 = GFP(LORA_OK),
+                          GsmConstStr r2 = GFP(LORA_ERROR),
                           GsmConstStr r3 = NULL, GsmConstStr r4 = NULL,
-#endif
                           GsmConstStr r5 = NULL, GsmConstStr r6 = NULL,
                           GsmConstStr r7 = NULL) {
     data.reserve(TINY_LORA_RX_BUFFER);
+    // DBG(GF("r1 <"), r1 ? r1 : GF("NULL"), GF("> r2 <"), r2 ? r2 : GF("NULL"),
+    //     GF("> r3 <"), r3 ? r3 : GF("NULL"), GF("> r4 <"), r4 ? r4 :
+    //     GF("NULL"), GF("> r5 <"), r5 ? r5 : GF("NULL"), GF("> r6 <"), r6 ? r6
+    //     : GF("NULL"), GF("> r7 <"), r7 ? r7 : GF("NULL"), '>');
     uint8_t  index       = 0;
     uint32_t startMillis = millis();
     do {
@@ -817,11 +882,6 @@ class TinyLoRaModem {
           index = 2;
           goto finish;
         } else if (r3 && data.endsWith(r3)) {
-#if defined TINY_GSM_DEBUG
-          if (r3 == GFP(GSM_CME_ERROR)) {
-            streamSkipUntil('\n');  // Read out the error
-          }
-#endif
           index = 3;
           goto finish;
         } else if (r4 && data.endsWith(r4)) {
@@ -836,20 +896,33 @@ class TinyLoRaModem {
         } else if (r7 && data.endsWith(r7)) {
           index = 7;
           goto finish;
-        } else if (thisModem().handleURCs(data)) {
+        }
+#if defined TINY_LORA_DEBUG
+        else if (data.endsWith(GFP(LORA_VERBOSE))) {
+          // DBG(GF("Verbose details <<<"));
+          // Read out the verbose message, until whichever type of new line
+          // comes first
+          thisModem().stream.findUntil(const_cast<char*>("\r"),
+                                       const_cast<char*>("\n"));
+          // DBG(GF(">>>"));
+          data = "";
+        }
+#endif
+        else if (thisModem().handleURCs(data)) {
           data = "";
         }
       }
     } while (millis() - startMillis < timeout_ms);
   finish:
+    // data.replace("\r", "←");
+    // data.replace("\n", "↓");
     if (!index) {
       data.trim();
       if (data.length()) { DBG("### Unhandled:", data); }
       data = "";
+    } else {
+      // DBG('<', index, '>', data);
     }
-    // data.replace("\r", "←");
-    // data.replace("\n", "↓");
-    // DBG('<', index, '>', data);
     return index;
   }
 
@@ -882,10 +955,8 @@ class TinyLoRaModem {
    */
  protected:
   bool restartImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
-  bool poweroffImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  bool powerOffImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
   bool radioOffImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
-  bool sleepEnableImpl(bool enable = true) TINY_LORA_ATTR_NOT_IMPLEMENTED;
-
 
   /*
    * Generic network functions
@@ -894,12 +965,13 @@ class TinyLoRaModem {
   bool setPublicNetworkImpl(bool isPublic) TINY_LORA_ATTR_NOT_IMPLEMENTED;
   bool getPublicNetworkImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
 
-  bool
-  setConfirmationRetriesImpl(bool isAckRequired) TINY_LORA_ATTR_NOT_IMPLEMENTED;
-  bool getConfirmationRetriesImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  bool setConfirmationRetriesImpl(int8_t numAckRetries)
+      TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  int8_t getConfirmationRetriesImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
 
   bool joinOTAAImpl(const char* appEui, const char* appKey, const char* devEui,
-                    uint32_t timeout) TINY_LORA_ATTR_NOT_IMPLEMENTED;
+                    uint32_t timeout,
+                    bool     useHex) TINY_LORA_ATTR_NOT_IMPLEMENTED;
 
   bool joinABPImpl(const char* devAddr, const char* nwkSKey,
                    const char* appSKey, uint32_t timeout = DEFAULT_JOIN_TIMEOUT)
@@ -916,6 +988,9 @@ class TinyLoRaModem {
   bool        setClassImpl(_lora_class _class) TINY_LORA_ATTR_NOT_IMPLEMENTED;
   _lora_class getClassImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
 
+  bool    setPortImpl(uint8_t _port) TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  uint8_t getPortImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
+
   bool   setBandImpl(const char* band) TINY_LORA_ATTR_NOT_IMPLEMENTED;
   String getBandImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
 
@@ -924,7 +999,30 @@ class TinyLoRaModem {
 
   String getChannelMaskImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
 
-  int isChannelEnabledImpl(int pos) {
+  bool isChannelEnabledImpl(int pos) {
+    // Populate channelsMask array
+    int    max_retry        = 3;
+    int    retry            = 0;
+    String channel_mask_str = "";
+    while (retry < max_retry) {
+      channel_mask_str = thisModem().getChannelMask();
+      if (channel_mask_str.length() > 1) { break; }
+      retry++;
+    }
+    uint8_t channelsMask[LORA_CHANNEL_BYTES];
+    // parse the hex mask into a bit array
+    parseChannelMask(channel_mask_str.c_str(), channelsMask);
+    // get the channel possition in the array
+    int row = getChannelOffset(pos);
+    // convert the channel position into a mask
+    uint8_t channel = getChannelBitMask(pos);
+
+    bool channelEnabled = (channelsMask[row] & channel) > 0;
+
+    return channelEnabled;
+  }
+
+  bool enableChannelImpl(int pos, bool enable) {
     // Populate channelsMask array
     int    max_retry        = 3;
     int    retry            = 0;
@@ -934,88 +1032,28 @@ class TinyLoRaModem {
       if (channel_mask_str != "0") { break; }
       retry++;
     }
-    uint16_t channelsMask[6];
-    if (channel_mask_str.length() > 0) {
-      sscanf(channel_mask_str.c_str(), "%04hx%04hx%04hx%04hx%04hx%04hx",
-             &channelsMask[0], &channelsMask[1], &channelsMask[2],
-             &channelsMask[3], &channelsMask[4], &channelsMask[5]);
+
+    uint8_t channelsMask[LORA_CHANNEL_BYTES] = {0};
+    // parse the hex mask into a bit array
+    parseChannelMask(channel_mask_str.c_str(), channelsMask);
+
+    // get the channel possition in the array
+    int row = getChannelOffset(pos);
+    // convert the channel position into a mask
+    uint8_t mask = getChannelBitMask(pos);
+    // DBG("Channel Mask:", dbg_print_bin(mask));
+    // DBG("Row Mask    :", dbg_print_bin(channelsMask[row]));
+    if (enable) {
+      // or with the mask if we're enabling the channel
+      channelsMask[row] = channelsMask[row] | mask;
+    } else {
+      // and with the inverted mask if we're disabling the channel
+      channelsMask[row] = channelsMask[row] & ~mask;
     }
+    // DBG("Masked Row  :", dbg_print_bin(channelsMask[row]),
+    //     enable ? "(enabling)" : "(disabling)");
 
-    int      row     = pos / 16;
-    int      col     = pos % 16;
-    uint16_t channel = (uint16_t)(1 << col);
-
-    channel = ((channelsMask[row] & channel) >> col);
-
-    return channel;
-  }
-
-  bool disableChannelImpl(int pos) {
-    // Populate channelsMask array
-    int    max_retry        = 3;
-    int    retry            = 0;
-    String channel_mask_str = "";
-    while (retry < max_retry) {
-      channel_mask_str = thisModem().getChannelMask();
-      if (channel_mask_str != "0") { break; }
-      retry++;
-    }
-    uint16_t channelsMask[6];
-    if (channel_mask_str.length() > 0) {
-      sscanf(channel_mask_str.c_str(), "%04hx%04hx%04hx%04hx%04hx%04hx",
-             &channelsMask[0], &channelsMask[1], &channelsMask[2],
-             &channelsMask[3], &channelsMask[4], &channelsMask[5]);
-    }
-
-    int      row  = pos / 16;
-    int      col  = pos % 16;
-    uint16_t mask = ~(uint16_t)(1 << col);
-
-    channelsMask[row] = channelsMask[row] & mask;
-
-    return thisModem().setChannelMask();
-  }
-
-  bool enableChannelImpl(int pos) {
-    // Populate channelsMask array
-    int    max_retry        = 3;
-    int    retry            = 0;
-    String channel_mask_str = "";
-    while (retry < max_retry) {
-      channel_mask_str = thisModem().getChannelMask();
-      if (channel_mask_str != "0") { break; }
-      retry++;
-    }
-    uint16_t channelsMask[6];
-    if (channel_mask_str.length() > 0) {
-      sscanf(channel_mask_str.c_str(), "%04hx%04hx%04hx%04hx%04hx%04hx",
-             &channelsMask[0], &channelsMask[1], &channelsMask[2],
-             &channelsMask[3], &channelsMask[4], &channelsMask[5]);
-    }
-
-    int      row  = pos / 16;
-    int      col  = pos % 16;
-    uint16_t mask = (uint16_t)(1 << col);
-
-    channelsMask[row] = channelsMask[row] | mask;
-
-    return thisModem().setChannelMask();
-  }
-
-  bool setChannelMaskImpl() {
-    String   newMask;
-    uint16_t channelsMask[6];
-
-    /* Convert channel mask into string */
-    for (int i = 0; i < 6; i++) {
-      char hex[4];
-      sprintf(hex, "%04x", channelsMask[i]);
-      newMask.concat(hex);
-    }
-
-    DBG("Newmask: ", newMask);
-
-    return thisModem().setChannelMask(newMask);
+    return thisModem().setChannelMask(createHexChannelMask(channelsMask));
   }
 
   bool setChannelMaskImpl(const char* newMask) TINY_LORA_ATTR_NOT_IMPLEMENTED;
@@ -1023,8 +1061,10 @@ class TinyLoRaModem {
   /*
    * LoRa Data Rate and Duty Cycle functions
    */
-  bool   setDutyCycleImpl(int8_t dutyCycle) TINY_LORA_ATTR_NOT_IMPLEMENTED;
-  int8_t getDutyCycleImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  bool enableDutyCycleImpl(bool dutyCycle) TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  bool isDutyCycleEnabledImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  bool setMaxDutyCycleImpl(int8_t maxDutyCycle) TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  int8_t getMaxDutyCycleImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
   bool   setDataRateImpl(uint8_t dataRate) TINY_LORA_ATTR_NOT_IMPLEMENTED;
   int8_t getDataRateImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
   bool   setAdaptiveDataRateImpl(bool useADR) TINY_LORA_ATTR_NOT_IMPLEMENTED;
@@ -1072,87 +1112,104 @@ class TinyLoRaModem {
     }
   }
 
- protected:
-  inline bool streamGetLength(char* buf, int8_t numChars,
-                              const uint32_t timeout_ms = 1000L) {
-    if (!buf) { return false; }
-
-    int8_t   numCharsReady = -1;
-    uint32_t startMillis   = millis();
-    while (millis() - startMillis < timeout_ms &&
-           (numCharsReady = thisModem().stream.available()) < numChars) {
+  inline void streamDump() {
+    TINY_LORA_YIELD();
+    while (thisModem().stream.available()) {
+      thisModem().stream.read();
       TINY_LORA_YIELD();
     }
-
-    if (numCharsReady >= numChars) {
-      thisModem().stream.readBytes(buf, numChars);
-      return true;
-    }
-
-    return false;
   }
 
-  inline int16_t streamGetIntLength(int8_t         numChars,
-                                    const uint32_t timeout_ms = 1000L) {
-    char buf[numChars + 1];
-    if (streamGetLength(buf, numChars, timeout_ms)) {
-      buf[numChars] = '\0';
-      return atoi(buf);
-    }
-
-    return -9999;
-  }
-
-  inline int16_t streamGetIntBefore(char lastChar) {
-    char   buf[7];
-    size_t bytesRead = thisModem().stream.readBytesUntil(
-        lastChar, buf, static_cast<size_t>(7));
-    // if we read 7 or more bytes, it's an overflow
-    if (bytesRead && bytesRead < 7) {
-      buf[bytesRead] = '\0';
-      int16_t res    = atoi(buf);
-      return res;
-    }
-
-    return -9999;
-  }
-
-  inline float streamGetFloatLength(int8_t         numChars,
-                                    const uint32_t timeout_ms = 1000L) {
-    char buf[numChars + 1];
-    if (streamGetLength(buf, numChars, timeout_ms)) {
-      buf[numChars] = '\0';
-      return atof(buf);
-    }
-
-    return -9999.0F;
-  }
-
-  inline float streamGetFloatBefore(char lastChar) {
-    char   buf[16];
-    size_t bytesRead = thisModem().stream.readBytesUntil(
-        lastChar, buf, static_cast<size_t>(16));
-    // if we read 16 or more bytes, it's an overflow
-    if (bytesRead && bytesRead < 16) {
-      buf[bytesRead] = '\0';
-      float res      = atof(buf);
-      return res;
-    }
-
-    return -9999.0F;
-  }
-
-  inline bool streamSkipUntil(const char c, const uint32_t timeout_ms = 1000L) {
-    uint32_t startMillis = millis();
-    while (millis() - startMillis < timeout_ms) {
-      while (millis() - startMillis < timeout_ms &&
-             !thisModem().stream.available()) {
-        TINY_LORA_YIELD();
+ protected:
+  void parseChannelMask(const char* mask, uint8_t* channelsMask) {
+    // the input mask must be MSB - most significant first
+    if (strlen(mask) > 0) {
+      size_t startByte = 0;
+      // If we got a 20 character mask, assume the first two bytes are 00's and
+      // skip them. This will be the case for the mDot.
+      if (strlen(mask) == 20) { startByte = 2; }
+      for (size_t i = startByte; i < strlen(mask); i += 2) {
+        char hexBuff[3] = {'\0'};
+        hexBuff[0]      = mask[i];
+        hexBuff[1]      = mask[i + 1];
+        // DBG(strlen(mask), startByte, i, ((strlen(mask) - i) / 2) - 1,
+        //     (int8_t)strtol(hexBuff, NULL, 16),
+        //     dbg_print_bin((int8_t)strtol(hexBuff, NULL, 16)));
+        channelsMask[((strlen(mask) - i) / 2) - 1] = (int8_t)strtol(hexBuff,
+                                                                    NULL, 16);
       }
-      if (thisModem().stream.read() == c) { return true; }
+      // #ifdef TINY_LORA_DEBUG
+      //       DBG(GF("Input mask:"), mask);
+      //       TINY_LORA_DEBUG.print(GF("Input mask in binary: "));
+      //       for (int8_t j = 0; j < LORA_CHANNEL_BYTES; j++) {
+      //         TINY_LORA_DEBUG.print(dbg_print_bin(channelsMask[j]));
+      //         TINY_LORA_DEBUG.print(',');
+      //       }
+      //       TINY_LORA_DEBUG.println();
+      // #endif
     }
-    return false;
   }
+
+  String createHexChannelMask(uint8_t* channelsMask) {
+    // #ifdef TINY_LORA_DEBUG
+    //     TINY_LORA_DEBUG.print(GF("Mask array in binary:"));
+    //     for (int8_t j = 0; j < LORA_CHANNEL_BYTES; j++) {
+    //       TINY_LORA_DEBUG.print(dbg_print_bin(channelsMask[j]));
+    //       TINY_LORA_DEBUG.print(',');
+    //     }
+    //     TINY_LORA_DEBUG.println();
+    // #endif
+    // convert the completed channel mask to a string, switching endian-ness
+    String resp = "";
+    for (int8_t i = LORA_CHANNEL_BYTES - 1; i > -1; i--) {
+      if (channelsMask[i] < 16) { resp += '0'; }  // must zero pad!
+      resp += String(channelsMask[i], HEX);
+      // DBG(i, channelsMask[i], dbg_print_bin(channelsMask[i]),
+      //     String(channelsMask[i], HEX));
+    }
+    // DBG(GF("Mask array in HEX:"), resp);
+    return resp;
+  }
+
+  uint8_t getChannelBitMask(uint8_t channelNumber) {
+    // get the channel possition in the array
+    int col = channelNumber % 8;
+    // convert the channel position into a mask
+    uint8_t channel = (uint8_t)(1 << col);
+    // #ifdef TINY_LORA_DEBUG
+    //     int row = channelNumber / 8;
+    //     DBG(GF("\nChannel Number:"), channelNumber, GF("Row:"), row,
+    //     GF("Col:"),
+    //         col);
+    //     TINY_LORA_DEBUG.print(GF("Channel Mask:         "));
+    //     for (int8_t j = 0; j < LORA_CHANNEL_BYTES; j++) {
+    //       if (j == row) {
+    //         TINY_LORA_DEBUG.print(dbg_print_bin(channel));
+    //       } else {
+    //         TINY_LORA_DEBUG.print("00000000");
+    //       }
+    //       TINY_LORA_DEBUG.print(',');
+    //     }
+    //     TINY_LORA_DEBUG.println();
+    // #endif
+    return channel;
+  }
+
+  uint8_t getChannelOffset(uint8_t channelNumber) {
+    // get the channel possition in the array
+    int row = channelNumber / 8;
+    return row;
+  }
+
+  //   String dbg_print_bin(uint8_t num) {
+  // #ifdef TINY_LORA_DEBUG
+  //     String binPrint = "";
+  //     int8_t bin_len  = String(num, BIN).length();
+  //     for (int8_t z = 0; z < 8 - bin_len; z++) { binPrint += "0"; }
+  //     binPrint += String(num, BIN);
+  //     return binPrint;
+  // #endif
+  // }
 
   bool _requireAck;
   bool _networkConnected;
