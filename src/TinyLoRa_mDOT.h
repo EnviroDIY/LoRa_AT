@@ -268,9 +268,10 @@ class TinyLoRa_mDOT : public TinyLoRaModem<TinyLoRa_mDOT>,
   }
 
   bool joinABPImpl(const char* devAddr, const char* nwkSKey,
-                   const char* appSKey,
-                   uint32_t    timeout = DEFAULT_JOIN_TIMEOUT) {
-    sendAT(GF("+NJM=1"));  // Configure mDot for manual provisioning (ABP)
+                   const char* appSKey, int uplinkCounter = 1,
+                   int      downlinkCounter = 0,
+                   uint32_t timeout         = DEFAULT_JOIN_TIMEOUT) {
+    sendAT(GF("+NJM=0"));  // Configure mDot for manual provisioning (ABP)
     waitResponse();
     sendAT(GF("+NA="), devAddr);  // set the network address (device address)
     waitResponse();
@@ -278,17 +279,88 @@ class TinyLoRa_mDOT : public TinyLoRaModem<TinyLoRa_mDOT>,
     waitResponse();
     sendAT(GF("+NSK="), nwkSKey);  // set the network session key
     waitResponse();
+    // set the uplink and downlink counters, if we need to
+    if (uplinkCounter != 1) {
+      sendAT(GF("+ULC="), uplinkCounter);  // set the uplink counter
+      waitResponse();
+    }
+    if (downlinkCounter != 0) {
+      sendAT(GF("+DLC="), downlinkCounter);  // set the downlink counter
+      waitResponse();
+    }
     committSettings();            // save configuration changes
-    join(5, timeout);             // join the network
     return isNetworkConnected();  // verify that we're connected
   }
 
   bool isNetworkConnectedImpl() {
-    sendAT(GF("+NJS?"));
-    bool resp = waitResponse(GF("1"), GF("0")) == 1;
-    waitResponse();  // returns an "OK" after the number
-    _networkConnected = resp;
-    return resp;
+    // NOTE: The network join status depends on the link check count and the
+    // link check threshold to look for previous ACK's or network link checks
+    // and decide if the module is on the network or not. It may not be
+    // accurate RIGHT NOW, so we'll do a network link check to get the status
+    // NOW.
+
+    // sendAT(GF("+NJS?"));
+    // bool resp = waitResponse(GF("1"), GF("0")) == 1;
+    // waitResponse();  // returns an "OK" after the number
+    // _networkConnected = resp;
+    // if (!resp) {
+
+    int8_t tries_remaining = 10;
+    int    _link_margin    = 255;
+    while (_link_margin == 255 && tries_remaining) {
+      sendAT(GF("+NLC"));
+      DBG(GF("Sending LinkCheckReq"), tries_remaining, GF("tries remaining"));
+      tries_remaining--;
+
+      // If there is downlink data available, it will be returned before the
+      // "OK" from the NLC command.  Unfortunately, there will be no warning
+      // if the downlink data is going to be present or not.  If no data is
+      // present, a extra blank line is sent before the "OK."
+
+      String nlc_resp_str = "";  // to hold any downlink data
+      nlc_resp_str.reserve(TINY_LORA_RX_BUFFER);
+      int8_t resp = waitResponse(5000L, nlc_resp_str, GFP(LORA_OK),
+                                 GFP(LORA_ERROR), GF("Network Not Joined"));
+      if (resp == 1) {
+        // The first number in the response is the dBm level above the
+        // demodulation floor (not to be confused with the noise floor). This
+        // value is from the perspective of the signal sent from the end
+        // device and received by the gateway. The second number is the count
+        // of gateways reporting the link-check request to the network server.
+        int firstComma   = nlc_resp_str.indexOf(',');
+        int afterCommaCR = nlc_resp_str.indexOf('\r', firstComma + 1);
+        int afterCommaLF = nlc_resp_str.indexOf('\n', afterCommaCR + 1);
+
+        _link_margin = nlc_resp_str.substring(0, firstComma).toInt();
+
+#ifdef TINY_LORA_DEBUG
+        int gatewayCount =
+            nlc_resp_str.substring(firstComma + 1, afterCommaCR).toInt();
+        DBG("## NLC link margin in dBm:", _link_margin,
+            "gatewayCount:", gatewayCount);
+#endif
+        // the rest of the string should be the downlink data and the OK
+        String downlinkData = "";
+        downlinkData.reserve(TINY_LORA_RX_BUFFER);
+        downlinkData = nlc_resp_str.substring(afterCommaLF + 1);
+
+        prev_dl_check = millis();          // mark that we checked for downlink
+        readDownlinkToFifo(downlinkData);  // deal with the downlink data
+      } else if (resp == 3) {              // if we got a not joined error, stop
+        tries_remaining = 0;
+        waitResponse();  // catch the "ERROR"
+      } else {
+        // delay before the next attempt
+        DBG(GF("Delay 5s before next LinkCheckReq attempt"));
+        delay(5000L);
+      }
+    }
+    if (_link_margin != 255) {
+      _networkConnected = true;
+    } else {
+      _networkConnected = false;
+    }
+    return _link_margin != 255;
   }
 
   int8_t getSignalQualityImpl() {
@@ -517,16 +589,35 @@ class TinyLoRa_mDOT : public TinyLoRaModem<TinyLoRa_mDOT>,
   // NOTE: This module only returns epoch time! If you need to convert from
   // Epoch time to a human readable time, use a date library.
   uint32_t getDateTimeEpochImpl(TinyLoRaEpochStart epoch = UNIX) {
-    sendAT(GF("+GPSTIME"));  // Use this to retrieve GPC synchronized time in
-                             // milliseconds.
+    uint32_t epoch_time      = 0;
+    int8_t   tries_remaining = 5;
+    while (epoch_time == 0 && tries_remaining) {
+      sendAT(GF("+GPSTIME"));  // Use this to retrieve GPC synchronized time in
+                               // milliseconds.
+      tries_remaining--;
 
-    // NOTE: We can't use parseInt here because the return is slow!
-    String   epoch_str  = "";
-    uint32_t epoch_time = 0;
-    epoch_str.reserve(16);
-    // Wait for final OK
-    bool got_ok = waitResponse(5000L, epoch_str) == 1;
-    if (got_ok) { epoch_time = epoch_str.toInt(); }
+      // NOTE: We can't use parseInt or sendATGetString here because the return
+      // is slow!
+      String epoch_str = "";
+      epoch_str.reserve(16);
+      // Wait for final OK
+      bool got_ok = waitResponse(5000L, epoch_str) == 1;
+      if (got_ok) {
+        epoch_str.replace(AT_NL "OK" AT_NL, "");
+        epoch_str.trim();
+
+        // subset text before the first carriage return
+        int firstCR = epoch_str.indexOf('\r');
+        epoch_str   = epoch_str.substring(0, firstCR);
+        epoch_str.trim();
+        epoch_time = epoch_str.toInt();
+        DBG("Epoch str:", epoch_str, "epoch_time", epoch_time);
+      } else {
+        // delay before the next attempt
+        DBG(GF("Delay 5s before next time request attempt"));
+        delay(5000L);
+      }
+    }
 
     if (epoch_time != 0) {
       switch (epoch) {
@@ -738,7 +829,7 @@ class TinyLoRa_mDOT : public TinyLoRaModem<TinyLoRa_mDOT>,
     return resp;
   }
 
-  bool join(uint8_t attempts, uint32_t timeout) {
+  bool join(uint8_t attempts, uint32_t timeout, bool force = false) {
     // try multiple times to join
     bool    success            = false;
     uint8_t attempts_remaining = attempts;
@@ -746,7 +837,7 @@ class TinyLoRa_mDOT : public TinyLoRaModem<TinyLoRa_mDOT>,
 #ifdef TINY_LORA_DEBUG
       uint32_t start = millis();
 #endif
-      sendAT(GF("+JOIN"));
+      sendAT(force ? GF("+JOIN=1") : GF("+JOIN"));
       attempts_remaining--;
       int8_t join_resp = waitResponse(
           timeout, GF("Successfully joined network" AT_NL),
@@ -789,6 +880,9 @@ class TinyLoRa_mDOT : public TinyLoRaModem<TinyLoRa_mDOT>,
         downlink == "\n") {
       return 0;
     }
+
+    // if there's data in the downlink, we're connected
+    _networkConnected = true;
 
     // deal with the downlink data
     int downlinkedBytes = downlink.length();

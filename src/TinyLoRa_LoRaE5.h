@@ -86,6 +86,8 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
     prev_dl_check        = 0;
     inLowestPowerMode    = false;
     _requireConfirmation = false;
+    _msg_quality         = 0;
+    _link_margin         = 255;
   }
 
 
@@ -173,7 +175,17 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
   }
 
   String getModuleInfoImpl() {
-    return sendATGetString(GF("+VER"));
+    String info = "Firmware: ";
+    info += sendATGetString(GF("+VER"));
+    info += " LoRaWan: ";
+    String info2;
+    sendAT(GF("+LW=VER"));
+    if (waitResponse(GF("+LW: VER, ")) != 1) {
+      info2 = "UNKNOWN";
+    } else {
+      info2 = stream.readStringUntil('\r');
+    }
+    return info + info2;
   }
 
   bool factoryDefaultImpl() {
@@ -267,8 +279,6 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
 
   bool joinOTAAImpl(const char* appEui, const char* appKey, const char* devEui,
                     uint32_t timeout, bool) {
-    sendAT(GF("+MODE=LWOTAA"));  // Configure for OTAA join mode (default)
-    waitResponse(GF("+MODE: LWOTAA" AT_NL));  // echos the set command
     // The App EUI must be a hex value
     sendAT(GF("+ID=AppEui, \""), appEui, '"');
     waitResponse(GF("+ID: AppEui"));  // echos the set command
@@ -282,14 +292,14 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
       waitResponse(GF("+ID: DevEui"));            // echos the set command
       stream.find('\n');  // throw away the echoed Device EUI
     }
+    changeModes(OTAA);
     return join(5, timeout);  // join the network
   }
 
   bool joinABPImpl(const char* devAddr, const char* nwkSKey,
-                   const char* appSKey,
-                   uint32_t    timeout = DEFAULT_JOIN_TIMEOUT) {
-    sendAT(GF("+MODE=LWABP"));  // Configure for manual provisioning (ABP)
-    waitResponse(GF("+MODE: LWABP"));
+                   const char* appSKey, int uplinkCounter = 1,
+                   int      downlinkCounter = 0,
+                   uint32_t timeout         = DEFAULT_JOIN_TIMEOUT) {
     sendAT(GF("+ID=DevAddr, \""), devAddr, '"');  // set the device address
     waitResponse(GF("+ID: DevAddr"));             // echos the set command
     stream.find('\n');  // throw away the echoed Device Address
@@ -300,12 +310,42 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
     sendAT(GF("+KEY=NWKSKEY,\""), nwkSKey,
            '"');                        // set the network session key
     waitResponse(GF("+KEY: NWKSKEY"));  // echos the set command
-    stream.find('\n');        // throw away the echoed network session key
-    return join(5, timeout);  // join the network
+    stream.find('\n');  // throw away the echoed network session key
+    // set the uplink and downlink counters, if we need to
+    if (uplinkCounter != 1 || downlinkCounter != 0) {
+      sendAT(GF("+LW=ULDL, "), uplinkCounter, ',',
+             downlinkCounter);        // set the network session key
+      waitResponse(GF("+LW: ULDL"));  // echos the set command
+      stream.find('\n');              // throw away the echoed counters
+    }
+    changeModes(ABP);
+    return isNetworkConnected();  // verify that we're connected
   }
 
   bool isNetworkConnectedImpl() {
-    return join(1, 1000L);
+    int8_t tries_remaining = 10;
+    _link_margin           = 255;
+    while (_link_margin == 255 && tries_remaining) {
+      sendAT(GF("+LW=LCR"));
+      waitResponse(GF("+LW: LCR"));
+      stream.find('\n');  // throw away the new line
+      delay(100);         // short delay to let the MAC queue itself
+      DBG(GF("Sending empty message to carry LinkCheckReq"), tries_remaining,
+          GF("tries remaining"));
+      modemSend(NULL, 0);
+      tries_remaining--;
+      // delay before the next attempt
+      if (_link_margin == 255) {
+        DBG(GF("Delay 5s before next LinkCheckReq attempt"));
+        delay(5000L);
+      }
+    }
+    if (_link_margin != 255) {
+      _networkConnected = true;
+    } else {
+      _networkConnected = false;
+    }
+    return _link_margin != 255;
   }
 
   int8_t getSignalQualityImpl() {
@@ -314,7 +354,8 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
     // drop off the network and requires you to rejoin
     int8_t tries_remaining = 5;
     while (_msg_quality == 0 && tries_remaining) {
-      DBG(GF("Sending empty message to get RSSI"), tries_remaining);
+      DBG(GF("Sending empty message to get RSSI"), tries_remaining,
+          GF("tries remaining"));
       modemSend(NULL, 0);
       tries_remaining--;
     }
@@ -382,8 +423,8 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
     sendAT(GF("+CH"));  // request all channel type_info
     waitResponse(GF("+CH: "));
     int8_t num_active_channels = 0;
-    // bool   all_inactive = waitResponse(50, GF("No channel is activated")) ==
-    // 1;
+    // bool   all_inactive = waitResponse(50, GF("No channel is activated"))
+    // == 1;
     num_active_channels = stream.parseInt();
     DBG(GF("\nTotal Active Channels:"), num_active_channels);
     if (num_active_channels > 0) {
@@ -745,10 +786,12 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
     size_t bytesSent = 0;
 
     GsmConstStr at_msg_cmd;
-    if (_requireConfirmation) {
-      at_msg_cmd = GF("CMSG");
+    if (_requireConfirmation && len > 0) {
+      at_msg_cmd = GF("+CMSG");  // cannot carry 0 payload
+    } else if (_requireConfirmation) {
+      at_msg_cmd = GF("+CMSGHEX");
     } else {
-      at_msg_cmd = GF("MSG");
+      at_msg_cmd = GF("+MSG");
     }
 
     do {
@@ -779,14 +822,16 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
         // if there's no space available to send data, the queue is full of MAC
         // commands and we need to send empty messages to flush them out
         if (uplinkAvailable == 0 || len == 0) {
-          stream.write("AT+");
-          stream.print(at_msg_cmd);
-          // finish with a new line
-          stream.println();
-          stream.flush();
+          sendAT(at_msg_cmd);
         } else {
           // start the send command
-          stream.write("AT+");
+          if (inLowestPowerMode) {
+            // If extremely low power mode is enabled, when sending commands
+            // to modem, at least four 0xFFs need to be added to the start of
+            // each AT command.
+            for (uint8_t i = 0; i < 4; i++) { stream.write(0xFF); }
+          }
+          stream.write("AT");
           stream.print(at_msg_cmd);
           stream.write("=\"");
           // write out the number of bytes that are available for this uplink
@@ -798,7 +843,7 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
         }
 
         // always sends a start notice
-        if (waitResponse(GF(": Start")) == 1) {}
+        waitResponse(GF(": Start"));
         // the downlink should be processed by handle URCs
         uint32_t sendTimeout;
         if (_requireConfirmation) {
@@ -806,13 +851,29 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
         } else {
           sendTimeout = DEFAULT_MESSAGE_TIMEOUT;
         }
-        if (waitResponse(sendTimeout, GF(": Done")) == 1) {
-          bytesSent += sendLength;   // bump up number of bytes sent
-          txPtr += sendLength;       // bump up the pointer
-          prev_dl_check = millis();  // mark that we checked for downlink
-          send_success  = true;
-          stream.find('\n');  // throw away the new line
+        if (_requireConfirmation) {
+          if (waitResponse(sendTimeout, GF(": ACK Received"), GF(": Done")) ==
+              1) {
+            bytesSent += sendLength;   // bump up number of bytes sent
+            txPtr += sendLength;       // bump up the pointer
+            prev_dl_check = millis();  // mark that we checked for downlink
+            send_success  = true;
+            stream.find('\n');  // throw away the new line
+            waitResponse(sendTimeout, GF(": Done"));
+          } else {
+            DBG(GF("No ACK received on ACK message!"));
+            break;
+          }
+        } else {
+          if (waitResponse(sendTimeout, GF(": Done")) == 1) {
+            bytesSent += sendLength;   // bump up number of bytes sent
+            txPtr += sendLength;       // bump up the pointer
+            prev_dl_check = millis();  // mark that we checked for downlink
+            send_success  = true;
+            stream.find('\n');  // throw away the new line
+          }
         }
+        DBG(send_attempts, send_success);
         send_attempts++;
       }
       // if we completely failed after 5 attempts, bail from the whole thing
@@ -902,11 +963,22 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
       DBG(GF("Got RSSI:"), _msg_quality);
       stream.find('\n');  // skip the SNR
       return true;
+    } else if (data.endsWith(GF(": Link"))) {
+      // +MSG: Link 20, 1
+      _link_margin = stream.parseInt();
+      stream.find(',');  // skip the , after the link margin
+#ifdef TINY_LORA_DEBUG
+      int8_t gateway_count = stream.parseInt();
+      DBG(GF("## LinkCheckAns received. Link Margin:"), _link_margin,
+          GF("Number Gateways:"), gateway_count);
+#endif
+      stream.find('\n');  // skip the SNR
+      return true;
     }
     return false;
   }
 
-  bool join(uint8_t attempts, uint32_t timeout) {
+  bool join(uint8_t attempts, uint32_t timeout, bool force = false) {
     // try multiple times to join
     bool    success            = false;
     uint8_t attempts_remaining = attempts;
@@ -914,11 +986,12 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
 #ifdef TINY_LORA_DEBUG
       uint32_t start = millis();
 #endif
-      sendAT(GF("+JOIN"));
+      sendAT(force ? GF("+JOIN=FORCE") : GF("+JOIN"));
       attempts_remaining--;
       int8_t join_resp = waitResponse(
           timeout, GF("+JOIN: Network joined"), GF("+JOIN: Join failed"),
-          GF("+JOIN: Joined already"), GF("+JOIN: LoRaWAN modem is busy"));
+          GF("+JOIN: Joined already"), GF("+JOIN: LoRaWAN modem is busy"),
+          GF("+JOIN: Not in OTAA mode"));
       if (join_resp == 1 || join_resp == 3) {
         success           = true;
         _networkConnected = true;
@@ -934,7 +1007,7 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
             attempts_remaining, GF("attempts remaining"));
         // TODO: Implement join backoff
       }
-      if (join_resp != 3) {
+      if (join_resp != 3 && join_resp != 4) {
         if (waitResponse(timeout, GF("+JOIN: Done")) == 1) {
           DBG(GF("Join finished after"), millis() - start, GF("ms"));
         } else {
@@ -946,20 +1019,35 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
     return success;
   }
 
+  bool changeModes(_lora_mode mode) {
+    bool success = true;
+    if (mode == OTAA) {
+      sendAT(
+          GF("+MODE=LWOTAA"));  // Configure for Over the Air Activation (OTAA)
+      success &= waitResponse(GF("+MODE: LWOTAA")) == 1;
+    } else if (mode == ABP) {
+      sendAT(
+          GF("+MODE=LWABP"));  // Configure for manual provisioning/Activation
+                               // by Personalization (ABP)
+      success &= waitResponse(GF("+MODE: LWABP")) == 1;
+    }
+    stream.find('\n');  // throw away the new line
+    return success;
+  }
+
   bool deviceTimeRequest() {
     // Bufferer DeviceTimeReq MAC command for AT modem, the MAC command will
     // be sent in next LoRaWAN transaction controlled by command
     // MSG/CMSG/MSGHEX/CMSGHEX. It is recommended to use MSGHEX and CMSGHEX to
     // carry this command if there is no application payload to send.
-    // We'll use the modem read command to send the empty message
     sendAT(GF("+LW=DTR"));
     waitResponse(GF("+LW: DTR"));
     stream.find('\n');  // throw away the new line
+    delay(100);         // short delay to let the MAC queue itself
     DBG(GF("Sending empty message to carry DeviceTimeReq"));
     modemSend(NULL, 0);
     return true;
   }
-
 
   String sendATGetString(GsmConstStr cmd) {
     String resp;
@@ -977,6 +1065,7 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
   LoRaStream_LoRaE5* loraStream;
   bool               inLowestPowerMode;
   int8_t             _msg_quality;
+  uint8_t            _link_margin;
 };
 
 #endif  // SRC_TINYLORA_LORAE5_H_

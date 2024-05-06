@@ -48,19 +48,30 @@ SoftwareSerial SerialAT(2, 3);  // RX, TX
  */
 #define TINY_LORA_TEST_ABP false
 #define TINY_LORA_TEST_OTAA true
+#define TINY_LORA_TEST_SETTINGS false
 #define TINY_LORA_TEST_BATTERY true
 #define TINY_LORA_TEST_TEMPERATURE true
 #define TINY_LORA_TEST_TIME true
 #define TINY_LORA_TEST_SLEEP true
 
 // Your ABP credentials, if applicable
-const char devAddr[] = "YourDeviceAddress";
-const char nwkSKey[] = "YourNetworkSessionKey";
-const char appSKey[] = "YourAppSessionKey";
+// // The device address (network address). This must be 4 bytes of hex data.
+// const char devAddr[] = "4ByteDevAddr";
+// // The network session key. This must be 16 bytes of hex data.
+// const char nwkSKey[] = "16ByteNwkSKey";
+// // The app session key (data session key). This must be 16 bytes of hex data.
+// const char appSKey[] = "16ByteAppSKey";
+// // The last server uplink counter
+// int uplinkCounter = 1;
+// // The last server downlink counter
+// int downlinkCounter = 0;
+
 
 // Your OTAA connection credentials, if applicable
-// const char appEui[] = "YourAppEUI";
-// const char appKey[] = "YourAppKey";
+// The App EUI (also called the Join EUI or the Network ID)
+// const char appEui[] = "8ByteAppEui";
+// The App Key (also called the network key)
+// const char appKey[] = "16ByteAppKey";
 
 // the pin on your Arduino that will turn on power to the module
 int8_t power_pin_for_module = 18;
@@ -92,6 +103,8 @@ TinyLoRa       modem(debugger);
 #else
 TinyLoRa       modem(SerialAT);
 #endif
+
+TinyLoRaStream loraStream(modem);
 
 void setup() {
   // Set console baud rate
@@ -141,33 +154,7 @@ void loop() {
   SerialMon.println(modemInfo);
   delay(2000L);
 
-  // get and set the public network status to test functionality
-  bool isPublic = modem.getPublicNetwork();
-  SerialMon.print(F("Currently set in "));
-  SerialMon.println(isPublic ? "public network mode" : "private network mode");
-  delay(1000L);
-  if (modem.setPublicNetwork(isPublic)) {
-    SerialMon.print(F("  Reset public network mode to "));
-    SerialMon.println(isPublic ? "public network mode"
-                               : "private network mode");
-  } else {
-    SerialMon.println(F("--Failed to set public network mode"));
-  }
-  delay(2000L);
-
-  // get and set the ack status to test functionality
-  int8_t ackRetries = modem.getConfirmationRetries();
-  SerialMon.print(F("Device will retry "));
-  SerialMon.print(ackRetries);
-  SerialMon.println(F(" times waiting for ACK"));
-  delay(1000L);
-  if (modem.setConfirmationRetries(ackRetries)) {
-    SerialMon.print(F("  Set ACK retry count to "));
-    SerialMon.println(ackRetries);
-  } else {
-    SerialMon.println(F("--Failed to set ACK retry count"));
-  }
-  delay(2000L);
+#if TINY_LORA_TEST_SETTINGS
 
   // get and set the device class to test functionality
   _lora_class currClass = modem.getClass();
@@ -183,6 +170,20 @@ void loop() {
   }
   delay(2000L);
 
+  // get and set the public network status to test functionality
+  bool isPublic = modem.getPublicNetwork();
+  SerialMon.print(F("Currently set in "));
+  SerialMon.println(isPublic ? "public network mode" : "private network mode");
+  delay(1000L);
+  if (modem.setPublicNetwork(isPublic)) {
+    SerialMon.print(F("  Reset public network mode to "));
+    SerialMon.println(isPublic ? "public network mode"
+                               : "private network mode");
+  } else {
+    SerialMon.println(F("--Failed to set public network mode"));
+  }
+  delay(2000L);
+
   // get and set the application port
   uint8_t currPort = modem.getPort();
   SerialMon.print(F("Device is set to use LoRa device port "));
@@ -195,12 +196,15 @@ void loop() {
     SerialMon.println(F("--Failed to set LoRa device port"));
   }
   delay(2000L);
+#endif
 
   // get and set the current band to test functionality
   String currBand = modem.getBand();
   SerialMon.print(F("Device is currently using LoRa band "));
   SerialMon.println(currBand);
   delay(1000L);
+
+#if TINY_LORA_TEST_SETTINGS
   // doesn't work with all modules
   currBand = "US915";
   if (modem.setBand(currBand)) {
@@ -210,7 +214,6 @@ void loop() {
     SerialMon.println(F("--Failed to set LoRa device band"));
   }
   delay(2000L);
-
 // get and set the sub-band to test functionality
 #ifndef TINY_LORA_LORAE5  // not supported
   int8_t currSubBand = modem.getFrequencySubBand();
@@ -276,6 +279,20 @@ void loop() {
     SerialMon.println(F("--Failed to change individual channels."));
   }
 
+  // get and set the ack status to test functionality
+  int8_t ackRetries = modem.getConfirmationRetries();
+  SerialMon.print(F("Device will retry "));
+  SerialMon.print(ackRetries);
+  SerialMon.println(F(" times waiting for ACK"));
+  delay(1000L);
+  if (modem.setConfirmationRetries(ackRetries)) {
+    SerialMon.print(F("  Set ACK retry count to "));
+    SerialMon.println(ackRetries);
+  } else {
+    SerialMon.println(F("--Failed to set ACK retry count"));
+  }
+  delay(2000L);
+
   // get and set the duty cycle to test functionality
   int8_t currDuty = modem.getMaxDutyCycle();
   SerialMon.print(F("Current duty cycle: "));
@@ -317,12 +334,19 @@ void loop() {
     SerialMon.println(F("--Failed to set adaptive data rate"));
   }
   delay(2000L);
+#endif
 
 #if TINY_LORA_TEST_OTAA
   SerialMon.println(F("Attempting to join with OTAA..."));
   if (!modem.joinOTAA(appEui, appKey)) {
     SerialMon.println(F("--fail\n"));
-    delay(10000L);
+    // power cycle
+    if (power_pin_for_module >= 0) { digitalWrite(power_pin_for_module, LOW); }
+    delay(10000);
+    if (power_pin_for_module >= 0) {
+      digitalWrite(power_pin_for_module, HIGH);
+      delay(5000);
+    }
     return;
   }
   SerialMon.println(F("  success"));
@@ -346,9 +370,16 @@ void loop() {
 
 #if TINY_LORA_TEST_ABP
   SerialMon.println(F("Attempting to join with ABP..."));
-  if (!modem.joinABP(devAddr, nwkSKey, appSKey)) {
-    SerialMon.print(F("--fail"));
+  if (!modem.joinABP(devAddr, nwkSKey, appSKey, uplinkCounter,
+                     downlinkCounter)) {
+    SerialMon.print(F("--fail\n"));
+    // power cycle
+    if (power_pin_for_module >= 0) { digitalWrite(power_pin_for_module, LOW); }
     delay(10000);
+    if (power_pin_for_module >= 0) {
+      digitalWrite(power_pin_for_module, HIGH);
+      delay(5000);
+    }
     return;
   }
   SerialMon.println(F("  success"));
@@ -374,8 +405,14 @@ void loop() {
   SerialMon.print(F("Network status: "));
   SerialMon.println(res ? "connected" : "not connected");
   delay(2000L);
-
-  TinyLoRaStream loraStream(modem);
+  // we may get downlink from the network link check in the isNetworkConnected
+  // fxn
+  if (loraStream.available()) {
+    SerialMon.print(F("Got downlink data!\n<<<"));
+    while (loraStream.available()) { SerialMon.write(loraStream.read()); }
+    SerialMon.println(F(">>>"));
+  }
+  delay(2000L);
 
   // Send out some data, without confirmation
   String short_message = "hello";
@@ -385,6 +422,9 @@ void loop() {
     SerialMon.println(F("  Successfully sent unconfirmed data"));
   } else {
     SerialMon.println(F("--Failed to send unconfirmed data!"));
+    res = modem.isNetworkConnected();
+    SerialMon.print(F("Network status: "));
+    SerialMon.println(res ? "connected" : "not connected");
   }
   if (loraStream.available()) {
     SerialMon.print(F("Got downlink data!\n<<<"));
@@ -399,6 +439,9 @@ void loop() {
     SerialMon.println(F("  Successfully sent acknowledged data"));
   } else {
     SerialMon.println(F("--Failed to send acknowledged data!"));
+    res = modem.isNetworkConnected();
+    SerialMon.print(F("Network status: "));
+    SerialMon.println(res ? "connected" : "not connected");
   }
   if (loraStream.available()) {
     SerialMon.print(F("Got downlink data!\n<<<"));
@@ -414,6 +457,9 @@ void loop() {
     SerialMon.println(F("  Successfully sent longer unconfirmed message"));
   } else {
     SerialMon.println(F("--Failed to send longer unconfirmed message!"));
+    res = modem.isNetworkConnected();
+    SerialMon.print(F("Network status: "));
+    SerialMon.println(res ? "connected" : "not connected");
   }
   if (loraStream.available()) {
     SerialMon.print(F("Got downlink data!\n<<<"));
@@ -423,7 +469,7 @@ void loop() {
   delay(2000L);
   String super_long_message =
       "This is a really long message that I'm using to test and ensure that "
-      "packets are being broken up correctly by the send function.\nLorem "
+      "packets are being broken up correctly by the send function.  Lorem "
       "ipsum dolor sit amet, consectetur adipiscing elit. Quisque vulputate "
       "dolor vitae ante vehicula molestie. Duis in quam nec dolor varius "
       "lobortis. Proin eget malesuada odio. Etiam condimentum sodales "
@@ -436,18 +482,21 @@ void loop() {
       "fringilla auctor metus faucibus non. Nulla blandit mauris a quam "
       "tincidunt commodo. Duis dapibus lorem eget augue ornare, id lobortis "
       "quam volutpat.";
-  // SerialMon.println(F("Sending a super long message without confirmation"));
-  // if (loraStream.print(super_long_message) == super_long_message.length()) {
-  //   SerialMon.println(F("  Successfully sent super long message"));
-  // } else {
-  //   SerialMon.println(F("--Failed to send super long message!"));
-  // }
-  // if (loraStream.available()) {
-  //   SerialMon.print(F("Got downlink data!\n<<<"));
-  //   while (loraStream.available()) { SerialMon.write(loraStream.read()); }
-  //   SerialMon.println(F(">>>"));
-  // }
-  // delay(2000L);
+  SerialMon.println(F("Sending a super long message without confirmation"));
+  if (loraStream.print(super_long_message) == super_long_message.length()) {
+    SerialMon.println(F("  Successfully sent super long message"));
+  } else {
+    SerialMon.println(F("--Failed to send super long message!"));
+    res = modem.isNetworkConnected();
+    SerialMon.print(F("Network status: "));
+    SerialMon.println(res ? "connected" : "not connected");
+  }
+  if (loraStream.available()) {
+    SerialMon.print(F("Got downlink data!\n<<<"));
+    while (loraStream.available()) { SerialMon.write(loraStream.read()); }
+    SerialMon.println(F(">>>"));
+  }
+  delay(2000L);
 
   int rssi = modem.getSignalQuality();
   SerialMon.print(F("Signal quality: "));

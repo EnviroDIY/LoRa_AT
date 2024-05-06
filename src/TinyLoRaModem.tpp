@@ -371,7 +371,7 @@ class TinyLoRaModem {
    * and supported by the module - set useHex to false. If using 8 bytes of hex
    * data, set useHex to true.
    * @param appKey The app key (Network key). If using a string, set useHex to
-   * false. If using 8 bytes of hex data, set useHex to true.
+   * false. If using 16 bytes of hex data, set useHex to true.
    * @param devEui The device EUI. This must be 16 bytes of hex data.
    * @param useHex True if the appKey and appEUI are in hex; false for standard
    * strings
@@ -434,8 +434,10 @@ class TinyLoRaModem {
    * @return *false* The network join failed
    */
   bool joinABP(const char* devAddr, const char* nwkSKey, const char* appSKey,
+               int uplinkCounter = 1, int downlinkCounter = 0,
                uint32_t timeout = DEFAULT_JOIN_TIMEOUT) {
-    return thisModem().joinABPImpl(devAddr, nwkSKey, appSKey, timeout);
+    return thisModem().joinABPImpl(devAddr, nwkSKey, appSKey, uplinkCounter,
+                                   downlinkCounter, timeout);
   }
 
   /**
@@ -450,8 +452,11 @@ class TinyLoRaModem {
    * @return *true* The network join was successful
    * @return *false* The network join failed
    */
-  bool joinABP(String devAddr, String nwkSKey, String appSKey) {
-    return joinABP(devAddr.c_str(), nwkSKey.c_str(), appSKey.c_str());
+  bool joinABP(String devAddr, String nwkSKey, String appSKey,
+               int uplinkCounter = 1, int downlinkCounter = 0,
+               uint32_t timeout = DEFAULT_JOIN_TIMEOUT) {
+    return joinABP(devAddr.c_str(), nwkSKey.c_str(), appSKey.c_str(),
+                   uplinkCounter, downlinkCounter, timeout);
   }
   /**
    * @brief Confirm whether the module is currently connected to the LoRaWAN
@@ -973,9 +978,10 @@ class TinyLoRaModem {
                     uint32_t timeout,
                     bool     useHex) TINY_LORA_ATTR_NOT_IMPLEMENTED;
 
-  bool joinABPImpl(const char* devAddr, const char* nwkSKey,
-                   const char* appSKey, uint32_t timeout = DEFAULT_JOIN_TIMEOUT)
-      TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  bool joinABPImpl(
+      const char* devAddr, const char* nwkSKey, const char* appSKey,
+      int uplinkCounter = 1, int downlinkCounter = 0,
+      uint32_t timeout = DEFAULT_JOIN_TIMEOUT) TINY_LORA_ATTR_NOT_IMPLEMENTED;
   bool isNetworkConnectedImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
 
   int8_t getSignalQualityImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
