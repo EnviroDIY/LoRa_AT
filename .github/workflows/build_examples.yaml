@@ -111,10 +111,15 @@ jobs:
       # Run the script to compile the examples
       - name: Compile
         env:
-          ACTION_RUN_ID: ${{ github.run_id }}
+          PLATFORMIO_CI_SRC: ${{ matrix.example }}
+          TINY_LORA_MODEM_TO_USE: ${{ matrix.modem }}
         run: |
-          chmod +x ${{ matrix.job_info.script }}
-          bash ${{ matrix.job_info.script }}
+          sed -i 's/\/\/ #define TINY_LORA_MDOT/#define TINY_LORA_MDOT/g' ${{ matrix.example }}/*
+          arduino-cli compile --fqbn arduino:avr:uno --build-property "build.extra_flags=\"-D${{ matrix.modem }}\"" --format text /home/user/Arduino/MySketch
+          arduino-cli compile --fqbn arduino:avr:mega --build-property "build.extra_flags=\"-D${{ matrix.modem }}\"" --format text /home/user/Arduino/MySketch
+          arduino-cli compile --fqbn arduino:samd:mzero_bl --build-property "build.extra_flags=\"-D${{ matrix.modem }}\"" --format text /home/user/Arduino/MySketch
+          arduino-cli compile --fqbn adafruit:samd:adafruit_feather_m0 --build-property "build.extra_flags=\"-D${{ matrix.modem }}\"" --format text /home/user/Arduino/MySketch
+          arduino-cli compile --fqbn EnviroDIY:avr:envirodiy_mayfly --build-property "build.extra_flags=\"-D${{ matrix.modem }}\"" --format text /home/user/Arduino/MySketch
 
       # NOTE:  Don't uninstall for PlatformIO because the library manager will clean up the
       # dependencies leaving nothing for the cache
