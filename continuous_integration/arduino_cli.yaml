@@ -2,7 +2,6 @@ board_manager:
   additional_urls:
     - https://raw.githubusercontent.com/EnviroDIY/Arduino_boards/master/package_EnviroDIY_index.json
     - https://adafruit.github.io/arduino-board-index/package_adafruit_index.json
-    - http://downloads.sodaq.net/package_sodaq_samd_index.json
 daemon:
   port: '50051'
 directories:
