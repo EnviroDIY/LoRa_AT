@@ -547,7 +547,7 @@ class TinyLoRa_mDOT : public TinyLoRaModem<TinyLoRa_mDOT>,
  protected:
   // aka network address
   String getDevAddrImpl() {
-    return sendATGetString(GF("+DI?"));
+    return sendATGetString(GF("+NA?"));
   }
 
   // network session key
@@ -606,12 +606,16 @@ class TinyLoRa_mDOT : public TinyLoRaModem<TinyLoRa_mDOT>,
         epoch_str.replace(AT_NL "OK" AT_NL, "");
         epoch_str.trim();
 
-        // subset text before the first carriage return
+        // the epoch time is returned in MILLISECONDS which is too large for a
+        // 32-bit unsigned into.  I'm chopping off the milliseconds and only
+        // keeping the seconds.
+        int endSeconds = epoch_str.length() - 3;
+        // subset text before the first carriage return, if it's there
         int firstCR = epoch_str.indexOf('\r');
-        epoch_str   = epoch_str.substring(0, firstCR);
+        if (firstCR > 0) { endSeconds = firstCR - 3; }
+        epoch_str = epoch_str.substring(0, endSeconds);
         epoch_str.trim();
         epoch_time = epoch_str.toInt();
-        DBG("Epoch str:", epoch_str, "epoch_time", epoch_time);
       } else {
         // delay before the next attempt
         DBG(GF("Delay 5s before next time request attempt"));

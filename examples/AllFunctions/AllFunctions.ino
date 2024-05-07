@@ -48,23 +48,24 @@ SoftwareSerial SerialAT(2, 3);  // RX, TX
  */
 #define TINY_LORA_TEST_ABP false
 #define TINY_LORA_TEST_OTAA true
-#define TINY_LORA_TEST_SETTINGS false
+#define TINY_LORA_TEST_SETTINGS true
+#define TINY_LORA_TEST_UPLINK true
 #define TINY_LORA_TEST_BATTERY true
 #define TINY_LORA_TEST_TEMPERATURE true
 #define TINY_LORA_TEST_TIME true
 #define TINY_LORA_TEST_SLEEP true
 
 // Your ABP credentials, if applicable
-// // The device address (network address). This must be 4 bytes of hex data.
-// const char devAddr[] = "4ByteDevAddr";
-// // The network session key. This must be 16 bytes of hex data.
-// const char nwkSKey[] = "16ByteNwkSKey";
-// // The app session key (data session key). This must be 16 bytes of hex data.
-// const char appSKey[] = "16ByteAppSKey";
-// // The last server uplink counter
-// int uplinkCounter = 1;
-// // The last server downlink counter
-// int downlinkCounter = 0;
+// The device address (network address). This must be 4 bytes of hex data.
+const char devAddr[] = "4ByteDevAddr";
+// The network session key. This must be 16 bytes of hex data.
+const char nwkSKey[] = "16ByteNwkSKey";
+// The app session key (data session key). This must be 16 bytes of hex data.
+const char appSKey[] = "16ByteAppSKey";
+// The last server uplink counter
+int uplinkCounter = 1;
+// The last server downlink counter
+int downlinkCounter = 0;
 
 
 // Your OTAA connection credentials, if applicable
@@ -414,6 +415,7 @@ void loop() {
   }
   delay(2000L);
 
+#if TINY_LORA_TEST_UPLINK
   // Send out some data, without confirmation
   String short_message = "hello";
   SerialMon.println(F("Sending a short message without confirmation"));
@@ -497,6 +499,7 @@ void loop() {
     SerialMon.println(F(">>>"));
   }
   delay(2000L);
+#endif
 
   int rssi = modem.getSignalQuality();
   SerialMon.print(F("Signal quality: "));
