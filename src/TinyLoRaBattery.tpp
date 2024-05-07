@@ -1,9 +1,9 @@
 /**
  * @file       TinyLoRaBattery.tpp
- * @author     Volodymyr Shymanskyy
+ * @author     Sara Damiano
  * @license    LGPL-3.0
- * @copyright  Copyright (c) 2016 Volodymyr Shymanskyy
- * @date       Nov 2016
+ * @copyright  Stroud Water Research Center
+ * @date       May 2024
  */
 
 #ifndef SRC_TINYLORABATTERY_H_

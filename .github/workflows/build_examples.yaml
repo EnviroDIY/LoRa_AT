@@ -177,6 +177,7 @@ jobs:
       - name: Install the testing version of TinyLoRa for PlatformIO
         run: |
           pio pkg install -g --library ${{ env.LIBRARY_INSTALL_GIT }}
+          pio pkg list -g --only-libraries
 
       - name: Include problem matcher
         uses: ammaraskar/gcc-problem-matcher@master

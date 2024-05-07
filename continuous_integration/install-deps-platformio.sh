@@ -20,10 +20,15 @@ pio pkg install -g --tool framework-arduino-megaavr
 echo "\e[32mInstalling Atmel SAM platform \e[0m"
 pio pkg install -g --platform atmelsam
 
+echo "\e[32mInstalling Intel ARC 32 platform \e[0m"
+pio pkg install -g --platform intel_arc32
+
+echo "\e[32mInstalling Teensy platform \e[0m"
+pio pkg install -g --platform teensy
+
 echo "\e[32mInstalling Atmel SAM framework \e[0m"
 pio pkg install -g --tool framework-arduino-samd
 pio pkg install -g --tool framework-arduino-samd-adafruit
-pio pkg install -g --tool framework-arduino-samd-sodaq
 pio pkg install -g --tool framework-cmsis
 pio pkg install -g --tool framework-cmsis-atmel
 pio pkg install -g --tool tool-bossac

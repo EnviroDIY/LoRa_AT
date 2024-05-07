@@ -70,9 +70,9 @@ int downlinkCounter = 0;
 
 // Your OTAA connection credentials, if applicable
 // The App EUI (also called the Join EUI or the Network ID)
-// const char appEui[] = "8ByteAppEui";
+const char appEui[] = "8ByteAppEui";
 // The App Key (also called the network key)
-// const char appKey[] = "16ByteAppKey";
+const char appKey[] = "16ByteAppKey";
 
 // the pin on your Arduino that will turn on power to the module
 int8_t power_pin_for_module = 18;

@@ -2,7 +2,7 @@
   "name": "TinyLoRa",
   "version": "0.1.0",
   "description": "A small Arduino library for LoRa modules, that just works. Supports modules with AT command interfaces.",
-  "keywords": "GSM, AT commands, AT, mDOT",
+  "keywords": "LoRa, LoRaWAN, AT commands, AT, mDOT",
   "authors": [
     {
       "name": "Sara Damiano",
