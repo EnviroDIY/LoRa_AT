@@ -10,7 +10,7 @@
 #define SRC_TINYLORA_H_
 
 #if defined(TINY_LORA_MDOT)
-#include "TinyLoRa_MDOT.h"
+#include "TinyLoRa_mDOT.h"
 typedef TinyLoRa_mDOT                  TinyLoRa;
 typedef TinyLoRa_mDOT::LoRaStream_mDOT TinyLoRaStream;
 
