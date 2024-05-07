@@ -114,6 +114,8 @@ jobs:
           PLATFORMIO_CI_SRC: ${{ matrix.example }}
           TINY_LORA_MODEM_TO_USE: ${{ matrix.modem }}
         run: |
+          status=0
+
           sed -i 's/#define TINY_LORA_MDOT/\/\/ #define TINY_LORA_MDOT/g' ${{ matrix.example }}/*
 
           echo ::group::Uno
@@ -145,6 +147,8 @@ jobs:
           result_code=${PIPESTATUS[0]}
           echo ::endgroup::
           if [ "$result_code" -eq "0" ]; then echo -e "\e[32mMayfly successfully compiled\e[0m"; else echo -e "\e[31mMayfly failed to compile\e[0m"; fi
+
+          exit $status
 
       - name: Uninstall testing version of Modular Sensors before caching
         run: |
