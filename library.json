@@ -28,5 +28,8 @@
   },
   "frameworks": ["arduino", "energia", "wiringpi"],
   "platforms": "*",
-  "headers": "TinyLoRa.h"
+  "headers": ["TinyLoRa.h"],
+  "build": {
+    "libLDFMode": "deep+"
+  }
 }
