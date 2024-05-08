@@ -61,7 +61,7 @@ class TinyLoRaRadio {
 
     size_t write(const char* str) {
       if (str == NULL) return 0;
-      return write((const uint8_t*)str, strlen(str));
+      return write(reinterpret_cast<uint8_t*>(str), strlen(str));
     }
 
     int available() override {

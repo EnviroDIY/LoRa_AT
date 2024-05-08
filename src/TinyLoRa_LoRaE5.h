@@ -782,7 +782,8 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
    */
  protected:
   int16_t modemSend(const void* buff, size_t len) {
-    char*  txPtr = (char*)buff;  // Pointer to where in the buffer we're up to
+    char* txPtr = reinterpret_cast<char*>(
+        const_cast<void*>(buff));  // Pointer to where in the buffer we're up to
     size_t bytesSent = 0;
 
     GsmConstStr at_msg_cmd;
@@ -816,8 +817,10 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
 
         // Ensure the program doesn't read past the allocated memory
         sendLength = uplinkAvailable;
-        if (txPtr + uplinkAvailable > (char*)buff + len) {
-          sendLength = (char*)buff + len - txPtr;
+        if (txPtr + uplinkAvailable >
+            reinterpret_cast<char*>(const_cast<void*>(buff)) + len) {
+          sendLength = reinterpret_cast<char*>(const_cast<void*>(buff)) + len -
+              txPtr;
         }
         // if there's no space available to send data, the queue is full of MAC
         // commands and we need to send empty messages to flush them out

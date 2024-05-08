@@ -439,8 +439,8 @@ class TinyLoRa_mDOT : public TinyLoRaModem<TinyLoRa_mDOT>,
     // command is sent multiple times.
 
     size_t maskLen = strlen(newMask);
-    char*  maskPtr =
-        (char*)newMask;  // Pointer to where in the buffer we're up to
+    char*  maskPtr = const_cast<char*>(
+        newMask);  // Pointer to where in the buffer we're up to
     uint8_t maskOffset = 4;
     size_t  bytesSent  = 0;
 
@@ -684,7 +684,8 @@ class TinyLoRa_mDOT : public TinyLoRaModem<TinyLoRa_mDOT>,
    */
  protected:
   int16_t modemSend(const void* buff, size_t len) {
-    char*  txPtr = (char*)buff;  // Pointer to where in the buffer we're up to
+    char* txPtr = reinterpret_cast<char*>(
+        const_cast<void*>(buff));  // Pointer to where in the buffer we're up to
     size_t bytesSent = 0;
 
     // NOTE: There's no way to require or not require confirmation for an
@@ -726,8 +727,10 @@ class TinyLoRa_mDOT : public TinyLoRaModem<TinyLoRa_mDOT>,
 
         // Ensure the program doesn't read past the allocated memory
         sendLength = uplinkAvailable;
-        if (txPtr + uplinkAvailable > (char*)buff + len) {
-          sendLength = (char*)buff + len - txPtr;
+        if (txPtr + uplinkAvailable >
+            reinterpret_cast<char*>(const_cast<void*>(buff)) + len) {
+          sendLength = reinterpret_cast<char*>(const_cast<void*>(buff)) + len -
+              txPtr;
         }
         // if there's no space available to send data, the queue is full of MAC
         // commands and we need to send empty messages to flush them out
@@ -902,7 +905,9 @@ class TinyLoRa_mDOT : public TinyLoRaModem<TinyLoRa_mDOT>,
         // reset amount to put into the buffer to the free space available
         putBuffLen = loraStream->rx.free();
       }
-      loraStream->rx.put((uint8_t*)(downlink.c_str()), putBuffLen, false);
+      loraStream->rx.put(
+          reinterpret_cast<uint8_t*>(const_cast<char*>(downlink.c_str())),
+          putBuffLen, false);
       loraStream->sock_available = putBuffLen;
       return putBuffLen;
     }

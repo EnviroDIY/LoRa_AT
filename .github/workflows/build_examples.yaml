@@ -111,7 +111,7 @@ jobs:
       # Run the script to compile the examples
       - name: Compile
         env:
-          PLATFORMIO_CI_SRC: ${{ matrix.example }}
+          ARDUINO_CODE_SOURCE: ${{ matrix.example }}
           TINY_LORA_MODEM_TO_USE: ${{ matrix.modem }}
         run: |
           status=0
@@ -141,6 +141,13 @@ jobs:
 
           echo ::group::FeatherM0
           arduino-cli compile --fqbn adafruit:samd:adafruit_feather_m0 --build-property "build.extra_flags=\"-D${{ matrix.modem }}\"" --format text --warnings more --verbose --config-file continuous_integration/arduino_cli.yaml  ${{ matrix.example }} 2>&1 | tee output.log
+          result_code=${PIPESTATUS[0]}
+          if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
+          echo ::endgroup::
+          if [ "$result_code" -eq "0" ]; then echo -e "\e[32mFeatherM0 successfully compiled\e[0m"; else echo -e "\e[31mFeatherM0 failed to compile\e[0m"; fi
+
+          echo ::group::FeatherM4
+          arduino-cli compile --fqbn adafruit:samd:adafruit_feather_m4 --build-property "build.extra_flags=\"-D${{ matrix.modem }}\"" --format text --warnings more --verbose --config-file continuous_integration/arduino_cli.yaml  ${{ matrix.example }} 2>&1 | tee output.log
           result_code=${PIPESTATUS[0]}
           if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
           echo ::endgroup::
