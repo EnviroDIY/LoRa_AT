@@ -17,14 +17,14 @@ echo "\e[32mInstalling Atmel AVR framework \e[0m"
 pio pkg install -g --platform atmelmegaavr
 pio pkg install -g --tool framework-arduino-megaavr
 
-echo "\e[32mInstalling Atmel SAM platform \e[0m"
-pio pkg install -g --platform atmelsam
-
 echo "\e[32mInstalling Intel ARC 32 platform \e[0m"
 pio pkg install -g --platform intel_arc32
 
-echo "\e[32mInstalling Teensy platform \e[0m"
-pio pkg install -g --platform teensy
+echo "\e[32mInstalling Reneses (Uno R4) platform \e[0m"
+pio pkg install -g --platform renesas-ra
+
+echo "\e[32mInstalling Atmel SAM platform \e[0m"
+pio pkg install -g --platform atmelsam
 
 echo "\e[32mInstalling Atmel SAM framework \e[0m"
 pio pkg install -g --tool framework-arduino-samd
@@ -34,6 +34,24 @@ pio pkg install -g --tool framework-cmsis-atmel
 pio pkg install -g --tool tool-bossac
 pio pkg install -g --tool toolchain-gccarmnoneeabi
 echo "::endgroup::"
+
+echo "\e[32mInstalling Teensy platform \e[0m"
+pio pkg install -g --platform teensy
+
+echo "\e[32mInstalling STM32 platform \e[0m"
+pio pkg install -g --platform ststm32
+
+echo "\e[32mInstalling MicroChip Pic32 platform \e[0m"
+pio pkg install -g --platform microchippic32
+
+echo "\e[32mInstalling Espressif 8266 platform \e[0m"
+pio pkg install -g --platform espressif8266
+
+echo "\e[32mInstalling Espressif 32 platform \e[0m"
+pio pkg install -g --platform espressif32
+
+echo "\e[32mInstalling Raspberry Pi \e[0m"
+pio pkg install -g --platform raspberrypi
 
 
 echo "::group::Installing Libraries"

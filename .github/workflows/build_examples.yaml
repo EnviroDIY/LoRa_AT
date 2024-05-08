@@ -121,30 +121,35 @@ jobs:
           echo ::group::Uno
           arduino-cli compile --fqbn arduino:avr:uno --build-property "build.extra_flags=\"-D${{ matrix.modem }}\"" --format text --warnings more --verbose --config-file continuous_integration/arduino_cli.yaml  ${{ matrix.example }} 2>&1 | tee output.log
           result_code=${PIPESTATUS[0]}
+          if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
           echo ::endgroup::
           if [ "$result_code" -eq "0" ]; then echo -e "\e[32mUno successfully compiled\e[0m"; else echo -e "\e[31mUno failed to compile\e[0m"; fi
 
           echo ::group::Mega
           arduino-cli compile --fqbn arduino:avr:mega --build-property "build.extra_flags=\"-D${{ matrix.modem }}\"" --format text --warnings more --verbose --config-file continuous_integration/arduino_cli.yaml  ${{ matrix.example }} 2>&1 | tee output.log
           result_code=${PIPESTATUS[0]}
+          if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
           echo ::endgroup::
           if [ "$result_code" -eq "0" ]; then echo -e "\e[32mMega successfully compiled\e[0m"; else echo -e "\e[31mMega failed to compile\e[0m"; fi
 
           echo ::group::ArduinoZero
           arduino-cli compile --fqbn arduino:samd:mzero_bl --build-property "build.extra_flags=\"-D${{ matrix.modem }}\"" --format text --warnings more --verbose --config-file continuous_integration/arduino_cli.yaml  ${{ matrix.example }} 2>&1 | tee output.log
           result_code=${PIPESTATUS[0]}
+          if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
           echo ::endgroup::
           if [ "$result_code" -eq "0" ]; then echo -e "\e[32mArduinoZero successfully compiled\e[0m"; else echo -e "\e[31mArduinoZero failed to compile\e[0m"; fi
 
           echo ::group::FeatherM0
           arduino-cli compile --fqbn adafruit:samd:adafruit_feather_m0 --build-property "build.extra_flags=\"-D${{ matrix.modem }}\"" --format text --warnings more --verbose --config-file continuous_integration/arduino_cli.yaml  ${{ matrix.example }} 2>&1 | tee output.log
           result_code=${PIPESTATUS[0]}
+          if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
           echo ::endgroup::
           if [ "$result_code" -eq "0" ]; then echo -e "\e[32mFeatherM0 successfully compiled\e[0m"; else echo -e "\e[31mFeatherM0 failed to compile\e[0m"; fi
 
           echo ::group::Mayfly
           arduino-cli compile --fqbn EnviroDIY:avr:envirodiy_mayfly --build-property "build.extra_flags=\"-D${{ matrix.modem }}\"" --format text --warnings more --verbose --config-file continuous_integration/arduino_cli.yaml  ${{ matrix.example }} 2>&1 | tee output.log
           result_code=${PIPESTATUS[0]}
+          if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
           echo ::endgroup::
           if [ "$result_code" -eq "0" ]; then echo -e "\e[32mMayfly successfully compiled\e[0m"; else echo -e "\e[31mMayfly failed to compile\e[0m"; fi
 
@@ -215,4 +220,4 @@ jobs:
           TINY_LORA_MODEM_TO_USE: ${{ matrix.modem }}
         run: |
           sed -i 's/#define TINY_LORA_MDOT/\/\/ #define TINY_LORA_MDOT/g' ${{ matrix.example }}/*
-          platformio ci --verbose --project-option='build_flags=-D ${{ env.TINY_LORA_MODEM_TO_USE }}' --project-option='framework=arduino' --board=uno --board=leonardo --board=yun --board=megaatmega2560 --board=genuino101 --board=mkr1000USB --board=zero --board=teensy31 --board=bluepill_f103c8 --board=uno_pic32 --board=esp01 --board=nodemcuv2 --board=esp32dev
+          platformio ci --verbose --project-option='build_flags=-D ${{ env.TINY_LORA_MODEM_TO_USE }}' --project-option='framework=arduino' --board=mayfly --board=uno --board=leonardo --board=yun --board=megaatmega2560 --board=nano_every --board=uno_wifi_rev2 --board=genuino101 --board=uno_r4_wifi --board=dueUSB --board=mkr1000USB --board=mkrvidor4000 --board=zero --board=adafruit_feather_m0 --board=adafruit_feather_m4 --board=teensy31 --board=bluepill_f103c8 --board=uno_pic32 --board=esp01 --board=nodemcuv2 --board=esp32dev --board=featheresp32 --board=adafruit_feather_esp32s2 --board=esp32-c3-devkitm-1 --board=pico
