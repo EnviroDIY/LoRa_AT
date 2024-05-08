@@ -88,6 +88,7 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
     _requireConfirmation = false;
     _msg_quality         = 0;
     _link_margin         = 255;
+    _networkConnected    = false;
   }
 
 
@@ -148,11 +149,11 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
 #ifdef TINY_LORA_DEBUG
     sendAT(GF("+LOG=DEBUG"));  // turn on verbose error codes
     waitResponse(GF("+LOG: DEBUG"));
-    stream.find('\n');  // throw away the new line
+    streamFind('\n');  // throw away the new line
 #else
     sendAT(GF("+LOG=QUIET"));  // turn off verbose error codes
     waitResponse(GF("+LOG: QUIET"));
-    stream.find('\n');  // throw away the new line
+    streamFind('\n');  // throw away the new line
 #endif
     return true;
   }
@@ -161,7 +162,7 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
     sendAT(GF("+UART=BR, "), baud);
     bool resp = waitResponse(GF("+UART=BR, "));
     resp &= (uint32_t)stream.parseInt() == baud;
-    stream.find('\n');  // throw away the new line
+    streamFind('\n');  // throw away the new line
     return resp;
   }
 
@@ -221,7 +222,7 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
     // ^^ this is not the lowest power mode using the extra 0xFF characters
     bool resp = waitResponse(GF("+LOWPOWER:")) == 1;
     resp &= waitResponse(GF("SLEEP")) == 1;
-    stream.find('\n');  // throw away the new line
+    streamFind('\n');  // throw away the new line
     // There will be a +LOWPOWER: WAKEUP message at the next UART communication
     return true;
   }
@@ -230,7 +231,7 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
     sendAT(GF("+LOWPOWER="), sleepTimer);
     bool resp = waitResponse(GF("+LOWPOWER:")) == 1;
     resp &= waitResponse(GF("SLEEP")) == 1;
-    stream.find('\n');  // throw away the new line
+    streamFind('\n');  // throw away the new line
     return resp;
   }
 
@@ -239,7 +240,7 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
     bool resp = waitResponse(GF("+LOWPOWER:")) == 1;
     resp &= waitResponse(GF("AUTOOFF"), GF("AUTOON")) - 1 == enable;
     if (resp) { inLowestPowerMode = enable; }
-    stream.find('\n');  // throw away the new line
+    streamFind('\n');  // throw away the new line
     return resp;
   }
 
@@ -252,13 +253,13 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
     sendAT(GF("+LW=NET, "), isPublic ? GF("ON") : GF("OFF"));
     bool resp = waitResponse(GF("LW: NET, "));
     resp &= waitResponse(isPublic ? GF("ON") : GF("OFF")) == 1;
-    stream.find('\n');  // throw away the new line
+    streamFind('\n');  // throw away the new line
     return resp;
   }
   bool getPublicNetworkImpl() {
     sendAT(GF("+LW=NET"));
     bool resp = waitResponse(GF("ON"), GF("OFF")) == 1;
-    stream.find('\n');  // throw away the new line
+    streamFind('\n');  // throw away the new line
     return resp;
   }
 
@@ -266,14 +267,14 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
     sendAT(GF("+RETRY="), numAckRetries);
     bool resp = waitResponse(GF("+RETRY: "));
     resp &= stream.parseInt() == numAckRetries;
-    stream.find('\n');  // throw away the new line
+    streamFind('\n');  // throw away the new line
     return resp;
   }
   int8_t getConfirmationRetriesImpl() {
     sendAT(GF("+RETRY"));
     waitResponse(GF("+RETRY: "));
     int8_t resp = stream.parseInt();
-    stream.find('\n');  // throw away the new line
+    streamFind('\n');  // throw away the new line
     return resp;
   }
 
@@ -282,15 +283,15 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
     // The App EUI must be a hex value
     sendAT(GF("+ID=AppEui, \""), appEui, '"');
     waitResponse(GF("+ID: AppEui"));  // echos the set command
-    stream.find('\n');                // throw away the echoed App EUI
+    streamFind('\n');                 // throw away the echoed App EUI
     // The App Key must also be a hex value
     sendAT(GF("+KEY=APPKEY, \""), appKey, '"');
     waitResponse(GF("+KEY: APPKEY"));  // echos the set command
-    stream.find('\n');                 // throw away the echoed App Key
+    streamFind('\n');                  // throw away the echoed App Key
     if (devEui != NULL) {
       sendAT(GF("+ID=DevEui, \""), devEui, '"');  // set the device EUI
       waitResponse(GF("+ID: DevEui"));            // echos the set command
-      stream.find('\n');  // throw away the echoed Device EUI
+      streamFind('\n');  // throw away the echoed Device EUI
     }
     changeModes(OTAA);
     return join(5, timeout);  // join the network
@@ -302,21 +303,21 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
                    uint32_t timeout         = DEFAULT_JOIN_TIMEOUT) {
     sendAT(GF("+ID=DevAddr, \""), devAddr, '"');  // set the device address
     waitResponse(GF("+ID: DevAddr"));             // echos the set command
-    stream.find('\n');  // throw away the echoed Device Address
+    streamFind('\n');  // throw away the echoed Device Address
     sendAT(GF("+KEY=APPSKEY,\""), appSKey,
            '"');  // set the data session key (app session key)
     waitResponse(GF("+KEY: APPSKEY"));  // echos the set command
-    stream.find('\n');                  // throw away the echoed App Session Key
+    streamFind('\n');                   // throw away the echoed App Session Key
     sendAT(GF("+KEY=NWKSKEY,\""), nwkSKey,
            '"');                        // set the network session key
     waitResponse(GF("+KEY: NWKSKEY"));  // echos the set command
-    stream.find('\n');  // throw away the echoed network session key
+    streamFind('\n');  // throw away the echoed network session key
     // set the uplink and downlink counters, if we need to
     if (uplinkCounter != 1 || downlinkCounter != 0) {
       sendAT(GF("+LW=ULDL, "), uplinkCounter, ',',
              downlinkCounter);        // set the network session key
       waitResponse(GF("+LW: ULDL"));  // echos the set command
-      stream.find('\n');              // throw away the echoed counters
+      streamFind('\n');               // throw away the echoed counters
     }
     changeModes(ABP);
     return isNetworkConnected();  // verify that we're connected
@@ -328,8 +329,7 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
     while (_link_margin == 255 && tries_remaining) {
       sendAT(GF("+LW=LCR"));
       waitResponse(GF("+LW: LCR"));
-      stream.find('\n');  // throw away the new line
-      delay(100);         // short delay to let the MAC queue itself
+      streamFind('\n');  // throw away the new line
       DBG(GF("Sending empty message to carry LinkCheckReq"), tries_remaining,
           GF("tries remaining"));
       modemSend(NULL, 0);
@@ -372,14 +372,14 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
     bool   resp     = waitResponse(GF("+CLASS: "));
     int8_t devClass = waitResponse(GF("A"), GF("B"), GF("C"));
     resp &= (_lora_class)(devClass - 1 + 'A') == _class;
-    stream.find('\n');  // throw away the new line
+    streamFind('\n');  // throw away the new line
     return resp;
   }
   _lora_class getClassImpl() {
     sendAT(GF("+CLASS"));
     waitResponse(GF("+CLASS: "));
     int8_t devClass = waitResponse(GF("A"), GF("B"), GF("C"));
-    stream.find('\n');  // throw away the new line
+    streamFind('\n');  // throw away the new line
     return (_lora_class)(devClass - 1 + 'A');
   }
 
@@ -387,21 +387,21 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
     sendAT(GF("+PORT="), _port);
     bool resp = waitResponse(GF("+PORT: "));  // always echos
     resp &= stream.parseInt() == _port;
-    stream.find('\n');  // throw away the new line
+    streamFind('\n');  // throw away the new line
     return resp;
   }
   uint8_t getPortImpl() {
     sendAT(GF("+PORT"));
     waitResponse(GF("+PORT: "));  // always echos
     int8_t resp = stream.parseInt();
-    stream.find('\n');  // throw away the new line
+    streamFind('\n');  // throw away the new line
     return resp;
   }
 
   bool setBandImpl(const char* band) {
     sendAT(GF("+DR="), band);
     bool resp = waitResponse(GF("+DR: "));
-    stream.find('\n');  // throw away the returned band
+    streamFind('\n');  // throw away the returned band
     return resp;
   }
   String getBandImpl() {
@@ -428,14 +428,14 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
     num_active_channels = stream.parseInt();
     DBG(GF("\nTotal Active Channels:"), num_active_channels);
     if (num_active_channels > 0) {
-      stream.find(';');  // skip the ;
+      streamFind(';');  // skip the ;
     }
     // first returns the number of enabled channels, then metadata about the
     // enabled channels
     for (int8_t i = 0; i < num_active_channels; i++) {
       int8_t active_channel_num = stream.parseInt();
-      stream.find(',');  // skip the ,
-      stream.find(';');  // skip the channel data rates
+      streamFind(',');  // skip the ,
+      streamFind(';');  // skip the channel data rates
 
       // get the channel possition in the array
       int row = getChannelOffset(active_channel_num);
@@ -466,11 +466,11 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
     // +CH: 1,0,DR0:DR0
     uint8_t ret_channel = stream.parseInt();
     // DBG(GF("Returned channel:"), ret_channel);
-    stream.find(',');  // skip the , after the channel number
+    streamFind(',');  // skip the , after the channel number
     uint32_t ret_freq = stream.parseInt();
     // DBG(GF("Channel frequency:"), ret_freq);
-    stream.find(',');   // skip the , after the frequency
-    stream.find('\n');  // dump the data rates
+    streamFind(',');   // skip the , after the frequency
+    streamFind('\n');  // dump the data rates
     return ret_channel == pos && ret_freq > 0;
   }
 
@@ -481,7 +481,7 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
     int8_t resp2 = waitResponse(GF("ON"), GF("on"), GF("OFF"), GF("off"));
     resp &= ((resp2 == 1 || resp2 == 2) && enable) ||
         ((resp2 == 3 || resp2 == 4) && !enable);
-    stream.find('\n');  // throw away the new line
+    streamFind('\n');  // throw away the new line
     return resp;
   }
 
@@ -525,15 +525,15 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
     resp &= waitResponse(GF("OFF"),
                          GF("ON")) -
             1 ==
-        dutyCycle;      // returns on/off for the duty cycle limit
-    stream.find('\n');  // throw away the max duty cycle setting
+        dutyCycle;     // returns on/off for the duty cycle limit
+    streamFind('\n');  // throw away the max duty cycle setting
     return resp;
   }
   bool isDutyCycleEnabledImpl() {
     sendAT(GF("+LW=DC"));
     waitResponse(GF("+LW: DC"));  // echos your command
     bool resp = waitResponse(GF("ON"), GF("OFF")) == 1;
-    stream.find('\n');  // throw away the new line
+    streamFind('\n');  // throw away the new line
     return resp;
   }
 
@@ -543,7 +543,7 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
     waitResponse(GF("ON"),
                  GF("OFF"));  // returns on/off for the duty cycle limit
     resp &= stream.parseInt() == maxDutyCycle;  // then returns the limit value
-    stream.find('\n');                          // throw away the new line
+    streamFind('\n');                           // throw away the new line
     return resp;
   }
   int8_t getMaxDutyCycleImpl() {
@@ -552,7 +552,7 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
     waitResponse(GF("ON"),
                  GF("OFF"));          // returns on/off for the duty cycle limit
     int8_t resp = stream.parseInt();  // then returns the limit value
-    stream.find('\n');                // throw away the new line
+    streamFind('\n');                 // throw away the new line
     return resp;
   }
 
@@ -560,7 +560,7 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
     sendAT(GF("+DR="), dataRate);
     bool resp = waitResponse(GF("+DR: DR"));
     resp &= stream.parseInt() == dataRate;
-    stream.find('\n');  // throw away the new line
+    streamFind('\n');  // throw away the new line
     return resp;
   }
   int8_t getDataRateImpl() {
@@ -576,13 +576,13 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
     sendAT(GF("+ADR="), useADR ? GF("ON") : GF("OFF"));
     bool resp = waitResponse(GF("+ADR:"));
     resp &= waitResponse(useADR ? GF("ON") : GF("OFF")) == 1;
-    stream.find('\n');  // throw away the new line
+    streamFind('\n');  // throw away the new line
     return resp;
   }
   bool getAdaptiveDataRateImpl() {
     sendAT(GF("+ADR?"));
     bool resp = waitResponse(GF("ON"), GF("OFF")) == 1;
-    stream.find('\n');  // throw away the new line
+    streamFind('\n');  // throw away the new line
     return resp;
   }
 
@@ -641,12 +641,12 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
     switch (format) {
       case DATE_FULL: res = stream.readStringUntil(','); break;
       case DATE_TIME:
-        stream.find(' ');  // skip until the next blank space
+        streamFind(' ');  // skip until the next blank space
         res = stream.readStringUntil(' ');
         break;
       case DATE_DATE: res = stream.readStringUntil(' '); break;
     }
-    stream.find('\n');  // throw away epoch and age
+    streamFind('\n');  // throw away epoch and age
     return res;
   }
 
@@ -666,21 +666,21 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
 
     // Date & Time
     iyear = stream.parseInt();
-    stream.find('-');  // skip the - after the year
+    streamFind('-');  // skip the - after the year
     imonth = stream.parseInt();
-    stream.find('-');  // skip the - after the month
+    streamFind('-');  // skip the - after the month
     iday = stream.parseInt();
-    stream.find(' ');  // skip the space after the day
+    streamFind(' ');  // skip the space after the day
     ihour = stream.parseInt();
-    stream.find(':');  // skip the : after the hour
+    streamFind(':');  // skip the : after the hour
     imin = stream.parseInt();
-    stream.find(':');  // skip the : after the minute
+    streamFind(':');  // skip the : after the minute
     isec        = stream.parseInt();
     char tzSign = stream.read();
     itimezone   = stream.parseInt();
-    stream.find(':');  // skip the : after the time zone hour
+    streamFind(':');  // skip the : after the time zone hour
     if (tzSign == '-') { itimezone = itimezone * -1; }
-    stream.find('\n');  // throw away epoch and age
+    streamFind('\n');  // throw away epoch and age
 
     // Set pointers
     if (iyear < 2000) iyear += 2000;
@@ -698,10 +698,10 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
     deviceTimeRequest();
     sendAT(GF("+RTC=FULL"));
     if (waitResponse(2000L, GF("+RTC: ")) != 1) { return 0; }
-    stream.find(',');  // Skip the text string
+    streamFind(',');  // Skip the text string
 
     uint32_t resp = stream.parseInt();
-    stream.find('\n');  // throw away age
+    streamFind('\n');  // throw away age
 
     if (resp != 0) {
       switch (epoch) {
@@ -729,7 +729,7 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
     sendAT(GF("+VDD"));
     waitResponse(GF("+VDD: "));
     float resp = stream.parseFloat();
-    stream.find('\n');  // Throw away the "V" if it's there
+    streamFind('\n');  // Throw away the "V" if it's there
     // convert V to mV
     return (int16_t)(resp * 1000.);
   }
@@ -740,7 +740,7 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
     // Read battery charge level
     // returns a number between 0 and 255
     float resp = stream.parseFloat();
-    stream.find('\n');  // throw away the new line
+    streamFind('\n');  // throw away the new line
     return (int8_t)((resp / 255.) * 100.);
   }
 
@@ -751,13 +751,13 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
     // Read battery charge level
     // returns a number between 0 and 255
     float resp = stream.parseFloat();
-    stream.find('\n');  // throw away the new line
+    streamFind('\n');  // throw away the new line
     percent = (int8_t)((resp / 255.) * 100.);
 
     sendAT(GF("+VDD"));
     wasOk &= waitResponse(GF("+VDD: "));
     resp = stream.parseFloat();
-    stream.find('\n');  // throw away up to the new line
+    streamFind('\n');  // throw away up to the new line
     // convert V to mV
     milliVolts = (int16_t)(resp * 1000.);
     return wasOk;
@@ -772,7 +772,7 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
     sendAT(GF("+TEMP"));
     waitResponse(GF("+TEMP: "));
     float resp = stream.parseFloat();
-    stream.find('\n');  // throw away the new line
+    streamFind('\n');  // throw away the new line
     return resp;
   }
 
@@ -808,7 +808,7 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
           sendAT(GF("+LW=LEN"));
           waitResponse(GF("+LW: LEN,"));  // echo
           uplinkAvailable = stream.parseInt();
-          stream.find('\n');  // throw away the new line
+          streamFind('\n');  // throw away the new line
           DBG(uplinkAvailable, GF("bytes available for uplink."),
               !uplinkAvailable ? GF("Flush the MAC buffer with empty message.")
                                : GF(" "));
@@ -858,7 +858,7 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
             txPtr += sendLength;       // bump up the pointer
             prev_dl_check = millis();  // mark that we checked for downlink
             send_success  = true;
-            stream.find('\n');  // throw away the new line
+            streamFind('\n');  // throw away the new line
             waitResponse(sendTimeout, GF(": Done"));
           } else {
             DBG(GF("No ACK received on ACK message!"));
@@ -870,7 +870,7 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
             txPtr += sendLength;       // bump up the pointer
             prev_dl_check = millis();  // mark that we checked for downlink
             send_success  = true;
-            stream.find('\n');  // throw away the new line
+            streamFind('\n');  // throw away the new line
           }
         }
         DBG(send_attempts, send_success);
@@ -923,8 +923,8 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
       int8_t incoming_port = stream.parseInt();
       DBG("## Data received on port", incoming_port);
 #endif
-      stream.find(';');  // skip the ; after the port
-      stream.find('"');  // skip to the "
+      streamFind(';');  // skip the ; after the port
+      streamFind('"');  // skip to the "
 
       // create a temporary buffer for reading
       // the data always comes in as hex
@@ -958,21 +958,21 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
       return true;
     } else if (data.endsWith(GF(": RXWIN"))) {
       // +MSG: RXWIN2, RSSI -106, SNR 4
-      stream.find('I');  // skip to the I
+      streamFind('I');  // skip to the I
       _msg_quality = stream.parseInt();
       DBG(GF("Got RSSI:"), _msg_quality);
-      stream.find('\n');  // skip the SNR
+      streamFind('\n');  // skip the SNR
       return true;
     } else if (data.endsWith(GF(": Link"))) {
       // +MSG: Link 20, 1
       _link_margin = stream.parseInt();
-      stream.find(',');  // skip the , after the link margin
+      streamFind(',');  // skip the , after the link margin
 #ifdef TINY_LORA_DEBUG
       int8_t gateway_count = stream.parseInt();
       DBG(GF("## LinkCheckAns received. Link Margin:"), _link_margin,
           GF("Number Gateways:"), gateway_count);
 #endif
-      stream.find('\n');  // skip the SNR
+      streamFind('\n');  // skip the SNR
       return true;
     }
     return false;
@@ -1014,7 +1014,7 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
           DBG(GF("Join timed out after"), millis() - start, GF("ms"));
         };
       }
-      stream.find('\n');  // throw away the new line
+      streamFind('\n');  // throw away the new line
     }
     return success;
   }
@@ -1031,7 +1031,7 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
                                // by Personalization (ABP)
       success &= waitResponse(GF("+MODE: LWABP")) == 1;
     }
-    stream.find('\n');  // throw away the new line
+    streamFind('\n');  // throw away the new line
     return success;
   }
 
@@ -1042,8 +1042,7 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
     // carry this command if there is no application payload to send.
     sendAT(GF("+LW=DTR"));
     waitResponse(GF("+LW: DTR"));
-    stream.find('\n');  // throw away the new line
-    delay(100);         // short delay to let the MAC queue itself
+    streamFind('\n');  // throw away the new line
     DBG(GF("Sending empty message to carry DeviceTimeReq"));
     modemSend(NULL, 0);
     return true;
@@ -1053,7 +1052,7 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
     String resp;
     sendAT(cmd);
     if (waitResponse(cmd) != 1) { return "UNKNOWN"; }
-    stream.find(' ');  // skip until the next blank space
+    streamFind(' ');  // skip until the next blank space
     return stream.readStringUntil('\r');
   }
 

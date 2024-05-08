@@ -69,6 +69,7 @@ class TinyLoRa_mDOT : public TinyLoRaModem<TinyLoRa_mDOT>,
   explicit TinyLoRa_mDOT(Stream& stream) : stream(stream) {
     prev_dl_check        = 0;
     _requireConfirmation = false;
+    _networkConnected    = false;
   }
 
 
@@ -509,7 +510,7 @@ class TinyLoRa_mDOT : public TinyLoRaModem<TinyLoRa_mDOT>,
     // 0 915000000 928000000 100
     // OK
     sendAT(GF("+DUTY?"));
-    stream.find(' ');
+    streamFind(' ');
     int8_t resp = stream.parseInt();
     waitResponse();  // wait for ending ok
     return resp;
@@ -523,7 +524,7 @@ class TinyLoRa_mDOT : public TinyLoRaModem<TinyLoRa_mDOT>,
     sendAT(GF("+TXDR?"));
     // returns a longer response like "DR0 - SF12BW125"
     // We're only going to keep the DR number
-    stream.find('R');
+    streamFind('R');
     int8_t resp = stream.parseInt();
     waitResponse();  // wait for ending ok
     return resp;

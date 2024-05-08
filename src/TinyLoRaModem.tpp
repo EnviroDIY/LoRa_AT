@@ -1127,6 +1127,10 @@ class TinyLoRaModem {
   }
 
  protected:
+  inline bool streamFind(char target) {
+    return thisModem().stream.find(const_cast<char*>(&target), 1);
+  }
+
   void parseChannelMask(const char* mask, uint8_t* channelsMask) {
     // the input mask must be MSB - most significant first
     if (strlen(mask) > 0) {
@@ -1217,7 +1221,6 @@ class TinyLoRaModem {
   // #endif
   // }
 
-  bool _requireAck;
   bool _networkConnected;
 };
 
