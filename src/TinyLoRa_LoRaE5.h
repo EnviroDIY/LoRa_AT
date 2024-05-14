@@ -18,18 +18,20 @@
 #endif
 #define AT_NL "\r\n"  // NOTE:  define before including TinyLoRaModem!
 
-#ifndef AT_OK
-#define AT_OK "+AT: OK"
+#ifdef AT_OK
+#undef AT_OK
 #endif
+#define AT_OK "+AT: OK"
 
 #ifdef AT_ERROR
 #undef AT_ERROR
+#endif
 #define AT_ERROR "+AT: ERROR"
-#endif
 
-#ifndef AT_VERBOSE
-#define AT_VERBOSE "+LOG: "
+#ifdef AT_VERBOSE
+#undef AT_VERBOSE
 #endif
+#define AT_VERBOSE "+LOG: "
 
 #include "TinyLoRaModem.tpp"
 #include "TinyLoRaRadio.tpp"
