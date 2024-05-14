@@ -26,31 +26,8 @@
 #define MAX_LORA_CHANNELS 72
 #define LORA_CHANNEL_BYTES 72 / 8
 
-#ifndef AT_NL
-#define AT_NL "\r\n"
-#endif
-
-#ifndef AT_OK
-#define AT_OK "OK"
-#endif
-
-#ifndef AT_ERROR
-#define AT_ERROR "ERROR"
-#endif
-
-#ifndef AT_VERBOSE
-#define AT_VERBOSE "+LOG"
-#endif
-
 static char const hex_chars[16] = {'0', '1', '2', '3', '4', '5', '6', '7',
                                    '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
-
-static const char LORA_OK[] TINY_LORA_PROGMEM    = AT_OK AT_NL;
-static const char LORA_ERROR[] TINY_LORA_PROGMEM = AT_ERROR AT_NL;
-
-#if defined       TINY_LORA_DEBUG
-static const char LORA_VERBOSE[] TINY_LORA_PROGMEM = AT_VERBOSE;
-#endif
 
 // Enums taken from: https://github.com/arduino-libraries/MKRWAN
 
