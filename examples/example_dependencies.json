@@ -1,12 +1,15 @@
-[
-  {
-    "name": "StreamDebugger",
-    "owner": "vshymanskyy",
-    "library id": "1286",
-    "url": "https://github.com/EnviroDIY/StreamDebugger.git",
-    "version": "~1.0.1",
-    "authors": ["Volodymyr Shymanskyy"],
-    "frameworks": "*",
-    "platforms": "*"
-  }
-]
+{
+  "action_cache_version": 1,
+  "dependencies": [
+    {
+      "name": "StreamDebugger",
+      "owner": "vshymanskyy",
+      "library id": "1286",
+      "url": "https://github.com/EnviroDIY/StreamDebugger.git",
+      "version": "~1.0.1",
+      "authors": ["Volodymyr Shymanskyy"],
+      "frameworks": "*",
+      "platforms": "*"
+    }
+  ]
+}

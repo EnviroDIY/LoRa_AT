@@ -880,7 +880,7 @@ class TinyLoRaModem {
           goto finish;
         }
 #if defined TINY_LORA_DEBUG
-        else if (data.endsWith(GFP(LORA_VERBOSE))) {
+        else if (data.endsWith(GFP(modem_verbose))) {
           // DBG(GF("Verbose details <<<"));
           // Read out the verbose message, until whichever type of new line
           // comes first
