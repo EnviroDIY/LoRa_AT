@@ -23,7 +23,7 @@
 #endif
 #define AT_ERROR "ERROR"
 
-#if defined TINY_GSM_DEBUG
+#if defined TINY_LORA_DEBUG
 
 #ifdef AT_VERBOSE
 #undef AT_VERBOSE
