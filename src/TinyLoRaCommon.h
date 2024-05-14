@@ -130,7 +130,7 @@ uint32_t TinyLoRaAutoBaud(T& SerialAT, uint32_t minimum = 9600,
   template <>                                                             \
   const char* TinyLoRaModem<specificModem>::modem_verbose = AT_VERBOSE;
 #else
-#define AT_STATIC_VARIABLES(specificModem)                          \
+#define LORA_STATIC_VARIABLES(specificModem)                        \
   template <>                                                       \
   const char* TinyLoRaModem<specificModem>::modem_nl = AT_NL;       \
   template <>                                                       \
