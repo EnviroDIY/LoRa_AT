@@ -317,8 +317,8 @@ class TinyLoRa_mDOT : public TinyLoRaModem<TinyLoRa_mDOT>,
 
       String nlc_resp_str = "";  // to hold any downlink data
       nlc_resp_str.reserve(TINY_LORA_RX_BUFFER);
-      int8_t resp = waitResponse(5000L, nlc_resp_str, GFP(LORA_OK),
-                                 GFP(LORA_ERROR), GF("Network Not Joined"));
+      int8_t resp = waitResponse(5000L, nlc_resp_str, GFP(modem_ok),
+                                 GFP(modem_error), GF("Network Not Joined"));
       if (resp == 1) {
         // The first number in the response is the dBm level above the
         // demodulation floor (not to be confused with the noise floor). This

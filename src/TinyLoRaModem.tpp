@@ -153,8 +153,8 @@ class TinyLoRaModem {
    * @return *int8_t* the index of the response input
    */
   int8_t waitResponse(uint32_t timeout_ms, String& data,
-                      GsmConstStr r1 = GFP(LORA_OK),
-                      GsmConstStr r2 = GFP(LORA_ERROR), GsmConstStr r3 = NULL,
+                      GsmConstStr r1 = GFP(modem_ok),
+                      GsmConstStr r2 = GFP(modem_error), GsmConstStr r3 = NULL,
                       GsmConstStr r4 = NULL, GsmConstStr r5 = NULL,
                       GsmConstStr r6 = NULL, GsmConstStr r7 = NULL) {
     return thisModem().waitResponseImpl(timeout_ms, data, r1, r2, r3, r4, r5,
@@ -181,8 +181,8 @@ class TinyLoRaModem {
    * of NULL
    * @return *int8_t* the index of the response input
    */
-  int8_t waitResponse(uint32_t timeout_ms, GsmConstStr r1 = GFP(LORA_OK),
-                      GsmConstStr r2 = GFP(LORA_ERROR), GsmConstStr r3 = NULL,
+  int8_t waitResponse(uint32_t timeout_ms, GsmConstStr r1 = GFP(modem_ok),
+                      GsmConstStr r2 = GFP(modem_error), GsmConstStr r3 = NULL,
                       GsmConstStr r4 = NULL, GsmConstStr r5 = NULL,
                       GsmConstStr r6 = NULL, GsmConstStr r7 = NULL) {
     String data;
@@ -209,8 +209,8 @@ class TinyLoRaModem {
    * of NULL
    * @return *int8_t* the index of the response input
    */
-  int8_t waitResponse(GsmConstStr r1 = GFP(LORA_OK),
-                      GsmConstStr r2 = GFP(LORA_ERROR), GsmConstStr r3 = NULL,
+  int8_t waitResponse(GsmConstStr r1 = GFP(modem_ok),
+                      GsmConstStr r2 = GFP(modem_error), GsmConstStr r3 = NULL,
                       GsmConstStr r4 = NULL, GsmConstStr r5 = NULL,
                       GsmConstStr r6 = NULL, GsmConstStr r7 = NULL) {
     return waitResponse(1000L, r1, r2, r3, r4, r5, r6, r7);
@@ -838,8 +838,8 @@ class TinyLoRaModem {
 
   // TODO(vshymanskyy): Optimize this!
   int8_t waitResponseImpl(uint32_t timeout_ms, String& data,
-                          GsmConstStr r1 = GFP(LORA_OK),
-                          GsmConstStr r2 = GFP(LORA_ERROR),
+                          GsmConstStr r1 = GFP(modem_ok),
+                          GsmConstStr r2 = GFP(modem_error),
                           GsmConstStr r3 = NULL, GsmConstStr r4 = NULL,
                           GsmConstStr r5 = NULL, GsmConstStr r6 = NULL,
                           GsmConstStr r7 = NULL) {
