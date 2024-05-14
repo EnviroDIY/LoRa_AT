@@ -1222,6 +1222,18 @@ class TinyLoRaModem {
   // }
 
   bool _networkConnected;
+
+  /*
+   * AT command chunks
+   */
+ protected:
+  static const char* modem_nl;
+  static const char* modem_ok;
+  static const char* modem_error;
+
+#if defined TINY_LORA_DEBUG
+  static const char* modem_verbose;
+#endif
 };
 
 #endif  // SRC_TINYLORAMODEM_H_

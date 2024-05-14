@@ -13,10 +13,7 @@
 // #define TINY_LORA_DEBUG Serial
 
 /// The new-line used by the LoRa module
-#ifdef AT_NL
-#undef AT_NL
-#endif
-#define AT_NL "\r\n"  // NOTE:  define before including TinyLoRaModem!
+#include "TinyLoRaATDefines.h"
 
 #include "TinyLoRaModem.tpp"
 #include "TinyLoRaRadio.tpp"
@@ -933,5 +930,7 @@ class TinyLoRa_mDOT : public TinyLoRaModem<TinyLoRa_mDOT>,
  protected:
   LoRaStream_mDOT* loraStream;
 };
+
+LORA_STATIC_VARIABLES(TinyLoRa_mDOT)
 
 #endif  // SRC_TINYLORA_MDOT_H_

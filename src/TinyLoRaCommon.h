@@ -118,4 +118,25 @@ uint32_t TinyLoRaAutoBaud(T& SerialAT, uint32_t minimum = 9600,
   return 0;
 }
 
+#if defined TINY_LORA_DEBUG
+#define LORA_STATIC_VARIABLES(specificModem)                              \
+  template <>                                                             \
+  const char* TinyLoRaModem<specificModem>::modem_nl = AT_NL;             \
+  template <>                                                             \
+  const char* TinyLoRaModem<specificModem>::modem_ok = AT_OK AT_NL;       \
+  template <>                                                             \
+  const char* TinyLoRaModem<specificModem>::modem_error = AT_ERROR AT_NL; \
+                                                                          \
+  template <>                                                             \
+  const char* TinyLoRaModem<specificModem>::modem_verbose = AT_VERBOSE;
+#else
+#define AT_STATIC_VARIABLES(specificModem)                          \
+  template <>                                                       \
+  const char* TinyLoRaModem<specificModem>::modem_nl = AT_NL;       \
+  template <>                                                       \
+  const char* TinyLoRaModem<specificModem>::modem_ok = AT_OK AT_NL; \
+  template <>                                                       \
+  const char* TinyLoRaModem<specificModem>::modem_error = AT_ERROR AT_NL
+#endif
+
 #endif  // SRC_TINYLORACOMMON_H_

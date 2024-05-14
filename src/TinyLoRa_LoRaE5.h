@@ -13,10 +13,7 @@
 // #define TINY_LORA_DEBUG Serial
 
 /// The new-line used by the LoRa module
-#ifdef AT_NL
-#undef AT_NL
-#endif
-#define AT_NL "\r\n"  // NOTE:  define before including TinyLoRaModem!
+#include "TinyLoRaATDefines.h"
 
 #ifdef AT_OK
 #undef AT_OK
@@ -1071,5 +1068,7 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
   int8_t             _msg_quality;
   uint8_t            _link_margin;
 };
+
+LORA_STATIC_VARIABLES(TinyLoRa_LoRaE5)
 
 #endif  // SRC_TINYLORA_LORAE5_H_
