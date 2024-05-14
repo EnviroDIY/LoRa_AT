@@ -136,7 +136,7 @@ uint32_t TinyLoRaAutoBaud(T& SerialAT, uint32_t minimum = 9600,
   template <>                                                       \
   const char* TinyLoRaModem<specificModem>::modem_ok = AT_OK AT_NL; \
   template <>                                                       \
-  const char* TinyLoRaModem<specificModem>::modem_error = AT_ERROR AT_NL
+  const char* TinyLoRaModem<specificModem>::modem_error = AT_ERROR AT_NL;
 #endif
 
 #endif  // SRC_TINYLORACOMMON_H_
