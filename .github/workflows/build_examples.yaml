@@ -171,7 +171,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [determine_library_source]
     env:
-      LIBRARY_INSTALL_GIT: ${{ needs.determine_library_source.outputs.library_install_zip }}
+      LIBRARY_INSTALL_GIT: ${{ needs.determine_library_source.outputs.library_install_git }}
     strategy:
       matrix:
         example: [examples/AllFunctions]
@@ -228,3 +228,7 @@ jobs:
         run: |
           sed -i 's/#define TINY_LORA_MDOT/\/\/ #define TINY_LORA_MDOT/g' ${{ matrix.example }}/*
           platformio ci --verbose --project-option='build_flags=-D ${{ env.TINY_LORA_MODEM_TO_USE }}' --project-option='framework=arduino' --board=mayfly --board=uno --board=leonardo --board=yun --board=megaatmega2560 --board=nano_every --board=uno_wifi_rev2 --board=genuino101 --board=uno_r4_wifi --board=dueUSB --board=mkr1000USB --board=mkrvidor4000 --board=zero --board=adafruit_feather_m0 --board=adafruit_feather_m4 --board=teensy31 --board=bluepill_f103c8 --board=uno_pic32 --board=esp01 --board=nodemcuv2 --board=esp32dev --board=featheresp32 --board=adafruit_feather_esp32s2 --board=esp32-c3-devkitm-1 --board=pico
+
+      - name: Uninstall testing version of Modular Sensors before caching
+        run: |
+          pio pkg uninstall -g --library TinyLoRa
