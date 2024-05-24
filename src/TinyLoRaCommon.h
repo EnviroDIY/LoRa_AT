@@ -92,6 +92,10 @@ const T& TinyLoRaMax(const T& a, const T& b) {
   return (b < a) ? a : b;
 }
 
+
+/*
+ * Automatically find baud rate
+ */
 template <class T>
 uint32_t TinyLoRaAutoBaud(T& SerialAT, uint32_t minimum = 9600,
                           uint32_t maximum = 115200) {

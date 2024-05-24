@@ -38,8 +38,10 @@
 #define AT_ERROR "ERROR"
 #endif
 
+#if defined TINY_LORA_DEBUG
 #ifndef AT_VERBOSE
 #define AT_VERBOSE "+LOG"
+#endif
 #endif
 
 static char const hex_chars[16] = {'0', '1', '2', '3', '4', '5', '6', '7',
@@ -94,6 +96,11 @@ typedef enum {
 
 template <class modemType>
 class TinyLoRaModem {
+  /* =========================================== */
+  /* =========================================== */
+  /*
+   * Define the interface
+   */
  public:
   /**
    * @anchor basic_functions
@@ -206,9 +213,10 @@ class TinyLoRaModem {
    * @return *int8_t* the index of the response input
    */
   int8_t waitResponse(uint32_t timeout_ms, GsmConstStr r1 = GFP(LORA_OK),
-                      GsmConstStr r2 = GFP(LORA_ERROR), GsmConstStr r3 = NULL,
-                      GsmConstStr r4 = NULL, GsmConstStr r5 = NULL,
-                      GsmConstStr r6 = NULL, GsmConstStr r7 = NULL) {
+                      GsmConstStr r2 = GFP(LORA_ERROR),
+                      GsmConstStr r3 = nullptr, GsmConstStr r4 = nullptr,
+                      GsmConstStr r5 = nullptr, GsmConstStr r6 = nullptr,
+                      GsmConstStr r7 = nullptr) {
     String data;
     return waitResponse(timeout_ms, data, r1, r2, r3, r4, r5, r6, r7);
   }
@@ -234,9 +242,10 @@ class TinyLoRaModem {
    * @return *int8_t* the index of the response input
    */
   int8_t waitResponse(GsmConstStr r1 = GFP(LORA_OK),
-                      GsmConstStr r2 = GFP(LORA_ERROR), GsmConstStr r3 = NULL,
-                      GsmConstStr r4 = NULL, GsmConstStr r5 = NULL,
-                      GsmConstStr r6 = NULL, GsmConstStr r7 = NULL) {
+                      GsmConstStr r2 = GFP(LORA_ERROR),
+                      GsmConstStr r3 = nullptr, GsmConstStr r4 = nullptr,
+                      GsmConstStr r5 = nullptr, GsmConstStr r6 = nullptr,
+                      GsmConstStr r7 = nullptr) {
     return waitResponse(1000L, r1, r2, r3, r4, r5, r6, r7);
   }
 
@@ -840,6 +849,12 @@ class TinyLoRaModem {
   }
   /**@}*/
 
+  /* =========================================== */
+  /* =========================================== */
+  /*
+   * Define the default function implementations
+   */
+
   /*
    * Basic functions
    */
@@ -907,13 +922,18 @@ class TinyLoRaModem {
         }
 #if defined TINY_LORA_DEBUG
         else if (data.endsWith(GFP(LORA_VERBOSE))) {
-          // DBG(GF("Verbose details <<<"));
-          // Read out the verbose message, until whichever type of new line
-          // comes first
-          thisModem().stream.findUntil(const_cast<char*>("\r"),
-                                       const_cast<char*>("\n"));
-          // DBG(GF(">>>"));
+          // check how long the new line is
+          // should be either 1 ('\r' or '\n') or 2 ("\r\n"))
+          int len_atnl = strnlen(AT_NL, 3);
+          // Read out the verbose message, until the last character of the new
+          // line
+          data += thisModem().stream.readStringUntil(AT_NL[len_atnl]);
+#ifdef TINY_GSM_DEBUG_DEEP
+          data.trim();
+          DBG(GF("Verbose details <<<"), data, GF(">>>"));
+#endif
           data = "";
+          goto finish;
         }
 #endif
         else if (thisModem().handleURCs(data)) {
@@ -931,7 +951,9 @@ class TinyLoRaModem {
       if (data.length()) { DBG("### Unhandled:", data); }
       data = "";
     } else {
+#ifdef TINY_LORA_DEBUG_DEEP
       // DBG('<', index, '>', data);
+#endif
     }
     return index;
   }

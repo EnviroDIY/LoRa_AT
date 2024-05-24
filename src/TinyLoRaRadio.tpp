@@ -17,12 +17,42 @@
 
 template <class modemType>
 class TinyLoRaRadio {
+  /* =========================================== */
+  /* =========================================== */
+  /*
+   * Define the interface
+   */
  public:
   /*
    * Basic functions
    */
   void maintain() {
     return thisModem().maintainImpl();
+  }
+
+  /**
+   * @brief Set the LoRa module to require confirmation (ACK) or messages, or
+   * not.
+   *
+   * @note Requiring acknowledgement of every send can significantly slow down
+   * the send time.
+   *
+   * @param requireConfirmation True to require that uplink messages be
+   * confirmed
+   */
+  void requireConfirmation(bool requireConfirmation) {
+    _requireConfirmation = requireConfirmation;
+  }
+
+  /**
+   * @brief Check whether the module is asking for confirmation of uplink
+   * messages or not.
+   *
+   * @return *true* Confirmation is being requested for all uplinks.
+   * @return *false* Confirmation is NOT being requested for all uplinks.
+   */
+  bool isConfrirmationRequired() {
+    return _requireConfirmation;
   }
 
   /*
@@ -35,6 +65,7 @@ class TinyLoRaRadio {
   inline modemType& thisModem() {
     return static_cast<modemType&>(*this);
   }
+  ~TinyLoRaRadio() {}
 
   /*
    * Inner Stream
@@ -138,35 +169,15 @@ class TinyLoRaRadio {
     RxFifo     rx;
   };
 
+  /* =========================================== */
+  /* =========================================== */
+  /*
+   * Define the default function implementations
+   */
+
   /*
    * Basic functions
    */
- public:
-  /**
-   * @brief Set the LoRa module to require confirmation (ACK) or messages, or
-   * not.
-   *
-   * @note Requiring acknowledgement of every send can significantly slow down
-   * the send time.
-   *
-   * @param requireConfirmation True to require that uplink messages be
-   * confirmed
-   */
-  void requireConfirmation(bool requireConfirmation) {
-    _requireConfirmation = requireConfirmation;
-  }
-
-  /**
-   * @brief Check whether the module is asking for confirmation of uplink
-   * messages or not.
-   *
-   * @return *true* Confirmation is being requested for all uplinks.
-   * @return *false* Confirmation is NOT being requested for all uplinks.
-   */
-  bool isConfrirmationRequired() {
-    return _requireConfirmation;
-  }
-
  protected:
   void maintainImpl() {
     // Check for any new downlinks

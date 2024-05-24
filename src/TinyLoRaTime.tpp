@@ -28,6 +28,11 @@ enum TinyLoRaEpochStart {
 
 template <class modemType>
 class TinyLoRaTime {
+  /* =========================================== */
+  /* =========================================== */
+  /*
+   * Define the interface
+   */
  public:
   /*
    * Time functions
@@ -83,6 +88,13 @@ class TinyLoRaTime {
   inline modemType& thisModem() {
     return static_cast<modemType&>(*this);
   }
+  ~TinyGsmTime() {}
+
+  /* =========================================== */
+  /* =========================================== */
+  /*
+   * Define the default function implementations
+   */
 
   /*
    * Time functions

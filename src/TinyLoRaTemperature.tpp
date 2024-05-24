@@ -15,6 +15,11 @@
 
 template <class modemType>
 class TinyLoRaTemperature {
+  /* =========================================== */
+  /* =========================================== */
+  /*
+   * Define the interface
+   */
  public:
   /*
    * Temperature functions
@@ -39,6 +44,17 @@ class TinyLoRaTemperature {
   inline modemType& thisModem() {
     return static_cast<modemType&>(*this);
   }
+  ~TinyGsmTemperature() {}
+
+  /* =========================================== */
+  /* =========================================== */
+  /*
+   * Define the default function implementations
+   */
+
+  /*
+   * Temperature functions
+   */
 
   float getTemperatureImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
 };
