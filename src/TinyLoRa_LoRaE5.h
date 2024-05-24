@@ -290,7 +290,7 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
     sendAT(GF("+KEY=APPKEY, \""), appKey, '"');
     waitResponse(GF("+KEY: APPKEY"));  // echos the set command
     streamFind('\n');                  // throw away the echoed App Key
-    if (devEui != NULL) {
+    if (devEui != nullptr) {
       sendAT(GF("+ID=DevEui, \""), devEui, '"');  // set the device EUI
       waitResponse(GF("+ID: DevEui"));            // echos the set command
       streamFind('\n');  // throw away the echoed Device EUI
@@ -334,7 +334,7 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
       streamFind('\n');  // throw away the new line
       DBG(GF("Sending empty message to carry LinkCheckReq"), tries_remaining,
           GF("tries remaining"));
-      modemSend(NULL, 0);
+      modemSend(nullptr, 0);
       tries_remaining--;
       // delay before the next attempt
       if (_link_margin == 255) {
@@ -358,7 +358,7 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
     while (_msg_quality == 0 && tries_remaining) {
       DBG(GF("Sending empty message to get RSSI"), tries_remaining,
           GF("tries remaining"));
-      modemSend(NULL, 0);
+      modemSend(nullptr, 0);
       tries_remaining--;
     }
     return _msg_quality;
@@ -686,13 +686,13 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
 
     // Set pointers
     if (iyear < 2000) iyear += 2000;
-    if (year != NULL) *year = iyear;
-    if (month != NULL) *month = imonth;
-    if (day != NULL) *day = iday;
-    if (hour != NULL) *hour = ihour;
-    if (minute != NULL) *minute = imin;
-    if (second != NULL) *second = isec;
-    if (timezone != NULL) *timezone = itimezone;
+    if (year != nullptr) *year = iyear;
+    if (month != nullptr) *month = imonth;
+    if (day != nullptr) *day = iday;
+    if (hour != nullptr) *hour = ihour;
+    if (minute != nullptr) *minute = imin;
+    if (second != nullptr) *second = isec;
+    if (timezone != nullptr) *timezone = itimezone;
     return true;
   }
 
@@ -727,7 +727,7 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
    * Battery functions
    */
  protected:
-  uint16_t getBattVoltageImpl() {
+  int16_t getBattVoltageImpl() {
     sendAT(GF("+VDD"));
     waitResponse(GF("+VDD: "));
     float resp = stream.parseFloat();
@@ -900,7 +900,7 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
            _networkConnected) {
       size_t prev_size = loraStream->rx.size();
       // Check for new downlink data using the by issuing an empty send command.
-      modemSend(NULL, 0);
+      modemSend(nullptr, 0);
       size_t curr_size = loraStream->rx.size();
       downlinkedBytes  = curr_size - prev_size;
       totalBytesRead += downlinkedBytes;
@@ -955,7 +955,7 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
         };
         buf[0] = tempRxBuff[i];
         buf[1] = tempRxBuff[i + 1];
-        char c = strtol(buf, NULL, 16);
+        char c = strtol(buf, nullptr, 16);
         loraStream->rx.put(c);
       }
       // reset the available count
@@ -1049,7 +1049,7 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
     waitResponse(GF("+LW: DTR"));
     streamFind('\n');  // throw away the new line
     DBG(GF("Sending empty message to carry DeviceTimeReq"));
-    modemSend(NULL, 0);
+    modemSend(nullptr, 0);
     return true;
   }
 

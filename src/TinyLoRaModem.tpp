@@ -177,9 +177,10 @@ class TinyLoRaModem {
    */
   int8_t waitResponse(uint32_t timeout_ms, String& data,
                       GsmConstStr r1 = GFP(LORA_OK),
-                      GsmConstStr r2 = GFP(LORA_ERROR), GsmConstStr r3 = NULL,
-                      GsmConstStr r4 = NULL, GsmConstStr r5 = NULL,
-                      GsmConstStr r6 = NULL, GsmConstStr r7 = NULL) {
+                      GsmConstStr r2 = GFP(LORA_ERROR),
+                      GsmConstStr r3 = nullptr, GsmConstStr r4 = nullptr,
+                      GsmConstStr r5 = nullptr, GsmConstStr r6 = nullptr,
+                      GsmConstStr r7 = nullptr) {
     return thisModem().waitResponseImpl(timeout_ms, data, r1, r2, r3, r4, r5,
                                         r6, r7);
   }
@@ -402,7 +403,7 @@ class TinyLoRaModem {
    */
   bool joinOTAA(String appEui, String appKey,
                 uint32_t timeout = DEFAULT_JOIN_TIMEOUT, bool useHex = true) {
-    return joinOTAA(appEui.c_str(), appKey.c_str(), NULL, timeout, useHex);
+    return joinOTAA(appEui.c_str(), appKey.c_str(), nullptr, timeout, useHex);
   }
 
 
@@ -863,14 +864,16 @@ class TinyLoRaModem {
   int8_t waitResponseImpl(uint32_t timeout_ms, String& data,
                           GsmConstStr r1 = GFP(LORA_OK),
                           GsmConstStr r2 = GFP(LORA_ERROR),
-                          GsmConstStr r3 = NULL, GsmConstStr r4 = NULL,
-                          GsmConstStr r5 = NULL, GsmConstStr r6 = NULL,
-                          GsmConstStr r7 = NULL) {
+                          GsmConstStr r3 = nullptr, GsmConstStr r4 = nullptr,
+                          GsmConstStr r5 = nullptr, GsmConstStr r6 = nullptr,
+                          GsmConstStr r7 = nullptr) {
     data.reserve(TINY_LORA_RX_BUFFER);
-    // DBG(GF("r1 <"), r1 ? r1 : GF("NULL"), GF("> r2 <"), r2 ? r2 : GF("NULL"),
-    //     GF("> r3 <"), r3 ? r3 : GF("NULL"), GF("> r4 <"), r4 ? r4 :
-    //     GF("NULL"), GF("> r5 <"), r5 ? r5 : GF("NULL"), GF("> r6 <"), r6 ? r6
-    //     : GF("NULL"), GF("> r7 <"), r7 ? r7 : GF("NULL"), '>');
+#ifdef TINY_LORA_DEBUG_DEEP
+    DBG(GF("r1 <"), r1 ? r1 : GF("NULL"), GF("> r2 <"), r2 ? r2 : GF("NULL"),
+        GF("> r3 <"), r3 ? r3 : GF("NULL"), GF("> r4 <"), r4 ? r4 : GF("NULL"),
+        GF("> r5 <"), r5 ? r5 : GF("NULL"), GF("> r6 <"), r6 ? r6 : GF("NULL"),
+        GF("> r7 <"), r7 ? r7 : GF("NULL"), '>');
+#endif
     uint8_t  index       = 0;
     uint32_t startMillis = millis();
     do {
@@ -919,8 +922,10 @@ class TinyLoRaModem {
       }
     } while (millis() - startMillis < timeout_ms);
   finish:
-    // data.replace("\r", "←");
-    // data.replace("\n", "↓");
+#ifdef TINY_LORA_DEBUG_DEEP
+    data.replace("\r", "←");
+    data.replace("\n", "↓");
+#endif
     if (!index) {
       data.trim();
       if (data.length()) { DBG("### Unhandled:", data); }
@@ -1114,7 +1119,7 @@ class TinyLoRaModem {
 
   inline void streamClear() {
     while (thisModem().stream.available()) {
-      thisModem().waitResponse(50, NULL, NULL);
+      thisModem().waitResponse(50, nullptr, nullptr);
     }
   }
 
@@ -1143,10 +1148,10 @@ class TinyLoRaModem {
         hexBuff[0]      = mask[i];
         hexBuff[1]      = mask[i + 1];
         // DBG(strlen(mask), startByte, i, ((strlen(mask) - i) / 2) - 1,
-        //     (int8_t)strtol(hexBuff, NULL, 16),
-        //     dbg_print_bin((int8_t)strtol(hexBuff, NULL, 16)));
-        channelsMask[((strlen(mask) - i) / 2) - 1] = (int8_t)strtol(hexBuff,
-                                                                    NULL, 16);
+        //     (int8_t)strtol(hexBuff, nullptr, 16),
+        //     dbg_print_bin((int8_t)strtol(hexBuff, nullptr, 16)));
+        channelsMask[((strlen(mask) - i) / 2) - 1] =
+            (int8_t)strtol(hexBuff, nullptr, 16);
       }
       // #ifdef TINY_LORA_DEBUG
       //       DBG(GF("Input mask:"), mask);

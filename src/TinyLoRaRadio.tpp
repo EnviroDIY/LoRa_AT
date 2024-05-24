@@ -60,7 +60,7 @@ class TinyLoRaRadio {
     }
 
     size_t write(const char* str) {
-      if (str == NULL) return 0;
+      if (str == nullptr) return 0;
       return write(reinterpret_cast<uint8_t*>(str), strlen(str));
     }
 
@@ -176,7 +176,7 @@ class TinyLoRaRadio {
     }
     // listen for URCs
     while (thisModem().stream.available()) {
-      thisModem().waitResponse(15, NULL, NULL);
+      thisModem().waitResponse(15, nullptr, nullptr);
     }
   }
 

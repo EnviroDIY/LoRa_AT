@@ -259,7 +259,7 @@ class TinyLoRa_mDOT : public TinyLoRaModem<TinyLoRa_mDOT>,
     waitResponse();
     sendAT(GF("+NK="), !useHex, ',', appKey);  // set the app key (network key)
     waitResponse();
-    if (devEui != NULL) {
+    if (devEui != nullptr) {
       sendAT(GF("+DI="), devEui);  // set the device EUI
       waitResponse();
     }
@@ -801,7 +801,7 @@ class TinyLoRa_mDOT : public TinyLoRaModem<TinyLoRa_mDOT>,
            _networkConnected) {
       size_t prev_size = loraStream->rx.size();
       // Check for new downlink data using the by issuing an empty send command.
-      modemSend(NULL, 0);
+      modemSend(nullptr, 0);
       size_t curr_size = loraStream->rx.size();
       downlinkedBytes  = curr_size - prev_size;
       totalBytesRead += downlinkedBytes;
