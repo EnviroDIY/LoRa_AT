@@ -10,7 +10,7 @@
 #define SRC_TINYLORACOMMON_H_
 
 // The current library version number
-#define TINY_LORA_VERSION "0.11.7"
+#define TINY_LORA_VERSION "0.1.0"
 
 #if defined(SPARK) || defined(PARTICLE)
 #include "Particle.h"

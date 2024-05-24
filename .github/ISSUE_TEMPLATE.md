@@ -25,7 +25,7 @@ with your board before submitting any issues.
 
 Modem: <!-- Brand, model, variant, firmware version, ie Quectel BG96 Revision: BG96MAR02A07M1G -->
 Main processor board: <!-- Uno, Zero, ESP32, Particle, etc -->
-TinyLoRa version: <!-- always try to use the latest (0.11.7) -->
+TinyLoRa version: <!-- always try to use the latest (0.1.0) -->
 Code: <!-- Example name or paste in your code -->
 
 ### Scenario, steps to reproduce
