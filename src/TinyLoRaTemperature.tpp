@@ -44,7 +44,7 @@ class TinyLoRaTemperature {
   inline modemType& thisModem() {
     return static_cast<modemType&>(*this);
   }
-  ~TinyGsmTemperature() {}
+  ~TinyLoRaTemperature() {}
 
   /* =========================================== */
   /* =========================================== */

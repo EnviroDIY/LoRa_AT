@@ -952,7 +952,7 @@ class TinyLoRaModem {
       data = "";
     } else {
 #ifdef TINY_LORA_DEBUG_DEEP
-      // DBG('<', index, '>', data);
+      DBG('<', index, '>', data);
 #endif
     }
     return index;

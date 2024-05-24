@@ -8,7 +8,7 @@
 
 #ifndef SRC_TINYLORA_MDOT_H_
 #define SRC_TINYLORA_MDOT_H_
-// #pragma message("TinyGSM:  TinyLoRa_mDOT")
+// #pragma message("TinyLoRa:  TinyLoRa_mDOT")
 
 // #define TINY_LORA_DEBUG Serial
 

@@ -50,3 +50,4 @@ platformio_extra_envs.ini
 pioScripts/generate_compile_commands.py
 compile_commands.json
 home
+runDoxygen.bat
