@@ -1,7 +1,6 @@
 /**
  * @file       TinyLoRaModem.tpp
  * @author     Sara Damiano
- * @license    LGPL-3.0
  * @copyright  Stroud Water Research Center
  * @date       May 2024
  */

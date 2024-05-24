@@ -1,7 +1,6 @@
 /**
  * @file       TinyLoRa_LORAE5.h
  * @author     Sara Damiano
- * @license    LGPL-3.0
  * @copyright  Copyright (c) 2024 Sara Damiano
  * @date       April 2024
  */
