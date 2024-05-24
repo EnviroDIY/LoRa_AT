@@ -15,17 +15,22 @@
 
 template <class modemType>
 class TinyLoRaBattery {
+  /* =========================================== */
+  /* =========================================== */
+  /*
+   * Define the interface
+   */
  public:
   /*
    * Battery functions
    */
-  uint16_t getBattVoltage() {
+  int16_t getBattVoltage() {
     return thisModem().getBattVoltageImpl();
   }
   int8_t getBattPercent() {
     return thisModem().getBattPercentImpl();
   }
-  uint8_t getBattChargeState() {
+  int8_t getBattChargeState() {
     return thisModem().getBattChargeStateImpl();
   }
   bool getBattStats(int8_t& chargeState, int8_t& percent, int16_t& milliVolts) {
@@ -42,17 +47,24 @@ class TinyLoRaBattery {
   inline modemType& thisModem() {
     return static_cast<modemType&>(*this);
   }
+  ~TinyLoRaBattery() {}
+
+  /* =========================================== */
+  /* =========================================== */
+  /*
+   * Define the default function implementations
+   */
 
   /*
    * Battery functions
    */
  protected:
   // Use: float vBatt = modem.getBattVoltage() / 1000.0;
-  uint16_t getBattVoltageImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  int16_t getBattVoltageImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
 
   int8_t getBattPercentImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
 
-  uint8_t getBattChargeStateImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  int8_t getBattChargeStateImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
 
   bool getBattStatsImpl(int8_t& chargeState, int8_t& percent,
                         int16_t& milliVolts) TINY_LORA_ATTR_NOT_IMPLEMENTED;
