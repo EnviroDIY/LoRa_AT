@@ -116,45 +116,46 @@ jobs:
         run: |
           status=0
 
-          sed -i 's/#define TINY_LORA_MDOT/\/\/ #define TINY_LORA_MDOT/g' ${{ matrix.example }}/*
+          sed -i 's/#define TINY_LORA_/\/\/ #define TINY_LORA_/g' ${{ matrix.example }}/*
+          sed -i '1s/^/#define ${{ matrix.modem }} /' ${{ matrix.example }}/*
 
           echo ::group::Uno
-          arduino-cli compile --fqbn arduino:avr:uno --build-property "build.extra_flags=\"-D${{ matrix.modem }}\"" --format text --warnings more --verbose --config-file continuous_integration/arduino_cli.yaml  ${{ matrix.example }} 2>&1 | tee output.log
+          arduino-cli compile --fqbn arduino:avr:uno --format text --warnings more --verbose --config-file continuous_integration/arduino_cli.yaml  ${{ matrix.example }} 2>&1 | tee output.log
           result_code=${PIPESTATUS[0]}
           if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
           echo ::endgroup::
           if [ "$result_code" -eq "0" ]; then echo -e "\e[32mUno successfully compiled\e[0m"; else echo -e "\e[31mUno failed to compile\e[0m"; fi
 
           echo ::group::Mega
-          arduino-cli compile --fqbn arduino:avr:mega --build-property "build.extra_flags=\"-D${{ matrix.modem }}\"" --format text --warnings more --verbose --config-file continuous_integration/arduino_cli.yaml  ${{ matrix.example }} 2>&1 | tee output.log
+          arduino-cli compile --fqbn arduino:avr:mega --format text --warnings more --verbose --config-file continuous_integration/arduino_cli.yaml  ${{ matrix.example }} 2>&1 | tee output.log
           result_code=${PIPESTATUS[0]}
           if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
           echo ::endgroup::
           if [ "$result_code" -eq "0" ]; then echo -e "\e[32mMega successfully compiled\e[0m"; else echo -e "\e[31mMega failed to compile\e[0m"; fi
 
           echo ::group::ArduinoZero
-          arduino-cli compile --fqbn arduino:samd:mzero_bl --build-property "build.extra_flags=\"-D${{ matrix.modem }}\"" --format text --warnings more --verbose --config-file continuous_integration/arduino_cli.yaml  ${{ matrix.example }} 2>&1 | tee output.log
+          arduino-cli compile --fqbn arduino:samd:mzero_bl --format text --warnings more --verbose --config-file continuous_integration/arduino_cli.yaml  ${{ matrix.example }} 2>&1 | tee output.log
           result_code=${PIPESTATUS[0]}
           if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
           echo ::endgroup::
           if [ "$result_code" -eq "0" ]; then echo -e "\e[32mArduinoZero successfully compiled\e[0m"; else echo -e "\e[31mArduinoZero failed to compile\e[0m"; fi
 
           echo ::group::FeatherM0
-          arduino-cli compile --fqbn adafruit:samd:adafruit_feather_m0 --build-property "build.extra_flags=\"-D${{ matrix.modem }}\"" --format text --warnings more --verbose --config-file continuous_integration/arduino_cli.yaml  ${{ matrix.example }} 2>&1 | tee output.log
+          arduino-cli compile --fqbn adafruit:samd:adafruit_feather_m0 --format text --warnings more --verbose --config-file continuous_integration/arduino_cli.yaml  ${{ matrix.example }} 2>&1 | tee output.log
           result_code=${PIPESTATUS[0]}
           if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
           echo ::endgroup::
           if [ "$result_code" -eq "0" ]; then echo -e "\e[32mFeatherM0 successfully compiled\e[0m"; else echo -e "\e[31mFeatherM0 failed to compile\e[0m"; fi
 
           echo ::group::FeatherM4
-          arduino-cli compile --fqbn adafruit:samd:adafruit_feather_m4 --build-property "build.extra_flags=\"-D${{ matrix.modem }}\"" --format text --warnings more --verbose --config-file continuous_integration/arduino_cli.yaml  ${{ matrix.example }} 2>&1 | tee output.log
+          arduino-cli compile --fqbn adafruit:samd:adafruit_feather_m4 --format text --warnings more --verbose --config-file continuous_integration/arduino_cli.yaml  ${{ matrix.example }} 2>&1 | tee output.log
           result_code=${PIPESTATUS[0]}
           if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
           echo ::endgroup::
           if [ "$result_code" -eq "0" ]; then echo -e "\e[32mFeatherM0 successfully compiled\e[0m"; else echo -e "\e[31mFeatherM0 failed to compile\e[0m"; fi
 
           echo ::group::Mayfly
-          arduino-cli compile --fqbn EnviroDIY:avr:envirodiy_mayfly --build-property "build.extra_flags=\"-D${{ matrix.modem }}\"" --format text --warnings more --verbose --config-file continuous_integration/arduino_cli.yaml  ${{ matrix.example }} 2>&1 | tee output.log
+          arduino-cli compile --fqbn EnviroDIY:avr:envirodiy_mayfly --format text --warnings more --verbose --config-file continuous_integration/arduino_cli.yaml  ${{ matrix.example }} 2>&1 | tee output.log
           result_code=${PIPESTATUS[0]}
           if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
           echo ::endgroup::
