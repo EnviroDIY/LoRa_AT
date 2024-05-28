@@ -5,8 +5,8 @@
  * @date       April 2024
  */
 
-#ifndef SRC_TINYLORA_MDOT_H_
-#define SRC_TINYLORA_MDOT_H_
+#ifndef SRC_LORA_AT_MDOT_H_
+#define SRC_LORA_AT_MDOT_H_
 // #pragma message("LoRa_AT:  LoRa_AT_mDOT")
 
 // #define LORA_AT_DEBUG Serial
@@ -933,4 +933,4 @@ class LoRa_AT_mDOT : public LoRa_AT_Modem<LoRa_AT_mDOT>,
   LoRaStream_mDOT* loraStream;
 };
 
-#endif  // SRC_TINYLORA_MDOT_H_
+#endif  // SRC_LORA_AT_MDOT_H_

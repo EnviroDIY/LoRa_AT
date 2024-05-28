@@ -5,8 +5,8 @@
  * @date       May 2024
  */
 
-#ifndef SRC_TINYLORA_H_
-#define SRC_TINYLORA_H_
+#ifndef SRC_LORA_AT_H_
+#define SRC_LORA_AT_H_
 
 #if defined(LORA_AT_MDOT)
 #include "LoRa_AT_mDOT.h"
@@ -22,4 +22,4 @@ typedef LoRa_AT_LoRaE5::LoRaStream_LoRaE5 LoRaStream;
 #error "Please define LoRa Radio model"
 #endif
 
-#endif  // SRC_TINYLORA_H_
+#endif  // SRC_LORA_AT_H_

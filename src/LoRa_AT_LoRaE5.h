@@ -1,12 +1,12 @@
 /**
- * @file       LoRa_AT_LORAE5.h
+ * @file       LoRa_AT_LoRaE5.h
  * @author     Sara Damiano
  * @copyright  Copyright (c) 2024 Sara Damiano
  * @date       April 2024
  */
 
-#ifndef SRC_TINYLORA_LORAE5_H_
-#define SRC_TINYLORA_LORAE5_H_
+#ifndef SRC_LORA_AT_LORAE5_H_
+#define SRC_LORA_AT_LORAE5_H_
 // #pragma message("LoRa_AT:  LoRa_AT_LoRaE5")
 
 // #define LORA_AT_DEBUG Serial
@@ -1071,4 +1071,4 @@ class LoRa_AT_LoRaE5 : public LoRa_AT_Modem<LoRa_AT_LoRaE5>,
   uint8_t            _link_margin;
 };
 
-#endif  // SRC_TINYLORA_LORAE5_H_
+#endif  // SRC_LORA_AT_LORAE5_H_
