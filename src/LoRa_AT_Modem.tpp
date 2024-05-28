@@ -1,5 +1,5 @@
 /**
- * @file       TinyLoRaModem.tpp
+ * @file       LoRa_AT_Modem.tpp
  * @author     Sara Damiano
  * @copyright  Stroud Water Research Center
  * @date       May 2024
@@ -8,7 +8,7 @@
 #ifndef SRC_TINYLORAMODEM_H_
 #define SRC_TINYLORAMODEM_H_
 
-#include "TinyLoRaCommon.h"
+#include "LoRa_AT_Common.h"
 
 #ifndef DEFAULT_JOIN_TIMEOUT
 #define DEFAULT_JOIN_TIMEOUT 60000L
@@ -37,7 +37,7 @@
 #define AT_ERROR "ERROR"
 #endif
 
-#if defined TINY_LORA_DEBUG
+#if defined LORA_AT_DEBUG
 #ifndef AT_VERBOSE
 #define AT_VERBOSE "+LOG"
 #endif
@@ -46,11 +46,11 @@
 static char const hex_chars[16] = {'0', '1', '2', '3', '4', '5', '6', '7',
                                    '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
 
-static const char LORA_OK[] TINY_LORA_PROGMEM    = AT_OK AT_NL;
-static const char LORA_ERROR[] TINY_LORA_PROGMEM = AT_ERROR AT_NL;
+static const char LORA_OK[] LORA_AT_PROGMEM    = AT_OK AT_NL;
+static const char LORA_ERROR[] LORA_AT_PROGMEM = AT_ERROR AT_NL;
 
-#if defined       TINY_LORA_DEBUG
-static const char LORA_VERBOSE[] TINY_LORA_PROGMEM = AT_VERBOSE;
+#if defined       LORA_AT_DEBUG
+static const char LORA_VERBOSE[] LORA_AT_PROGMEM = AT_VERBOSE;
 #endif
 
 // Enums taken from: https://github.com/arduino-libraries/MKRWAN
@@ -94,7 +94,7 @@ typedef enum {
 } _lora_class;
 
 template <class modemType>
-class TinyLoRaModem {
+class LoRa_AT_Modem {
   /* =========================================== */
   /* =========================================== */
   /*
@@ -117,7 +117,7 @@ class TinyLoRaModem {
     return thisModem().initImpl();
   }
   /**
-   * @copydoc TinyLoRaModem::begin()
+   * @copydoc LoRa_AT_Modem::begin()
    */
   bool init() {
     return thisModem().initImpl();
@@ -133,7 +133,7 @@ class TinyLoRaModem {
   inline void sendAT(Args... cmd) {
     thisModem().streamWrite("AT", cmd..., AT_NL);
     thisModem().stream.flush();
-    TINY_LORA_YIELD(); /* DBG("### AT:", cmd...); */
+    LORA_AT_YIELD(); /* DBG("### AT:", cmd...); */
   }
 
   /**
@@ -858,7 +858,7 @@ class TinyLoRaModem {
    * Basic functions
    */
  protected:
-  bool initImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  bool initImpl() LORA_AT_ATTR_NOT_IMPLEMENTED;
 
   bool setBaudImpl(uint32_t baud) {
     thisModem().sendAT(GF("+IPR="), baud);
@@ -881,8 +881,8 @@ class TinyLoRaModem {
                           GsmConstStr r3 = nullptr, GsmConstStr r4 = nullptr,
                           GsmConstStr r5 = nullptr, GsmConstStr r6 = nullptr,
                           GsmConstStr r7 = nullptr) {
-    data.reserve(TINY_LORA_RX_BUFFER);
-#ifdef TINY_LORA_DEBUG_DEEP
+    data.reserve(LORA_AT_RX_BUFFER);
+#ifdef LORA_AT_DEBUG_DEEP
     DBG(GF("r1 <"), r1 ? r1 : GF("NULL"), GF("> r2 <"), r2 ? r2 : GF("NULL"),
         GF("> r3 <"), r3 ? r3 : GF("NULL"), GF("> r4 <"), r4 ? r4 : GF("NULL"),
         GF("> r5 <"), r5 ? r5 : GF("NULL"), GF("> r6 <"), r6 ? r6 : GF("NULL"),
@@ -891,9 +891,9 @@ class TinyLoRaModem {
     uint8_t  index       = 0;
     uint32_t startMillis = millis();
     do {
-      TINY_LORA_YIELD();
+      LORA_AT_YIELD();
       while (thisModem().stream.available() > 0) {
-        TINY_LORA_YIELD();
+        LORA_AT_YIELD();
         int8_t a = thisModem().stream.read();
         if (a <= 0) continue;  // Skip 0x00 bytes, just in case
         data += static_cast<char>(a);
@@ -919,7 +919,7 @@ class TinyLoRaModem {
           index = 7;
           goto finish;
         }
-#if defined TINY_LORA_DEBUG
+#if defined LORA_AT_DEBUG
         else if (data.endsWith(GFP(LORA_VERBOSE))) {
           // check how long the new line is
           // should be either 1 ('\r' or '\n') or 2 ("\r\n"))
@@ -941,7 +941,7 @@ class TinyLoRaModem {
       }
     } while (millis() - startMillis < timeout_ms);
   finish:
-#ifdef TINY_LORA_DEBUG_DEEP
+#ifdef LORA_AT_DEBUG_DEEP
     data.replace("\r", "←");
     data.replace("\n", "↓");
 #endif
@@ -950,14 +950,14 @@ class TinyLoRaModem {
       if (data.length()) { DBG("### Unhandled:", data); }
       data = "";
     } else {
-#ifdef TINY_LORA_DEBUG_DEEP
+#ifdef LORA_AT_DEBUG_DEEP
       DBG('<', index, '>', data);
 #endif
     }
     return index;
   }
 
-  String getDevEUIImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  String getDevEUIImpl() LORA_AT_ATTR_NOT_IMPLEMENTED;
 
   String getModuleInfoImpl() {
     thisModem().sendAT(GF("I"));
@@ -985,51 +985,50 @@ class TinyLoRaModem {
    * Power functions
    */
  protected:
-  bool restartImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
-  bool powerOffImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
-  bool radioOffImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  bool restartImpl() LORA_AT_ATTR_NOT_IMPLEMENTED;
+  bool powerOffImpl() LORA_AT_ATTR_NOT_IMPLEMENTED;
+  bool radioOffImpl() LORA_AT_ATTR_NOT_IMPLEMENTED;
 
   /*
    * Generic network functions
    */
  protected:
-  bool setPublicNetworkImpl(bool isPublic) TINY_LORA_ATTR_NOT_IMPLEMENTED;
-  bool getPublicNetworkImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  bool setPublicNetworkImpl(bool isPublic) LORA_AT_ATTR_NOT_IMPLEMENTED;
+  bool getPublicNetworkImpl() LORA_AT_ATTR_NOT_IMPLEMENTED;
 
-  bool setConfirmationRetriesImpl(int8_t numAckRetries)
-      TINY_LORA_ATTR_NOT_IMPLEMENTED;
-  int8_t getConfirmationRetriesImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  bool
+  setConfirmationRetriesImpl(int8_t numAckRetries) LORA_AT_ATTR_NOT_IMPLEMENTED;
+  int8_t getConfirmationRetriesImpl() LORA_AT_ATTR_NOT_IMPLEMENTED;
 
   bool joinOTAAImpl(const char* appEui, const char* appKey, const char* devEui,
-                    uint32_t timeout,
-                    bool     useHex) TINY_LORA_ATTR_NOT_IMPLEMENTED;
+                    uint32_t timeout, bool useHex) LORA_AT_ATTR_NOT_IMPLEMENTED;
 
   bool joinABPImpl(
       const char* devAddr, const char* nwkSKey, const char* appSKey,
       int uplinkCounter = 1, int downlinkCounter = 0,
-      uint32_t timeout = DEFAULT_JOIN_TIMEOUT) TINY_LORA_ATTR_NOT_IMPLEMENTED;
-  bool isNetworkConnectedImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
+      uint32_t timeout = DEFAULT_JOIN_TIMEOUT) LORA_AT_ATTR_NOT_IMPLEMENTED;
+  bool isNetworkConnectedImpl() LORA_AT_ATTR_NOT_IMPLEMENTED;
 
-  int8_t getSignalQualityImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  int8_t getSignalQualityImpl() LORA_AT_ATTR_NOT_IMPLEMENTED;
 
 
   /*
    * LoRa Class and Band functions
    */
 
-  bool        setClassImpl(_lora_class _class) TINY_LORA_ATTR_NOT_IMPLEMENTED;
-  _lora_class getClassImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  bool        setClassImpl(_lora_class _class) LORA_AT_ATTR_NOT_IMPLEMENTED;
+  _lora_class getClassImpl() LORA_AT_ATTR_NOT_IMPLEMENTED;
 
-  bool    setPortImpl(uint8_t _port) TINY_LORA_ATTR_NOT_IMPLEMENTED;
-  uint8_t getPortImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  bool    setPortImpl(uint8_t _port) LORA_AT_ATTR_NOT_IMPLEMENTED;
+  uint8_t getPortImpl() LORA_AT_ATTR_NOT_IMPLEMENTED;
 
-  bool   setBandImpl(const char* band) TINY_LORA_ATTR_NOT_IMPLEMENTED;
-  String getBandImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  bool   setBandImpl(const char* band) LORA_AT_ATTR_NOT_IMPLEMENTED;
+  String getBandImpl() LORA_AT_ATTR_NOT_IMPLEMENTED;
 
-  bool   setFrequencySubBandImpl(int8_t subBand) TINY_LORA_ATTR_NOT_IMPLEMENTED;
-  int8_t getFrequencySubBandImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  bool   setFrequencySubBandImpl(int8_t subBand) LORA_AT_ATTR_NOT_IMPLEMENTED;
+  int8_t getFrequencySubBandImpl() LORA_AT_ATTR_NOT_IMPLEMENTED;
 
-  String getChannelMaskImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  String getChannelMaskImpl() LORA_AT_ATTR_NOT_IMPLEMENTED;
 
   bool isChannelEnabledImpl(int pos) {
     // Populate channelsMask array
@@ -1088,39 +1087,39 @@ class TinyLoRaModem {
     return thisModem().setChannelMask(createHexChannelMask(channelsMask));
   }
 
-  bool setChannelMaskImpl(const char* newMask) TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  bool setChannelMaskImpl(const char* newMask) LORA_AT_ATTR_NOT_IMPLEMENTED;
 
   /*
    * LoRa Data Rate and Duty Cycle functions
    */
-  bool enableDutyCycleImpl(bool dutyCycle) TINY_LORA_ATTR_NOT_IMPLEMENTED;
-  bool isDutyCycleEnabledImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
-  bool setMaxDutyCycleImpl(int8_t maxDutyCycle) TINY_LORA_ATTR_NOT_IMPLEMENTED;
-  int8_t getMaxDutyCycleImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
-  bool   setDataRateImpl(uint8_t dataRate) TINY_LORA_ATTR_NOT_IMPLEMENTED;
-  int8_t getDataRateImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
-  bool   setAdaptiveDataRateImpl(bool useADR) TINY_LORA_ATTR_NOT_IMPLEMENTED;
-  bool   getAdaptiveDataRateImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  bool   enableDutyCycleImpl(bool dutyCycle) LORA_AT_ATTR_NOT_IMPLEMENTED;
+  bool   isDutyCycleEnabledImpl() LORA_AT_ATTR_NOT_IMPLEMENTED;
+  bool   setMaxDutyCycleImpl(int8_t maxDutyCycle) LORA_AT_ATTR_NOT_IMPLEMENTED;
+  int8_t getMaxDutyCycleImpl() LORA_AT_ATTR_NOT_IMPLEMENTED;
+  bool   setDataRateImpl(uint8_t dataRate) LORA_AT_ATTR_NOT_IMPLEMENTED;
+  int8_t getDataRateImpl() LORA_AT_ATTR_NOT_IMPLEMENTED;
+  bool   setAdaptiveDataRateImpl(bool useADR) LORA_AT_ATTR_NOT_IMPLEMENTED;
+  bool   getAdaptiveDataRateImpl() LORA_AT_ATTR_NOT_IMPLEMENTED;
 
 
   /*
    * LoRa ABP Session Properties
    */
   // aka network address
-  String getDevAddrImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  String getDevAddrImpl() LORA_AT_ATTR_NOT_IMPLEMENTED;
   // network session key
-  String getNwkSKeyImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  String getNwkSKeyImpl() LORA_AT_ATTR_NOT_IMPLEMENTED;
   // aka data session key
-  String getAppSKeyImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  String getAppSKeyImpl() LORA_AT_ATTR_NOT_IMPLEMENTED;
 
 
   /*
    * LoRa OTAA Session Properties
    */
   // aka network id
-  String getAppEUIImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  String getAppEUIImpl() LORA_AT_ATTR_NOT_IMPLEMENTED;
   // aka network key
-  String getAppKeyImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  String getAppKeyImpl() LORA_AT_ATTR_NOT_IMPLEMENTED;
 
   /*
    Utilities
@@ -1145,10 +1144,10 @@ class TinyLoRaModem {
   }
 
   inline void streamDump() {
-    TINY_LORA_YIELD();
+    LORA_AT_YIELD();
     while (thisModem().stream.available()) {
       thisModem().stream.read();
-      TINY_LORA_YIELD();
+      LORA_AT_YIELD();
     }
   }
 
@@ -1174,26 +1173,26 @@ class TinyLoRaModem {
         channelsMask[((strlen(mask) - i) / 2) - 1] =
             (int8_t)strtol(hexBuff, nullptr, 16);
       }
-      // #ifdef TINY_LORA_DEBUG
+      // #ifdef LORA_AT_DEBUG
       //       DBG(GF("Input mask:"), mask);
-      //       TINY_LORA_DEBUG.print(GF("Input mask in binary: "));
+      //       LORA_AT_DEBUG.print(GF("Input mask in binary: "));
       //       for (int8_t j = 0; j < LORA_CHANNEL_BYTES; j++) {
-      //         TINY_LORA_DEBUG.print(dbg_print_bin(channelsMask[j]));
-      //         TINY_LORA_DEBUG.print(',');
+      //         LORA_AT_DEBUG.print(dbg_print_bin(channelsMask[j]));
+      //         LORA_AT_DEBUG.print(',');
       //       }
-      //       TINY_LORA_DEBUG.println();
+      //       LORA_AT_DEBUG.println();
       // #endif
     }
   }
 
   String createHexChannelMask(uint8_t* channelsMask) {
-    // #ifdef TINY_LORA_DEBUG
-    //     TINY_LORA_DEBUG.print(GF("Mask array in binary:"));
+    // #ifdef LORA_AT_DEBUG
+    //     LORA_AT_DEBUG.print(GF("Mask array in binary:"));
     //     for (int8_t j = 0; j < LORA_CHANNEL_BYTES; j++) {
-    //       TINY_LORA_DEBUG.print(dbg_print_bin(channelsMask[j]));
-    //       TINY_LORA_DEBUG.print(',');
+    //       LORA_AT_DEBUG.print(dbg_print_bin(channelsMask[j]));
+    //       LORA_AT_DEBUG.print(',');
     //     }
-    //     TINY_LORA_DEBUG.println();
+    //     LORA_AT_DEBUG.println();
     // #endif
     // convert the completed channel mask to a string, switching endian-ness
     String resp = "";
@@ -1212,21 +1211,21 @@ class TinyLoRaModem {
     int col = channelNumber % 8;
     // convert the channel position into a mask
     uint8_t channel = (uint8_t)(1 << col);
-    // #ifdef TINY_LORA_DEBUG
+    // #ifdef LORA_AT_DEBUG
     //     int row = channelNumber / 8;
     //     DBG(GF("\nChannel Number:"), channelNumber, GF("Row:"), row,
     //     GF("Col:"),
     //         col);
-    //     TINY_LORA_DEBUG.print(GF("Channel Mask:         "));
+    //     LORA_AT_DEBUG.print(GF("Channel Mask:         "));
     //     for (int8_t j = 0; j < LORA_CHANNEL_BYTES; j++) {
     //       if (j == row) {
-    //         TINY_LORA_DEBUG.print(dbg_print_bin(channel));
+    //         LORA_AT_DEBUG.print(dbg_print_bin(channel));
     //       } else {
-    //         TINY_LORA_DEBUG.print("00000000");
+    //         LORA_AT_DEBUG.print("00000000");
     //       }
-    //       TINY_LORA_DEBUG.print(',');
+    //       LORA_AT_DEBUG.print(',');
     //     }
-    //     TINY_LORA_DEBUG.println();
+    //     LORA_AT_DEBUG.println();
     // #endif
     return channel;
   }
@@ -1238,7 +1237,7 @@ class TinyLoRaModem {
   }
 
   //   String dbg_print_bin(uint8_t num) {
-  // #ifdef TINY_LORA_DEBUG
+  // #ifdef LORA_AT_DEBUG
   //     String binPrint = "";
   //     int8_t bin_len  = String(num, BIN).length();
   //     for (int8_t z = 0; z < 8 - bin_len; z++) { binPrint += "0"; }

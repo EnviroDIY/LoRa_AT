@@ -1,5 +1,5 @@
 /**
- * @file       TinyLoRaTime.tpp
+ * @file       LoRa_AT_Time.tpp
  * @author     Sara Damiano
  * @copyright  Stroud Water Research Center
  * @date       May 2024
@@ -8,15 +8,15 @@
 #ifndef SRC_TINYLORATIME_H_
 #define SRC_TINYLORATIME_H_
 
-#include "TinyLoRaCommon.h"
+#include "LoRa_AT_Common.h"
 
-#define TINY_LORA_HAS_TIME
+#define LORA_AT_HAS_TIME
 
-enum TinyLoRaDateTimeFormat { DATE_FULL = 0, DATE_TIME = 1, DATE_DATE = 2 };
+enum LoRa_AT_DateTimeFormat { DATE_FULL = 0, DATE_TIME = 1, DATE_DATE = 2 };
 /**
  * @brief Set the epoch start value.
  */
-enum TinyLoRaEpochStart {
+enum LoRa_AT_EpochStart {
   UNIX = 0,  ///< Use a Unix epoch, starting 1/1/1970 (946684800s behind of Y2K
              ///< epoch, 315878400ss behind of GPS epoch)
   Y2K = 1,   ///< Use an epoch starting 1/1/2000, as some RTC's and Arduinos do
@@ -26,7 +26,7 @@ enum TinyLoRaEpochStart {
 };
 
 template <class modemType>
-class TinyLoRaTime {
+class LoRa_AT_Time {
   /* =========================================== */
   /* =========================================== */
   /*
@@ -44,7 +44,7 @@ class TinyLoRaTime {
    * DATE_TIME, or DATE_DATE
    * @return *String*  The date and/or time from the module
    */
-  String getDateTimeString(TinyLoRaDateTimeFormat format) {
+  String getDateTimeString(LoRa_AT_DateTimeFormat format) {
     return thisModem().getDateTimeStringImpl(format);
   }
 
@@ -73,7 +73,7 @@ class TinyLoRaTime {
    * @param epoch The epoch start to use.
    * @return *uint32_t* The offset from the start of the epoch
    */
-  uint32_t getDateTimeEpoch(TinyLoRaEpochStart epoch = UNIX) {
+  uint32_t getDateTimeEpoch(LoRa_AT_EpochStart epoch = UNIX) {
     return thisModem().getDateTimeEpochImpl(epoch);
   }
 
@@ -87,7 +87,7 @@ class TinyLoRaTime {
   inline modemType& thisModem() {
     return static_cast<modemType&>(*this);
   }
-  ~TinyLoRaTime() {}
+  ~LoRa_AT_Time() {}
 
   /* =========================================== */
   /* =========================================== */
@@ -99,15 +99,15 @@ class TinyLoRaTime {
    * Time functions
    */
  protected:
-  String getDateTimeStringImpl(TinyLoRaDateTimeFormat format)
-      TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  String getDateTimeStringImpl(LoRa_AT_DateTimeFormat format)
+      LORA_AT_ATTR_NOT_IMPLEMENTED;
 
   bool getDateTimePartsImpl(int* year, int* month, int* day, int* hour,
                             int* minute, int* second,
-                            float* timezone) TINY_LORA_ATTR_NOT_IMPLEMENTED;
+                            float* timezone) LORA_AT_ATTR_NOT_IMPLEMENTED;
 
-  uint32_t getDateTimeEpochImpl(TinyLoRaEpochStart epoch = UNIX)
-      TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  uint32_t getDateTimeEpochImpl(LoRa_AT_EpochStart epoch = UNIX)
+      LORA_AT_ATTR_NOT_IMPLEMENTED;
 };
 
 #endif  // SRC_TINYLORATIME_H_

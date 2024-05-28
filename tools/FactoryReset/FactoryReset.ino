@@ -4,16 +4,13 @@
  *   https://github.com/EnviroDIY/StreamDebugger
  *   or from http://librarymanager/all#StreamDebugger
  *
- * TinyLoRa Getting Started guide:
- *   https://tiny.cc/TinyLoRa-readme
- *
  **************************************************************/
 
 // Select your modem:
-#define TINY_LORA_MDOT
-// #define TINY_LORA_LORAE5
+#define LORA_AT_MDOT
+// #define LORA_AT_LORAE5
 
-#include <TinyLoRa.h>
+#include <LoRa_AT.h>
 
 // Set serial for debug console (to the Serial Monitor, speed 115200)
 #define SerialMon Serial
@@ -31,7 +28,7 @@ SoftwareSerial SerialAT(2, 3);  // RX, TX
 
 #include <StreamDebugger.h>
 StreamDebugger debugger(SerialAT, SerialMon);
-TinyLoRa       modem(debugger);
+LoRa_AT        modem(debugger);
 
 void setup() {
   // Set console baud rate
@@ -47,7 +44,7 @@ void setup() {
         F("***********************************************************"));
     SerialMon.println(F(" Cannot initialize modem!"));
     SerialMon.println(
-        F("   Use File -> Examples -> TinyLoRa -> tools -> AT_Debug"));
+        F("   Use File -> Examples -> LoRa_AT -> tools -> AT_Debug"));
     SerialMon.println(F("   to find correct configuration"));
     SerialMon.println(
         F("***********************************************************"));

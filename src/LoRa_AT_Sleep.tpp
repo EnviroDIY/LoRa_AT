@@ -1,5 +1,5 @@
 /**
- * @file       TinyLoRaSleep.tpp
+ * @file       LoRa_AT_Sleep.tpp
  * @author     Sara Damiano
  * @copyright  Stroud Water Research Center
  * @date       May 2024
@@ -8,12 +8,12 @@
 #ifndef SRC_TINYLORASLEEP_H_
 #define SRC_TINYLORASLEEP_H_
 
-#include "TinyLoRaCommon.h"
+#include "LoRa_AT_Common.h"
 
-#define TINY_LORA_HAS_SLEEP_MODE
+#define LORA_AT_HAS_SLEEP_MODE
 
 template <class modemType>
-class TinyLoRaSleep {
+class LoRa_AT_Sleep {
  public:
   /*
    * Sleep functions
@@ -118,10 +118,10 @@ class TinyLoRaSleep {
   }
 
   bool pinSleepImpl(int8_t pin, int8_t pullupMode,
-                    int8_t trigger) TINY_LORA_ATTR_NOT_IMPLEMENTED;
-  bool uartSleepImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
-  bool sleepImpl(uint32_t sleepTimer) TINY_LORA_ATTR_NOT_IMPLEMENTED;
-  bool enableAutoSleepImpl(bool enable = true) TINY_LORA_ATTR_NOT_IMPLEMENTED;
+                    int8_t trigger) LORA_AT_ATTR_NOT_IMPLEMENTED;
+  bool uartSleepImpl() LORA_AT_ATTR_NOT_IMPLEMENTED;
+  bool sleepImpl(uint32_t sleepTimer) LORA_AT_ATTR_NOT_IMPLEMENTED;
+  bool enableAutoSleepImpl(bool enable = true) LORA_AT_ATTR_NOT_IMPLEMENTED;
 };
 
 #endif  // SRC_TINYLORASLEEP_H_

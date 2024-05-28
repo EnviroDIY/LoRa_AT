@@ -1,5 +1,5 @@
 /**
- * @file       TinyLoRaTemperature.tpp
+ * @file       LoRa_AT_Temperature.tpp
  * @author     Sara Damiano
  * @copyright  Stroud Water Research Center
  * @date       May 2024
@@ -8,12 +8,12 @@
 #ifndef SRC_TINYLORATEMPERATURE_H_
 #define SRC_TINYLORATEMPERATURE_H_
 
-#include "TinyLoRaCommon.h"
+#include "LoRa_AT_Common.h"
 
-#define TINY_LORA_HAS_TEMPERATURE
+#define LORA_AT_HAS_TEMPERATURE
 
 template <class modemType>
-class TinyLoRaTemperature {
+class LoRa_AT_Temperature {
   /* =========================================== */
   /* =========================================== */
   /*
@@ -43,7 +43,7 @@ class TinyLoRaTemperature {
   inline modemType& thisModem() {
     return static_cast<modemType&>(*this);
   }
-  ~TinyLoRaTemperature() {}
+  ~LoRa_AT_Temperature() {}
 
   /* =========================================== */
   /* =========================================== */
@@ -55,7 +55,7 @@ class TinyLoRaTemperature {
    * Temperature functions
    */
 
-  float getTemperatureImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  float getTemperatureImpl() LORA_AT_ATTR_NOT_IMPLEMENTED;
 };
 
 #endif  // SRC_TINYLORATEMPERATURE_H_

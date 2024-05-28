@@ -1,6 +1,6 @@
 {
-  "name": "TinyLoRa",
-  "version": "0.1.0",
+  "name": "LoRa_AT",
+  "version": "0.2.0",
   "description": "A small Arduino library for LoRa modules, that just works. Supports modules with AT command interfaces.",
   "keywords": "LoRa, LoRaWAN, AT commands, AT, mDOT",
   "authors": [
@@ -12,9 +12,9 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/EnviroDIY/TinyLoRa.git"
+    "url": "https://github.com/EnviroDIY/LoRa_AT.git"
   },
-  "homepage": "https://github.com/EnviroDIY/TinyLoRa",
+  "homepage": "https://github.com/EnviroDIY/LoRa_AT",
   "export": {
     "include": [
       "LICENSE",
@@ -28,7 +28,7 @@
   },
   "frameworks": ["arduino", "energia", "wiringpi"],
   "platforms": "*",
-  "headers": ["TinyLoRa.h"],
+  "headers": ["LoRa_AT.h"],
   "build": {
     "libLDFMode": "deep+"
   }

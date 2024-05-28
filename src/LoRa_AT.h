@@ -1,5 +1,5 @@
 /**
- * @file       TinyLoRa.h
+ * @file       LoRa_AT.h
  * @author     Sara Damiano
  * @copyright  Stroud Water Research Center
  * @date       May 2024
@@ -8,15 +8,15 @@
 #ifndef SRC_TINYLORA_H_
 #define SRC_TINYLORA_H_
 
-#if defined(TINY_LORA_MDOT)
-#include "TinyLoRa_mDOT.h"
-typedef TinyLoRa_mDOT                  TinyLoRa;
-typedef TinyLoRa_mDOT::LoRaStream_mDOT TinyLoRaStream;
+#if defined(LORA_AT_MDOT)
+#include "LoRa_AT_mDOT.h"
+typedef LoRa_AT_mDOT                  LoRa_AT;
+typedef LoRa_AT_mDOT::LoRaStream_mDOT LoRaStream;
 
-#elif defined(TINY_LORA_LORAE5)
-#include "TinyLoRa_LoRaE5.h"
-typedef TinyLoRa_LoRaE5                    TinyLoRa;
-typedef TinyLoRa_LoRaE5::LoRaStream_LoRaE5 TinyLoRaStream;
+#elif defined(LORA_AT_LORAE5)
+#include "LoRa_AT_LoRaE5.h"
+typedef LoRa_AT_LoRaE5                    LoRa_AT;
+typedef LoRa_AT_LoRaE5::LoRaStream_LoRaE5 LoRaStream;
 
 #else
 #error "Please define LoRa Radio model"

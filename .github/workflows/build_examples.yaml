@@ -19,21 +19,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set environment variables for pushes to any branch in EnviroDIY/TinyLoRa
+      - name: Set environment variables for pushes to any branch in EnviroDIY/LoRa_AT
         if: github.event_name == 'push'
         run: |
           echo "Push to commit ${GITHUB_SHA}"
           echo "LIBRARY_INSTALL_ZIP=https://github.com/${GITHUB_REPOSITORY}/archive/${GITHUB_SHA}.zip" >> $GITHUB_ENV
           echo "LIBRARY_INSTALL_GIT=https://github.com/${GITHUB_REPOSITORY}.git#${GITHUB_SHA}" >> $GITHUB_ENV
 
-      - name: Set environment variable for PR's from any branch in EnviroDIY/TinyLoRa
+      - name: Set environment variable for PR's from any branch in EnviroDIY/LoRa_AT
         if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.name == github.repository
         run: |
           echo "Pull Request from the ${GITHUB_HEAD_REF} branch"
           echo "LIBRARY_INSTALL_ZIP=https://github.com/${GITHUB_REPOSITORY}/archive/${GITHUB_HEAD_REF}.zip" >> $GITHUB_ENV
           echo "LIBRARY_INSTALL_GIT=https://github.com/${GITHUB_REPOSITORY}.git#${GITHUB_HEAD_REF}" >> $GITHUB_ENV
 
-      - name: Set environment variable for PR's from any branch in EnviroDIY/TinyLoRa
+      - name: Set environment variable for PR's from any branch in EnviroDIY/LoRa_AT
         if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.name != github.repository
         run: |
           echo "Pull Request from the fork ${{ github.event.pull_request.head.repo.full_name }} at ${{ github.event.pull_request.head.ref }}"
@@ -68,7 +68,7 @@ jobs:
     strategy:
       matrix:
         example: [examples/AllFunctions]
-        modem: [TINY_LORA_MDOT, TINY_LORA_LORAE5]
+        modem: [LORA_AT_MDOT, LORA_AT_LORAE5]
 
     steps:
       - uses: actions/checkout@v4
@@ -99,7 +99,7 @@ jobs:
           chmod +x continuous_integration/install-deps-arduino-cli.sh
           sh continuous_integration/install-deps-arduino-cli.sh
 
-      # Install TinyLoRa for the Arduino CLI
+      # Install LoRa_AT for the Arduino CLI
       - name: Install the testing version of Modular Sensors for the Arduino CLI
         run: |
           chmod +x continuous_integration/install-test-version-arduino-cli.sh
@@ -112,11 +112,11 @@ jobs:
       - name: Compile
         env:
           ARDUINO_CODE_SOURCE: ${{ matrix.example }}
-          TINY_LORA_MODEM_TO_USE: ${{ matrix.modem }}
+          LORA_AT_MODEM_TO_USE: ${{ matrix.modem }}
         run: |
           status=0
 
-          sed -i 's/#define TINY_LORA_/\/\/ #define TINY_LORA_/g' ${{ matrix.example }}/*
+          sed -i 's/#define LORA_AT_/\/\/ #define LORA_AT_/g' ${{ matrix.example }}/*
           sed -i '1s/^/#define ${{ matrix.modem }} /' ${{ matrix.example }}/*
 
           echo ::group::Uno
@@ -165,7 +165,7 @@ jobs:
 
       - name: Uninstall testing version of Modular Sensors before caching
         run: |
-          arduino-cli --config-file continuous_integration/arduino_cli.yaml lib uninstall TinyLoRa
+          arduino-cli --config-file continuous_integration/arduino_cli.yaml lib uninstall LoRa_AT
 
   build_pio:
     name: PlatformIO ${{ matrix.example }} ${{ matrix.modem }}
@@ -176,7 +176,7 @@ jobs:
     strategy:
       matrix:
         example: [examples/AllFunctions]
-        modem: [TINY_LORA_MDOT, TINY_LORA_LORAE5]
+        modem: [LORA_AT_MDOT, LORA_AT_LORAE5]
 
     steps:
       - uses: actions/checkout@v4
@@ -212,9 +212,9 @@ jobs:
           sh continuous_integration/install-deps-platformio.sh
           cp -a /home/runner/.platformio/lib/. $GITHUB_WORKSPACE/lib/
 
-      # Install TinyLoRa at the Global level for PlatformIO
+      # Install LoRa_AT at the Global level for PlatformIO
       # Force install to get the right version
-      - name: Install the testing version of TinyLoRa for PlatformIO
+      - name: Install the testing version of LoRa_AT for PlatformIO
         run: |
           pio pkg install -g --library ${{ env.LIBRARY_INSTALL_GIT }}
           pio pkg list -g --only-libraries
@@ -225,11 +225,11 @@ jobs:
       - name: Compile
         env:
           PLATFORMIO_CI_SRC: ${{ matrix.example }}
-          TINY_LORA_MODEM_TO_USE: ${{ matrix.modem }}
+          LORA_AT_MODEM_TO_USE: ${{ matrix.modem }}
         run: |
-          sed -i 's/#define TINY_LORA_MDOT/\/\/ #define TINY_LORA_MDOT/g' ${{ matrix.example }}/*
-          platformio ci --verbose --project-option='build_flags=-D ${{ env.TINY_LORA_MODEM_TO_USE }}' --project-option='framework=arduino' --board=mayfly --board=uno --board=leonardo --board=yun --board=megaatmega2560 --board=nano_every --board=uno_wifi_rev2 --board=genuino101 --board=uno_r4_wifi --board=dueUSB --board=mkr1000USB --board=mkrvidor4000 --board=zero --board=adafruit_feather_m0 --board=adafruit_feather_m4 --board=teensy31 --board=bluepill_f103c8 --board=uno_pic32 --board=esp01 --board=nodemcuv2 --board=esp32dev --board=featheresp32 --board=adafruit_feather_esp32s2 --board=esp32-c3-devkitm-1 --board=pico
+          sed -i 's/#define LORA_AT_MDOT/\/\/ #define LORA_AT_MDOT/g' ${{ matrix.example }}/*
+          platformio ci --verbose --project-option='build_flags=-D ${{ env.LORA_AT_MODEM_TO_USE }}' --project-option='framework=arduino' --board=mayfly --board=uno --board=leonardo --board=yun --board=megaatmega2560 --board=nano_every --board=uno_wifi_rev2 --board=genuino101 --board=uno_r4_wifi --board=dueUSB --board=mkr1000USB --board=mkrvidor4000 --board=zero --board=adafruit_feather_m0 --board=adafruit_feather_m4 --board=teensy31 --board=bluepill_f103c8 --board=uno_pic32 --board=esp01 --board=nodemcuv2 --board=esp32dev --board=featheresp32 --board=adafruit_feather_esp32s2 --board=esp32-c3-devkitm-1 --board=pico
 
       - name: Uninstall testing version of Modular Sensors before caching
         run: |
-          pio pkg uninstall -g --library TinyLoRa
+          pio pkg uninstall -g --library LoRa_AT

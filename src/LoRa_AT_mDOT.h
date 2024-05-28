@@ -1,5 +1,5 @@
 /**
- * @file       TinyLoRa_MDOT.h
+ * @file       LoRa_AT_MDOT.h
  * @author     Sara Damiano
  * @copyright  Copyright (c) 2024 Sara Damiano
  * @date       April 2024
@@ -7,48 +7,48 @@
 
 #ifndef SRC_TINYLORA_MDOT_H_
 #define SRC_TINYLORA_MDOT_H_
-// #pragma message("TinyLoRa:  TinyLoRa_mDOT")
+// #pragma message("LoRa_AT:  LoRa_AT_mDOT")
 
-// #define TINY_LORA_DEBUG Serial
+// #define LORA_AT_DEBUG Serial
 
 /// The new-line used by the LoRa module
 #ifdef AT_NL
 #undef AT_NL
 #endif
-#define AT_NL "\r\n"  // NOTE:  define before including TinyLoRaModem!
+#define AT_NL "\r\n"  // NOTE:  define before including LoRa_AT_Modem!
 
-#include "TinyLoRaModem.tpp"
-#include "TinyLoRaRadio.tpp"
-#include "TinyLoRaTime.tpp"
-#include "TinyLoRaBattery.tpp"
-#include "TinyLoRaSleep.tpp"
+#include "LoRa_AT_Modem.tpp"
+#include "LoRa_AT_Radio.tpp"
+#include "LoRa_AT_Time.tpp"
+#include "LoRa_AT_Battery.tpp"
+#include "LoRa_AT_Sleep.tpp"
 
-class TinyLoRa_mDOT : public TinyLoRaModem<TinyLoRa_mDOT>,
-                      public TinyLoRaTime<TinyLoRa_mDOT>,
-                      public TinyLoRaRadio<TinyLoRa_mDOT>,
-                      public TinyLoRaBattery<TinyLoRa_mDOT>,
-                      public TinyLoRaSleep<TinyLoRa_mDOT> {
-  friend class TinyLoRaModem<TinyLoRa_mDOT>;
-  friend class TinyLoRaTime<TinyLoRa_mDOT>;
-  friend class TinyLoRaRadio<TinyLoRa_mDOT>;
-  friend class TinyLoRaBattery<TinyLoRa_mDOT>;
-  friend class TinyLoRaSleep<TinyLoRa_mDOT>;
+class LoRa_AT_mDOT : public LoRa_AT_Modem<LoRa_AT_mDOT>,
+                     public LoRa_AT_Time<LoRa_AT_mDOT>,
+                     public LoRa_AT_Radio<LoRa_AT_mDOT>,
+                     public LoRa_AT_Battery<LoRa_AT_mDOT>,
+                     public LoRa_AT_Sleep<LoRa_AT_mDOT> {
+  friend class LoRa_AT_Modem<LoRa_AT_mDOT>;
+  friend class LoRa_AT_Time<LoRa_AT_mDOT>;
+  friend class LoRa_AT_Radio<LoRa_AT_mDOT>;
+  friend class LoRa_AT_Battery<LoRa_AT_mDOT>;
+  friend class LoRa_AT_Sleep<LoRa_AT_mDOT>;
 
   /*
    * Inner Client
    */
  public:
   class LoRaStream_mDOT : public LoRaStream {
-    friend class TinyLoRa_mDOT;
+    friend class LoRa_AT_mDOT;
 
    public:
     LoRaStream_mDOT() {}
 
-    explicit LoRaStream_mDOT(TinyLoRa_mDOT& modem) {
+    explicit LoRaStream_mDOT(LoRa_AT_mDOT& modem) {
       init(&modem);
     }
 
-    bool init(TinyLoRa_mDOT* modem) {
+    bool init(LoRa_AT_mDOT* modem) {
       this->at       = modem;
       sock_available = 0;
       at->loraStream = this;
@@ -65,7 +65,7 @@ class TinyLoRa_mDOT : public TinyLoRaModem<TinyLoRa_mDOT>,
    * Constructor
    */
  public:
-  explicit TinyLoRa_mDOT(Stream& stream) : stream(stream) {
+  explicit LoRa_AT_mDOT(Stream& stream) : stream(stream) {
     prev_dl_check        = 0;
     _requireConfirmation = false;
     _networkConnected    = false;
@@ -77,15 +77,15 @@ class TinyLoRa_mDOT : public TinyLoRaModem<TinyLoRa_mDOT>,
    */
  protected:
   bool initImpl() {
-    DBG(GF("### TinyLoRa Version:"), TINY_LORA_VERSION);
-    DBG(GF("### TinyLoRa Compiled Module:  TinyLoRa_mDOT"));
+    DBG(GF("### LoRa_AT Version:"), LORA_AT_VERSION);
+    DBG(GF("### LoRa_AT Compiled Module:  LoRa_AT_mDOT"));
 
     if (!testAT()) { return false; }
 
     sendAT(GF("E0"));  // Echo Off
     if (waitResponse() != 1) { return false; }
 
-#ifdef TINY_LORA_DEBUG
+#ifdef LORA_AT_DEBUG
     sendAT(GF("V1"));  // turn on verbose error codes
     waitResponse();
     sendAT(GF("+LOG=5"));  // set debug port logging level to debug
@@ -318,7 +318,7 @@ class TinyLoRa_mDOT : public TinyLoRaModem<TinyLoRa_mDOT>,
       // present, a extra blank line is sent before the "OK."
 
       String nlc_resp_str = "";  // to hold any downlink data
-      nlc_resp_str.reserve(TINY_LORA_RX_BUFFER);
+      nlc_resp_str.reserve(LORA_AT_RX_BUFFER);
       int8_t resp = waitResponse(5000L, nlc_resp_str, GFP(LORA_OK),
                                  GFP(LORA_ERROR), GF("Network Not Joined"));
       if (resp == 1) {
@@ -333,7 +333,7 @@ class TinyLoRa_mDOT : public TinyLoRaModem<TinyLoRa_mDOT>,
 
         _link_margin = nlc_resp_str.substring(0, firstComma).toInt();
 
-#ifdef TINY_LORA_DEBUG
+#ifdef LORA_AT_DEBUG
         int gatewayCount =
             nlc_resp_str.substring(firstComma + 1, afterCommaCR).toInt();
         DBG("## NLC link margin in dBm:", _link_margin,
@@ -341,7 +341,7 @@ class TinyLoRa_mDOT : public TinyLoRaModem<TinyLoRa_mDOT>,
 #endif
         // the rest of the string should be the downlink data and the OK
         String downlinkData = "";
-        downlinkData.reserve(TINY_LORA_RX_BUFFER);
+        downlinkData.reserve(LORA_AT_RX_BUFFER);
         downlinkData = nlc_resp_str.substring(afterCommaLF + 1);
 
         prev_dl_check = millis();          // mark that we checked for downlink
@@ -579,16 +579,16 @@ class TinyLoRa_mDOT : public TinyLoRaModem<TinyLoRa_mDOT>,
    * Time functions
    */
  protected:
-  String getDateTimeStringImpl(TinyLoRaDateTimeFormat format)
-      TINY_LORA_ATTR_NOT_AVAILABLE;
+  String getDateTimeStringImpl(LoRa_AT_DateTimeFormat format)
+      LORA_AT_ATTR_NOT_AVAILABLE;
 
   bool getDateTimePartsImpl(int* year, int* month, int* day, int* hour,
                             int* minute, int* second,
-                            float* timezone) TINY_LORA_ATTR_NOT_AVAILABLE;
+                            float* timezone) LORA_AT_ATTR_NOT_AVAILABLE;
 
   // NOTE: This module only returns epoch time! If you need to convert from
   // Epoch time to a human readable time, use a date library.
-  uint32_t getDateTimeEpochImpl(TinyLoRaEpochStart epoch = UNIX) {
+  uint32_t getDateTimeEpochImpl(LoRa_AT_EpochStart epoch = UNIX) {
     uint32_t epoch_time      = 0;
     int8_t   tries_remaining = 5;
     while (epoch_time == 0 && tries_remaining) {
@@ -765,7 +765,7 @@ class TinyLoRa_mDOT : public TinyLoRaModem<TinyLoRa_mDOT>,
         // present, a extra blank line is sent before the "OK."
 
         String downlinkData = "";  // to hold any downlink data
-        downlinkData.reserve(TINY_LORA_RX_BUFFER);
+        downlinkData.reserve(LORA_AT_RX_BUFFER);
         if (waitResponse(sendTimeout, downlinkData) == 1) {
           bytesSent += sendLength;   // bump up number of bytes sent
           txPtr += sendLength;       // bump up the pointer
@@ -841,7 +841,7 @@ class TinyLoRa_mDOT : public TinyLoRaModem<TinyLoRa_mDOT>,
     bool    success            = false;
     uint8_t attempts_remaining = attempts;
     while (!success && attempts_remaining) {
-#ifdef TINY_LORA_DEBUG
+#ifdef LORA_AT_DEBUG
       uint32_t start = millis();
 #endif
       sendAT(force ? GF("+JOIN=1") : GF("+JOIN"));

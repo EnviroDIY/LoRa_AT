@@ -3,9 +3,6 @@
  * This script just listens in on the communication
  * between an Arduino and the modem.
  *
- * TinyLoRa Getting Started guide:
- *   https://tiny.cc/TinyLoRa-readme
- *
  **************************************************************/
 
 // Set the baud rate between the modem and the board

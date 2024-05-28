@@ -3,14 +3,11 @@
  * This script tries to auto-detect the baud rate
  * and allows direct AT commands access
  *
- * TinyLoRa Getting Started guide:
- *   https://tiny.cc/TinyLoRa-readme
- *
  **************************************************************/
 
 // Select your modem:
-#define TINY_LORA_MDOT
-// #define TINY_LORA_LORAE5
+#define LORA_AT_MDOT
+// #define LORA_AT_LORAE5
 
 // Set serial for debug console (to the Serial Monitor, speed 115200)
 #define SerialMon Serial
@@ -26,9 +23,9 @@
 SoftwareSerial SerialAT(2, 3);  // RX, TX
 #endif
 
-#define TINY_LORA_DEBUG SerialMon
+#define LORA_AT_DEBUG SerialMon
 
-#include <TinyLoRa.h>
+#include <LoRa_AT.h>
 
 // Module baud rate
 uint32_t rate = 0;  // Set to 0 for Auto-Detect
@@ -40,7 +37,7 @@ void setup() {
 }
 
 void loop() {
-  if (!rate) { rate = TinyLoRaAutoBaud(SerialAT); }
+  if (!rate) { rate = LoRa_AT_AutoBaud(SerialAT); }
 
   if (!rate) {
     SerialMon.println(

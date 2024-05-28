@@ -21,6 +21,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ***
 
 
+## [0.2.0]
+
+### Changed
+- Renamed from TinyLoRa to LoRa_AT because the library name TinyLoRa was already taken.
+
+***
+
+
 ## [0.1.0]
 
 ### Added

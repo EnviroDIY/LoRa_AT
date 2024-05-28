@@ -1,6 +1,4 @@
-# TinyLoRa
-
-![TinyLoRa logo](https://cdn.rawgit.com/vshymanskyy/TinyLoRa/d18e93dc51fe988a0b175aac647185457ef640b5/extras/logo.svg)
+# LoRa_AT
 
 A small Arduino library for AT command based LoRa modules, that just works.
 

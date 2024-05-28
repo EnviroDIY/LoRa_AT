@@ -1,5 +1,5 @@
 /**
- * @file       TinyLoRaBattery.tpp
+ * @file       LoRa_AT_Battery.tpp
  * @author     Sara Damiano
  * @copyright  Stroud Water Research Center
  * @date       May 2024
@@ -8,12 +8,12 @@
 #ifndef SRC_TINYLORABATTERY_H_
 #define SRC_TINYLORABATTERY_H_
 
-#include "TinyLoRaCommon.h"
+#include "LoRa_AT_Common.h"
 
-#define TINY_LORA_HAS_BATTERY
+#define LORA_AT_HAS_BATTERY
 
 template <class modemType>
-class TinyLoRaBattery {
+class LoRa_AT_Battery {
   /* =========================================== */
   /* =========================================== */
   /*
@@ -46,7 +46,7 @@ class TinyLoRaBattery {
   inline modemType& thisModem() {
     return static_cast<modemType&>(*this);
   }
-  ~TinyLoRaBattery() {}
+  ~LoRa_AT_Battery() {}
 
   /* =========================================== */
   /* =========================================== */
@@ -59,14 +59,14 @@ class TinyLoRaBattery {
    */
  protected:
   // Use: float vBatt = modem.getBattVoltage() / 1000.0;
-  int16_t getBattVoltageImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  int16_t getBattVoltageImpl() LORA_AT_ATTR_NOT_IMPLEMENTED;
 
-  int8_t getBattPercentImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  int8_t getBattPercentImpl() LORA_AT_ATTR_NOT_IMPLEMENTED;
 
-  int8_t getBattChargeStateImpl() TINY_LORA_ATTR_NOT_IMPLEMENTED;
+  int8_t getBattChargeStateImpl() LORA_AT_ATTR_NOT_IMPLEMENTED;
 
   bool getBattStatsImpl(int8_t& chargeState, int8_t& percent,
-                        int16_t& milliVolts) TINY_LORA_ATTR_NOT_IMPLEMENTED;
+                        int16_t& milliVolts) LORA_AT_ATTR_NOT_IMPLEMENTED;
 };
 
 #endif  // SRC_TINYLORABATTERY_H_

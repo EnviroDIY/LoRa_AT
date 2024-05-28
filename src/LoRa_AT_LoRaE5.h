@@ -1,5 +1,5 @@
 /**
- * @file       TinyLoRa_LORAE5.h
+ * @file       LoRa_AT_LORAE5.h
  * @author     Sara Damiano
  * @copyright  Copyright (c) 2024 Sara Damiano
  * @date       April 2024
@@ -7,15 +7,15 @@
 
 #ifndef SRC_TINYLORA_LORAE5_H_
 #define SRC_TINYLORA_LORAE5_H_
-// #pragma message("TinyLoRa:  TinyLoRa_LoRaE5")
+// #pragma message("LoRa_AT:  LoRa_AT_LoRaE5")
 
-// #define TINY_LORA_DEBUG Serial
+// #define LORA_AT_DEBUG Serial
 
 /// The new-line used by the LoRa module
 #ifdef AT_NL
 #undef AT_NL
 #endif
-#define AT_NL "\r\n"  // NOTE:  define before including TinyLoRaModem!
+#define AT_NL "\r\n"  // NOTE:  define before including LoRa_AT_Modem!
 
 #ifdef AT_OK
 #undef AT_OK
@@ -32,41 +32,41 @@
 #endif
 #define AT_VERBOSE "+LOG: "
 
-#include "TinyLoRaModem.tpp"
-#include "TinyLoRaRadio.tpp"
-#include "TinyLoRaTime.tpp"
-#include "TinyLoRaBattery.tpp"
-#include "TinyLoRaTemperature.tpp"
-#include "TinyLoRaSleep.tpp"
+#include "LoRa_AT_Modem.tpp"
+#include "LoRa_AT_Radio.tpp"
+#include "LoRa_AT_Time.tpp"
+#include "LoRa_AT_Battery.tpp"
+#include "LoRa_AT_Temperature.tpp"
+#include "LoRa_AT_Sleep.tpp"
 
-class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
-                        public TinyLoRaTime<TinyLoRa_LoRaE5>,
-                        public TinyLoRaRadio<TinyLoRa_LoRaE5>,
-                        public TinyLoRaBattery<TinyLoRa_LoRaE5>,
-                        public TinyLoRaTemperature<TinyLoRa_LoRaE5>,
-                        public TinyLoRaSleep<TinyLoRa_LoRaE5> {
-  friend class TinyLoRaModem<TinyLoRa_LoRaE5>;
-  friend class TinyLoRaTime<TinyLoRa_LoRaE5>;
-  friend class TinyLoRaRadio<TinyLoRa_LoRaE5>;
-  friend class TinyLoRaBattery<TinyLoRa_LoRaE5>;
-  friend class TinyLoRaTemperature<TinyLoRa_LoRaE5>;
-  friend class TinyLoRaSleep<TinyLoRa_LoRaE5>;
+class LoRa_AT_LoRaE5 : public LoRa_AT_Modem<LoRa_AT_LoRaE5>,
+                       public LoRa_AT_Time<LoRa_AT_LoRaE5>,
+                       public LoRa_AT_Radio<LoRa_AT_LoRaE5>,
+                       public LoRa_AT_Battery<LoRa_AT_LoRaE5>,
+                       public LoRa_AT_Temperature<LoRa_AT_LoRaE5>,
+                       public LoRa_AT_Sleep<LoRa_AT_LoRaE5> {
+  friend class LoRa_AT_Modem<LoRa_AT_LoRaE5>;
+  friend class LoRa_AT_Time<LoRa_AT_LoRaE5>;
+  friend class LoRa_AT_Radio<LoRa_AT_LoRaE5>;
+  friend class LoRa_AT_Battery<LoRa_AT_LoRaE5>;
+  friend class LoRa_AT_Temperature<LoRa_AT_LoRaE5>;
+  friend class LoRa_AT_Sleep<LoRa_AT_LoRaE5>;
 
   /*
    * Inner Client
    */
  public:
   class LoRaStream_LoRaE5 : public LoRaStream {
-    friend class TinyLoRa_LoRaE5;
+    friend class LoRa_AT_LoRaE5;
 
    public:
     LoRaStream_LoRaE5() {}
 
-    explicit LoRaStream_LoRaE5(TinyLoRa_LoRaE5& modem) {
+    explicit LoRaStream_LoRaE5(LoRa_AT_LoRaE5& modem) {
       init(&modem);
     }
 
-    bool init(TinyLoRa_LoRaE5* modem) {
+    bool init(LoRa_AT_LoRaE5* modem) {
       this->at       = modem;
       sock_available = 0;
       at->loraStream = this;
@@ -83,7 +83,7 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
    * Constructor
    */
  public:
-  explicit TinyLoRa_LoRaE5(Stream& stream) : stream(stream) {
+  explicit LoRa_AT_LoRaE5(Stream& stream) : stream(stream) {
     prev_dl_check        = 0;
     inLowestPowerMode    = false;
     _requireConfirmation = false;
@@ -115,7 +115,7 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
     }
     streamWrite("AT", cmd..., AT_NL);
     stream.flush();
-    TINY_LORA_YIELD(); /* DBG("### AT:", cmd...); */
+    LORA_AT_YIELD(); /* DBG("### AT:", cmd...); */
   }
 
   bool testATImpl(uint32_t timeout_ms = 10000L) {
@@ -142,12 +142,12 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
 
  protected:
   bool initImpl() {
-    DBG(GF("### TinyLoRa Version:"), TINY_LORA_VERSION);
-    DBG(GF("### TinyLoRa Compiled Module:  TinyLoRa_LoRaE5"));
+    DBG(GF("### LoRa_AT Version:"), LORA_AT_VERSION);
+    DBG(GF("### LoRa_AT Compiled Module:  LoRa_AT_LoRaE5"));
 
     if (!testAT()) { return false; }
 
-#ifdef TINY_LORA_DEBUG
+#ifdef LORA_AT_DEBUG
     sendAT(GF("+LOG=DEBUG"));  // turn on verbose error codes
     waitResponse(GF("+LOG: DEBUG"));
     streamFind('\n');  // throw away the new line
@@ -214,7 +214,7 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
    */
  protected:
   bool pinSleepImpl(int8_t pin, int8_t pullupMode,
-                    int8_t trigger) TINY_LORA_ATTR_NOT_AVAILABLE;
+                    int8_t trigger) LORA_AT_ATTR_NOT_AVAILABLE;
 
   bool uartSleepImpl() {
     // enable sleep, will wake with the next UART TX command
@@ -414,8 +414,8 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
   }
 
   // these don't seem to exist
-  bool   setFrequencySubBandImpl(int8_t subBand) TINY_LORA_ATTR_NOT_AVAILABLE;
-  int8_t getFrequencySubBandImpl() TINY_LORA_ATTR_NOT_AVAILABLE;
+  bool   setFrequencySubBandImpl(int8_t subBand) LORA_AT_ATTR_NOT_AVAILABLE;
+  int8_t getFrequencySubBandImpl() LORA_AT_ATTR_NOT_AVAILABLE;
 
   // There isn't a simple way to get the whole mask!
   String getChannelMaskImpl() {
@@ -445,7 +445,7 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
 
       // add this channel mask to the full mask
       channelsMask[row] = channelsMask[row] | mask;
-      // #ifdef TINY_LORA_DEBUG
+      // #ifdef LORA_AT_DEBUG
       //       String binPrint = "";
       //       int8_t bin_len  = String(channelsMask[row], BIN).length();
       //       for (int8_t z = 0; z < 8 - bin_len; z++) { binPrint += "0"; }
@@ -632,7 +632,7 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
    * Time functions
    */
  protected:
-  String getDateTimeStringImpl(TinyLoRaDateTimeFormat format) {
+  String getDateTimeStringImpl(LoRa_AT_DateTimeFormat format) {
     deviceTimeRequest();
     sendAT(GF("+RTC=FULL"));
     if (waitResponse(2000L, GF("+RTC: ")) != 1) { return ""; }
@@ -695,7 +695,7 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
     return true;
   }
 
-  uint32_t getDateTimeEpochImpl(TinyLoRaEpochStart epoch = UNIX) {
+  uint32_t getDateTimeEpochImpl(LoRa_AT_EpochStart epoch = UNIX) {
     deviceTimeRequest();
     sendAT(GF("+RTC=FULL"));
     if (waitResponse(2000L, GF("+RTC: ")) != 1) { return 0; }
@@ -923,7 +923,7 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
       return true;
     } else if (data.endsWith(GF(": PORT: "))) {
       // +MSG: PORT: 8; RX: "12345678"
-#ifdef TINY_LORA_DEBUG
+#ifdef LORA_AT_DEBUG
       int8_t incoming_port = stream.parseInt();
       DBG("## Data received on port", incoming_port);
 #endif
@@ -934,11 +934,11 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
       // the data always comes in as hex
       // we always translate the data into ASCII, with two bytes of hex
       // translating to one character
-      uint8_t tempRxBuff[TINY_LORA_RX_BUFFER * 2];
-      memset(tempRxBuff, '\0', TINY_LORA_RX_BUFFER * 2);
+      uint8_t tempRxBuff[LORA_AT_RX_BUFFER * 2];
+      memset(tempRxBuff, '\0', LORA_AT_RX_BUFFER * 2);
       // read bytes until the next '"'
       int downlinkedBytes = stream.readBytesUntil('"', tempRxBuff,
-                                                  TINY_LORA_RX_BUFFER * 2);
+                                                  LORA_AT_RX_BUFFER * 2);
       DBG("## Got", downlinkedBytes, "bytes of downlink data");
       // check for buffer overflow
       int putBuffLen = downlinkedBytes / 2;
@@ -971,7 +971,7 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
       // +MSG: Link 20, 1
       _link_margin = stream.parseInt();
       streamFind(',');  // skip the , after the link margin
-#ifdef TINY_LORA_DEBUG
+#ifdef LORA_AT_DEBUG
       int8_t gateway_count = stream.parseInt();
       DBG(GF("## LinkCheckAns received. Link Margin:"), _link_margin,
           GF("Number Gateways:"), gateway_count);
@@ -987,7 +987,7 @@ class TinyLoRa_LoRaE5 : public TinyLoRaModem<TinyLoRa_LoRaE5>,
     bool    success            = false;
     uint8_t attempts_remaining = attempts;
     while (!success && attempts_remaining) {
-#ifdef TINY_LORA_DEBUG
+#ifdef LORA_AT_DEBUG
       uint32_t start = millis();
 #endif
       sendAT(force ? GF("+JOIN=FORCE") : GF("+JOIN"));

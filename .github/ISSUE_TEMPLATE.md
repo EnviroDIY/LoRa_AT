@@ -1,5 +1,5 @@
 <!--
-Thanks for using TinyLoRa!
+Thanks for using LoRa_AT!
 
 Before opening an issue, please make sure you've read the README.
 We do not respond to general questions here, use gitter chat for that.
@@ -25,7 +25,7 @@ with your board before submitting any issues.
 
 Modem: <!-- Brand, model, variant, firmware version, ie Quectel BG96 Revision: BG96MAR02A07M1G -->
 Main processor board: <!-- Uno, Zero, ESP32, Particle, etc -->
-TinyLoRa version: <!-- always try to use the latest (0.1.0) -->
+LoRa_AT version: <!-- always try to use the latest (0.2.0) -->
 Code: <!-- Example name or paste in your code -->
 
 ### Scenario, steps to reproduce
@@ -38,5 +38,5 @@ Code: <!-- Example name or paste in your code -->
 <!-- What actually happens after the reproduction steps? Include the error output or a link to a gist if possible. -->
 
 ### Debug and AT command log
-<!-- Enable debugging by defining TINY_LORA_DEBUG before including TinyLoRa -->
+<!-- Enable debugging by defining LORA_AT_DEBUG before including LoRa_AT -->
 <!-- The AT commands log you get using StreamDebugger or any other debugging method -->

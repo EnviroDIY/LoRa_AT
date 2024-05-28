@@ -1,8 +1,4 @@
 /**************************************************************
- *
- * TinyLoRa Getting Started guide:
- *   https://tiny.cc/TinyLoRa-readme
- *
  * NOTE:
  * Some of the functions may be unavailable for your modem.
  * Just comment them out.
@@ -10,8 +6,8 @@
  **************************************************************/
 
 // Select your modem:
-// #define TINY_LORA_MDOT
-// #define TINY_LORA_LORAE5
+// #define LORA_AT_MDOT
+// #define LORA_AT_LORAE5
 
 // Set serial for debug console (to the Serial Monitor, default speed 115200)
 #define SerialMon Serial
@@ -31,7 +27,7 @@ SoftwareSerial SerialAT(2, 3);  // RX, TX
 // #define DUMP_AT_COMMANDS
 
 // Define the serial console for debug prints, if needed
-// #define TINY_LORA_DEBUG SerialMon
+// #define LORA_AT_DEBUG SerialMon
 
 // Range to attempt to autobaud
 // NOTE:  DO NOT AUTOBAUD in production code.  Once you've established
@@ -41,19 +37,19 @@ SoftwareSerial SerialAT(2, 3);  // RX, TX
 
 // Add a reception delay, if needed.
 // This may be needed for a fast processor at a slow baud rate.
-// #define TINY_LORA_YIELD() { delay(2); }
+// #define LORA_AT_YIELD() { delay(2); }
 
 /*
  * Tests enabled
  */
-#define TINY_LORA_TEST_ABP false
-#define TINY_LORA_TEST_OTAA true
-#define TINY_LORA_TEST_SETTINGS true
-#define TINY_LORA_TEST_UPLINK true
-#define TINY_LORA_TEST_BATTERY true
-#define TINY_LORA_TEST_TEMPERATURE true
-#define TINY_LORA_TEST_TIME true
-#define TINY_LORA_TEST_SLEEP true
+#define LORA_AT_TEST_ABP false
+#define LORA_AT_TEST_OTAA true
+#define LORA_AT_TEST_SETTINGS true
+#define LORA_AT_TEST_UPLINK true
+#define LORA_AT_TEST_BATTERY true
+#define LORA_AT_TEST_TEMPERATURE true
+#define LORA_AT_TEST_TIME true
+#define LORA_AT_TEST_SLEEP true
 
 // Your ABP credentials, if applicable
 // The device address (network address). This must be 4 bytes of hex data.
@@ -86,26 +82,26 @@ int8_t lora_wake_pullup = 1;
 int8_t lora_wake_edge = 0;
 
 
-#include <TinyLoRa.h>
+#include <LoRa_AT.h>
 
-#if TINY_LORA_TEST_ABP
-#undef TINY_LORA_TEST_OTAA
-#define TINY_LORA_TEST_OTAA false
+#if LORA_AT_TEST_ABP
+#undef LORA_AT_TEST_OTAA
+#define LORA_AT_TEST_OTAA false
 #endif
-#if TINY_LORA_TEST_OTAA
-#undef TINY_LORA_TEST_ABP
-#define TINY_LORA_TEST_ABP false
+#if LORA_AT_TEST_OTAA
+#undef LORA_AT_TEST_ABP
+#define LORA_AT_TEST_ABP false
 #endif
 
 #ifdef DUMP_AT_COMMANDS
 #include <StreamDebugger.h>
 StreamDebugger debugger(SerialAT, SerialMon);
-TinyLoRa       modem(debugger);
+LoRa_AT        modem(debugger);
 #else
-TinyLoRa       modem(SerialAT);
+LoRa_AT        modem(SerialAT);
 #endif
 
-TinyLoRaStream loraStream(modem);
+LoRaStream loraStream(modem);
 
 void setup() {
   // Set console baud rate
@@ -128,7 +124,7 @@ void setup() {
   delay(6000);
 
   // Set GSM module baud rate
-  // TinyLoRaAutoBaud(SerialAT, GSM_AUTOBAUD_MIN, GSM_AUTOBAUD_MAX);
+  // LoRa_AT_AutoBaud(SerialAT, GSM_AUTOBAUD_MIN, GSM_AUTOBAUD_MAX);
   SerialAT.begin(9600);
 }
 
@@ -141,7 +137,7 @@ void loop() {
     SerialMon.println(
         F("--Failed to restart modem, delaying 10s and retrying"));
     // restart autobaud in case GSM just rebooted
-    TinyLoRaAutoBaud(SerialAT, GSM_AUTOBAUD_MIN, GSM_AUTOBAUD_MAX);
+    LoRa_AT_AutoBaud(SerialAT, GSM_AUTOBAUD_MIN, GSM_AUTOBAUD_MAX);
     return;
   }
 
@@ -155,7 +151,7 @@ void loop() {
   SerialMon.println(modemInfo);
   delay(2000L);
 
-#if TINY_LORA_TEST_SETTINGS
+#if LORA_AT_TEST_SETTINGS
 
   // get and set the device class to test functionality
   _lora_class currClass = modem.getClass();
@@ -205,7 +201,7 @@ void loop() {
   SerialMon.println(currBand);
   delay(1000L);
 
-#if TINY_LORA_TEST_SETTINGS
+#if LORA_AT_TEST_SETTINGS
   // doesn't work with all modules
   currBand = "US915";
   if (modem.setBand(currBand)) {
@@ -216,7 +212,7 @@ void loop() {
   }
   delay(2000L);
 // get and set the sub-band to test functionality
-#ifndef TINY_LORA_LORAE5  // not supported
+#ifndef LORA_AT_LORAE5  // not supported
   int8_t currSubBand = modem.getFrequencySubBand();
   SerialMon.print(F("Device is currently using LoRa sub-band "));
   SerialMon.println(currSubBand);
@@ -337,7 +333,7 @@ void loop() {
   delay(2000L);
 #endif
 
-#if TINY_LORA_TEST_OTAA
+#if LORA_AT_TEST_OTAA
   SerialMon.println(F("Attempting to join with OTAA..."));
   if (!modem.joinOTAA(appEui, appKey)) {
     SerialMon.println(F("--fail\n"));
@@ -369,7 +365,7 @@ void loop() {
   delay(2000L);
 #endif
 
-#if TINY_LORA_TEST_ABP
+#if LORA_AT_TEST_ABP
   SerialMon.println(F("Attempting to join with ABP..."));
   if (!modem.joinABP(devAddr, nwkSKey, appSKey, uplinkCounter,
                      downlinkCounter)) {
@@ -415,7 +411,7 @@ void loop() {
   }
   delay(2000L);
 
-#if TINY_LORA_TEST_UPLINK
+#if LORA_AT_TEST_UPLINK
   // Send out some data, without confirmation
   String short_message = "hello";
   SerialMon.println(F("Sending a short message without confirmation"));
@@ -507,8 +503,8 @@ void loop() {
   delay(2000L);
 
 
-#if TINY_LORA_TEST_TIME && defined TINY_LORA_HAS_TIME
-#ifndef TINY_LORA_MDOT  // mDot only does epoch time
+#if LORA_AT_TEST_TIME && defined LORA_AT_HAS_TIME
+#ifndef LORA_AT_MDOT  // mDot only does epoch time
   int   year3    = 0;
   int   month3   = 0;
   int   day3     = 0;
@@ -553,7 +549,7 @@ void loop() {
   SerialMon.println(epochTime);
 #endif
 
-#if TINY_LORA_TEST_BATTERY && defined TINY_LORA_HAS_BATTERY
+#if LORA_AT_TEST_BATTERY && defined LORA_AT_HAS_BATTERY
   int8_t  chargeState = -99;
   int8_t  percent     = -99;
   int16_t milliVolts  = -9999;
@@ -567,13 +563,13 @@ void loop() {
   delay(2000L);
 #endif
 
-#if TINY_LORA_TEST_TEMPERATURE && defined TINY_LORA_HAS_TEMPERATURE
+#if LORA_AT_TEST_TEMPERATURE && defined LORA_AT_HAS_TEMPERATURE
   float temp = modem.getTemperature();
   SerialMon.print(F("Chip temperature: "));
   SerialMon.println(temp);
 #endif
 
-#if TINY_LORA_TEST_SLEEP && defined TINY_LORA_HAS_SLEEP_MODE
+#if LORA_AT_TEST_SLEEP && defined LORA_AT_HAS_SLEEP_MODE
   // test sleeping and waking with the UART
   SerialMon.println(F("Testing basic sleep mode with UART wake after 5s"));
   if (modem.uartSleep()) {  // could alo use sleep();
@@ -589,7 +585,7 @@ void loop() {
   }
 
 
-#ifndef TINY_LORA_LORAE5  // LoRaE5 doesn't do pin sleep
+#ifndef LORA_AT_LORAE5  // LoRaE5 doesn't do pin sleep
   if (arduino_wake_pin >= 0) {
     // test sleeping and waking with the an interrupt pin
     SerialMon.println(
