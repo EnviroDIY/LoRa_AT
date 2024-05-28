@@ -116,6 +116,7 @@ class LoRa_AT_Sleep {
   inline modemType& thisModem() {
     return static_cast<modemType&>(*this);
   }
+  ~LoRa_AT_Sleep() {}
 
   bool pinSleepImpl(int8_t pin, int8_t pullupMode,
                     int8_t trigger) LORA_AT_ATTR_NOT_IMPLEMENTED;
