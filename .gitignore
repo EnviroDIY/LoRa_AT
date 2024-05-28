@@ -52,3 +52,6 @@ compile_commands.json
 home
 runDoxygen.bat
 */__pycache__/*
+continuous_integration/build-examples-arduino-cli.sh
+continuous_integration/keywords.py
+docs/Makefile

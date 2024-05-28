@@ -25,6 +25,16 @@ class LoRa_AT_Radio {
   /*
    * Basic functions
    */
+
+  /**
+   * @brief Checks for new downlinks from the LoRaWAN network at the frequency
+   * defined by #LORA_AT_DL_CHECK.
+   *
+   * @warning It is NOT good practice in LoRaWAN to check frequently for
+   * downlinks.  For this reason, the maintain function should not be regularly
+   * used.
+   *
+   */
   void maintain() {
     return thisModem().maintainImpl();
   }
@@ -54,9 +64,11 @@ class LoRa_AT_Radio {
     return _requireConfirmation;
   }
 
-  /*
-   * CRTP Helper
+  /**
+   * @anchor radio_crtp_helper
+   * @name Radio CRTP Helper
    */
+  /**@{*/
  protected:
   inline const modemType& thisModem() const {
     return static_cast<const modemType&>(*this);
@@ -64,6 +76,7 @@ class LoRa_AT_Radio {
   inline modemType& thisModem() {
     return static_cast<modemType&>(*this);
   }
+  /**@}*/
   ~LoRa_AT_Radio() {}
 
   /*

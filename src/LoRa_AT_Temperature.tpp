@@ -33,9 +33,11 @@ class LoRa_AT_Temperature {
     return thisModem().getTemperatureImpl();
   }
 
-  /*
-   * CRTP Helper
+  /**
+   * @anchor temperature_crtp_helper
+   * @name Temperature CRTP Helper
    */
+  /**@{*/
  protected:
   inline const modemType& thisModem() const {
     return static_cast<const modemType&>(*this);
@@ -43,6 +45,7 @@ class LoRa_AT_Temperature {
   inline modemType& thisModem() {
     return static_cast<modemType&>(*this);
   }
+  /**@}*/
   ~LoRa_AT_Temperature() {}
 
   /* =========================================== */

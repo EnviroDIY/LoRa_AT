@@ -835,8 +835,8 @@ class LoRa_AT_Modem {
   /**@}*/
 
   /**
-   * @anchor crtp_helper
-   * @name CRTP Helper
+   * @anchor modem_crtp_helper
+   * @name Modem CRTP Helper
    */
   /**@{*/
  protected:

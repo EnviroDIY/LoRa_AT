@@ -77,9 +77,11 @@ class LoRa_AT_Time {
     return thisModem().getDateTimeEpochImpl(epoch);
   }
 
-  /*
-   * CRTP Helper
+  /**
+   * @anchor time_crtp_helper
+   * @name Time CRTP Helper
    */
+  /**@{*/
  protected:
   inline const modemType& thisModem() const {
     return static_cast<const modemType&>(*this);
@@ -87,6 +89,7 @@ class LoRa_AT_Time {
   inline modemType& thisModem() {
     return static_cast<modemType&>(*this);
   }
+  /**@}*/
   ~LoRa_AT_Time() {}
 
   /* =========================================== */

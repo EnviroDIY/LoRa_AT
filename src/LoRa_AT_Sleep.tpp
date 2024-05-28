@@ -106,9 +106,11 @@ class LoRa_AT_Sleep {
     return thisModem().enableAutoSleepImpl(false);
   }
 
-  /*
-   * CRTP Helper
+  /**
+   * @anchor sleep_crtp_helper
+   * @name Sleep CRTP Helper
    */
+  /**@{*/
  protected:
   inline const modemType& thisModem() const {
     return static_cast<const modemType&>(*this);
@@ -116,6 +118,7 @@ class LoRa_AT_Sleep {
   inline modemType& thisModem() {
     return static_cast<modemType&>(*this);
   }
+  /**@}*/
   ~LoRa_AT_Sleep() {}
 
   bool pinSleepImpl(int8_t pin, int8_t pullupMode,
