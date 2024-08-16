@@ -308,8 +308,8 @@ class LoRa_AT_mDOT : public LoRa_AT_Modem<LoRa_AT_mDOT>,
     int8_t tries_remaining = 10;
     int    _link_margin    = 255;
     while (_link_margin == 255 && tries_remaining) {
-      sendAT(GF("+NLC"));
       DBG(GF("Sending LinkCheckReq"), tries_remaining, GF("tries remaining"));
+      sendAT(GF("+NLC"));
       tries_remaining--;
 
       // If there is downlink data available, it will be returned before the
@@ -319,7 +319,7 @@ class LoRa_AT_mDOT : public LoRa_AT_Modem<LoRa_AT_mDOT>,
 
       String nlc_resp_str = "";  // to hold any downlink data
       nlc_resp_str.reserve(LORA_AT_RX_BUFFER);
-      int8_t resp = waitResponse(5000L, nlc_resp_str, GFP(LORA_OK),
+      int8_t resp = waitResponse(10000L, nlc_resp_str, GFP(LORA_OK),
                                  GFP(LORA_ERROR), GF("Network Not Joined"));
       if (resp == 1) {
         // The first number in the response is the dBm level above the
