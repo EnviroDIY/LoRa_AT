@@ -32,8 +32,8 @@ SoftwareSerial SerialAT(2, 3);  // RX, TX
 // Range to attempt to autobaud
 // NOTE:  DO NOT AUTOBAUD in production code.  Once you've established
 // communication, set a fixed baud rate using modem.setBaud(#).
-#define GSM_AUTOBAUD_MIN 9600
-#define GSM_AUTOBAUD_MAX 115200
+#define LORA_AUTOBAUD_MIN 9600
+#define LORA_AUTOBAUD_MAX 115200
 
 // Add a reception delay, if needed.
 // This may be needed for a fast processor at a slow baud rate.
@@ -52,11 +52,14 @@ SoftwareSerial SerialAT(2, 3);  // RX, TX
 #define LORA_AT_TEST_SLEEP true
 
 // Your ABP credentials, if applicable
-// The device address (network address). This must be 4 bytes of hex data.
+// The device address (network address).
+// This must be 4 bytes of hex data (8 hex characters).
 const char devAddr[] = "4ByteDevAddr";
-// The network session key. This must be 16 bytes of hex data.
+// The network session key.
+// This must be 16 bytes of hex data (32 hex characters).
 const char nwkSKey[] = "16ByteNwkSKey";
-// The app session key (data session key). This must be 16 bytes of hex data.
+// The app session key (data session key).
+// This must be 16 bytes of hex data (32 hex characters).
 const char appSKey[] = "16ByteAppSKey";
 // The last server uplink counter
 int uplinkCounter = 1;
@@ -66,8 +69,10 @@ int downlinkCounter = 0;
 
 // Your OTAA connection credentials, if applicable
 // The App EUI (also called the Join EUI or the Network ID)
+// This must be exactly 16 hex characters (8 bytes = 64 bits)
 const char appEui[] = "8ByteAppEui";
 // The App Key (also called the network key)
+// This must be exactly 32 hex characters (16 bytes = 128 bits)
 const char appKey[] = "16ByteAppKey";
 
 // the pin on your Arduino that will turn on power to the module
@@ -111,10 +116,14 @@ void setup() {
   // !!!!!!!!!!!
   // Set your reset, enable, power pins here
   if (power_pin_for_module >= 0) {
+    SerialMon.print("Powering LoRa module with pin ");
+    SerialMon.println(power_pin_for_module);
     pinMode(power_pin_for_module, OUTPUT);
     digitalWrite(power_pin_for_module, HIGH);
   }
   if (arduino_wake_pin >= 0) {
+    SerialMon.print("Waking LoRa module with pin ");
+    SerialMon.println(arduino_wake_pin);
     pinMode(arduino_wake_pin, OUTPUT);
     digitalWrite(arduino_wake_pin, HIGH);
   }
@@ -124,7 +133,7 @@ void setup() {
   delay(6000);
 
   // Set GSM module baud rate
-  // LoRa_AT_AutoBaud(SerialAT, GSM_AUTOBAUD_MIN, GSM_AUTOBAUD_MAX);
+  // LoRa_AT_AutoBaud(SerialAT, LORA_AUTOBAUD_MIN, LORA_AUTOBAUD_MAX);
   SerialAT.begin(9600);
 }
 
@@ -137,7 +146,7 @@ void loop() {
     SerialMon.println(
         F("--Failed to restart modem, delaying 10s and retrying"));
     // restart autobaud in case GSM just rebooted
-    LoRa_AT_AutoBaud(SerialAT, GSM_AUTOBAUD_MIN, GSM_AUTOBAUD_MAX);
+    LoRa_AT_AutoBaud(SerialAT, LORA_AUTOBAUD_MIN, LORA_AUTOBAUD_MAX);
     return;
   }
 
