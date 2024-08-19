@@ -55,3 +55,4 @@ runDoxygen.bat
 continuous_integration/build-examples-arduino-cli.sh
 continuous_integration/keywords.py
 docs/Makefile
+AT Manuals

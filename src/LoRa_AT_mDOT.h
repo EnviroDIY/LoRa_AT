@@ -736,12 +736,20 @@ class LoRa_AT_mDOT : public LoRa_AT_Modem<LoRa_AT_mDOT>,
         // if there's no space available to send data, the queue is full of MAC
         // commands and we need to send empty messages to flush them out
         if (uplinkAvailable == 0 || len == 0) {
+          DBG(GF("Sending empty request"));
           sendAT(GF("+SEND"));
         } else {
+#ifdef LORA_AT_SEND_HEX
+          // start the send command
+          stream.write("AT+SENDB=");
+          // write everything as hex characters
+          writeHex(txPtr, sendLength);
+#else
           // start the send command
           stream.write("AT+SEND=");
           // write out the number of bytes that are available for this uplink
           stream.write(reinterpret_cast<const uint8_t*>(txPtr), sendLength);
+#endif
           // finish with a new line
           stream.println();
           stream.flush();
