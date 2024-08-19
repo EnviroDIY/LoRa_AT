@@ -684,10 +684,12 @@ class LoRa_AT_mDOT : public LoRa_AT_Modem<LoRa_AT_mDOT>,
    * Stream related functions
    */
  protected:
-  int16_t modemSend(const void* buff, size_t len) {
-    char* txPtr = reinterpret_cast<char*>(
-        const_cast<void*>(buff));  // Pointer to where in the buffer we're up to
-    size_t bytesSent = 0;
+  int16_t modemSend(const uint8_t* buff, size_t len) {
+    // Pointer to where in the buffer we're up to
+    // A const cast is need to cast-away the constantness of the buffer (ie,
+    // modify it).
+    uint8_t* txPtr     = const_cast<uint8_t*>(buff);
+    size_t   bytesSent = 0;
 
     // NOTE: There's no way to require or not require confirmation for an
     // individual message!
@@ -728,10 +730,8 @@ class LoRa_AT_mDOT : public LoRa_AT_Modem<LoRa_AT_mDOT>,
 
         // Ensure the program doesn't read past the allocated memory
         sendLength = uplinkAvailable;
-        if (txPtr + uplinkAvailable >
-            reinterpret_cast<char*>(const_cast<void*>(buff)) + len) {
-          sendLength = reinterpret_cast<char*>(const_cast<void*>(buff)) + len -
-              txPtr;
+        if (txPtr + uplinkAvailable > const_cast<uint8_t*>(buff) + len) {
+          sendLength = const_cast<uint8_t*>(buff) + len - txPtr;
         }
         // if there's no space available to send data, the queue is full of MAC
         // commands and we need to send empty messages to flush them out
