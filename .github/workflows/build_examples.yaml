@@ -9,55 +9,8 @@ concurrency:
 
 jobs:
   determine_library_source:
-    name: determine_library_source
-    runs-on: ubuntu-latest
-    if: "!contains(github.event.head_commit.message, 'ci skip')"
-    outputs:
-      library_install_zip: ${{ steps.store_vars.outputs.library_install_zip }}
-      library_install_git: ${{ steps.store_vars.outputs.library_install_git }}
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set environment variables for pushes to any branch in EnviroDIY/LoRa_AT
-        if: github.event_name == 'push'
-        run: |
-          echo "Push to commit ${GITHUB_SHA}"
-          echo "LIBRARY_INSTALL_ZIP=https://github.com/${GITHUB_REPOSITORY}/archive/${GITHUB_SHA}.zip" >> $GITHUB_ENV
-          echo "LIBRARY_INSTALL_GIT=https://github.com/${GITHUB_REPOSITORY}.git#${GITHUB_SHA}" >> $GITHUB_ENV
-
-      - name: Set environment variable for PR's from any branch in EnviroDIY/LoRa_AT
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.name == github.repository
-        run: |
-          echo "Pull Request from the ${GITHUB_HEAD_REF} branch"
-          echo "LIBRARY_INSTALL_ZIP=https://github.com/${GITHUB_REPOSITORY}/archive/${GITHUB_HEAD_REF}.zip" >> $GITHUB_ENV
-          echo "LIBRARY_INSTALL_GIT=https://github.com/${GITHUB_REPOSITORY}.git#${GITHUB_HEAD_REF}" >> $GITHUB_ENV
-
-      - name: Set environment variable for PR's from any fork of EnviroDIY/LoRa_AT
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.name != github.repository
-        run: |
-          echo "Pull Request from the fork ${{ github.event.pull_request.head.repo.full_name }} at ${{ github.event.pull_request.head.ref }}"
-          echo "LIBRARY_INSTALL_ZIP=https://github.com/${{ github.event.pull_request.head.repo.full_name }}/archive/${{ github.event.pull_request.head.ref }}.zip" >> $GITHUB_ENV
-          echo "LIBRARY_INSTALL_GIT=https://github.com${{ github.event.pull_request.head.repo.full_name }}.git#${{ github.event.pull_request.head.ref }}" >> $GITHUB_ENV
-
-      - name: store enviroment variables as output
-        id: store_vars
-        run: |
-          echo "library_install_zip=${{ env.LIBRARY_INSTALL_ZIP }}" >> $GITHUB_OUTPUT
-          echo "library_install_git=${{ env.LIBRARY_INSTALL_GIT }}" >> $GITHUB_OUTPUT
-
-  print_library_source:
-    name: print_library_source
-    runs-on: ubuntu-latest
-    needs: determine_library_source
-    steps:
-      - name: Check the library installation source
-        run: |
-          echo "Link to zip for Arduino CLI testing install:"
-          echo "${{ needs.determine_library_source.outputs.library_install_zip }}"
-          echo
-          echo "Git reference for PlatformIO testing install"
-          echo "${{ needs.determine_library_source.outputs.library_install_git }}"
+    name: Determine the source of the testing library
+    uses: EnviroDIY/workflows/.github/workflows/determine_library_source.yaml@main
 
   build_ex_arduino:
     name: Arduino CLI ${{ matrix.example }} ${{ matrix.modem }}
@@ -71,39 +24,70 @@ jobs:
         modem: [LORA_AT_MDOT, LORA_AT_LORAE5]
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Unused Step
-        run: echo "This is needed to make the step number match with the PlatformIO jobs. =)"
+      - name: Write the requirements file
+        run: |
+          echo "wheel" > requirements.txt
+          echo "adafruit-nrfutil" >> requirements.txt
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+          cache: 'pip'
+
+      - name: Install python dependencies, including NRF-Utils needed for Adafruit Feathers
+        run: |
+          pip install -r requirements.txt
 
       # We use the `arduino/setup-arduino-cli` action to install and
       # configure the Arduino CLI on the system.
       - name: Setup Arduino CLI
-        uses: arduino/setup-arduino-cli@v1.1.2
+        uses: arduino/setup-arduino-cli@v2.0.0
 
-      - name: Restore Arduino platforms and libraries
-        uses: actions/cache@v4
-        id: cache_libraries
+      - name: Restore Arduino platforms
+        uses: actions/cache/restore@v4
+        id: restore_platforms
         with:
           path: |
-            home/arduino
-          # if nothing in the dependencies.json file has changed, then it will
-          # be a "cache hit" and we can restore libraries from cache and not
-          # download them.  If it has changed we have to re-download.
-          key: ${{ hashFiles('./examples/example_dependencies.json','continuous_integration/install-deps-arduino-cli.sh') }}
+            home/arduino/data
+          key: ${{ hashFiles('continuous_integration/install-platforms-arduino-cli.sh') }}
 
-      # Install cores and library dependencies for the Arduino CLI, iff no cache
+      # Install cores for the Arduino CLI, iff no cache
+      - name: Install the Arduino Platforms
+        id: install_platforms
+        if: steps.restore_platforms.outputs.cache-hit != 'true'
+        run: |
+          chmod +x continuous_integration/install-platforms-arduino-cli.sh
+          sh continuous_integration/install-platforms-arduino-cli.sh
+
+      - name: Restore Arduino libraries
+        uses: actions/cache/restore@v4
+        id: restore_libraries
+        if: ${{ steps.check_lib_install.outputs.valid_lib_dep_script == 'true'}}
+        with:
+          path: |
+            home/arduino/user
+          key: ${{ hashFiles('continuous_integration/install-libraries-arduino-cli.sh') }}
+
+      # Install any library dependencies for the Arduino CLI, iff no cache
+      # NOTE: Don't update the dependencies beyond what's in the install script!
       - name: Install the Arduino libraries
-        if: steps.cache_libraries.outputs.cache-hit != 'true'
+        id: install_libraries
+        if: ${{ (steps.check_lib_install.outputs.valid_lib_dep_script == 'true') && (steps.restore_libraries.outputs.cache-hit != 'true') }}
         run: |
-          chmod +x continuous_integration/install-deps-arduino-cli.sh
-          sh continuous_integration/install-deps-arduino-cli.sh
+          chmod +x continuous_integration/install-libraries-arduino-cli.sh
+          sh continuous_integration/install-libraries-arduino-cli.sh
 
-      # Install LoRa_AT for the Arduino CLI
-      - name: Install the testing version of Modular Sensors for the Arduino CLI
+      # Install the test library for the Arduino CLI
+      - name: Install the testing version of the library for the Arduino CLI
+        id: install_test_library
         run: |
-          chmod +x continuous_integration/install-test-version-arduino-cli.sh
-          sh continuous_integration/install-test-version-arduino-cli.sh
+          curl -SL https://raw.githubusercontent.com/EnviroDIY/workflows/main/scripts/install-test-version-arduino-cli.sh -o install-test-version-arduino-cli.sh
+          chmod +x install-test-version-arduino-cli.sh
+          sh install-test-version-arduino-cli.sh
 
       - name: Include problem matcher
         uses: ammaraskar/gcc-problem-matcher@master
@@ -114,58 +98,251 @@ jobs:
           ARDUINO_CODE_SOURCE: ${{ matrix.example }}
           LORA_AT_MODEM_TO_USE: ${{ matrix.modem }}
         run: |
+          set -e # Exit with nonzero exit code if anything fails
+          if [ "$RUNNER_DEBUG" = "1" ]; then
+              echo "Enabling debugging!"
+              set -v # Prints shell input lines as they are read.
+              set -x # Print command traces before executing command.
+          fi
+
           status=0
 
           sed -i 's/#define LORA_AT_/\/\/ #define LORA_AT_/g' ${{ matrix.example }}/*
           sed -i '1s/^/#define ${{ matrix.modem }} /' ${{ matrix.example }}/*
 
-          echo ::group::Uno
-          arduino-cli compile --fqbn arduino:avr:uno --format text --warnings more --verbose --config-file continuous_integration/arduino_cli.yaml  ${{ matrix.example }} 2>&1 | tee output.log
+          echo ::group::EnviroDIY:avr:envirodiy_mayfly
+          arduino-cli compile --warnings more --config-file continuous_integration/arduino_cli.yaml --format text --fqbn EnviroDIY:avr:envirodiy_mayfly ${{ matrix.example }} 2>&1 | tee output.log
           result_code=${PIPESTATUS[0]}
           if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
           echo ::endgroup::
-          if [ "$result_code" -eq "0" ]; then echo -e "\e[32mUno successfully compiled\e[0m"; else echo -e "\e[31mUno failed to compile\e[0m"; fi
+          if [ "$result_code" -eq "0" ]; then echo -e "\e[32mEnviroDIY:avr:envirodiy_mayfly successfully compiled\e[0m"; else echo -e "\e[31mEnviroDIY:avr:envirodiy_mayfly failed to compile\e[0m"; fi
 
-          echo ::group::Mega
-          arduino-cli compile --fqbn arduino:avr:mega --format text --warnings more --verbose --config-file continuous_integration/arduino_cli.yaml  ${{ matrix.example }} 2>&1 | tee output.log
+          echo ::group::arduino:avr:uno
+          arduino-cli compile --warnings more --config-file continuous_integration/arduino_cli.yaml --format text --fqbn arduino:avr:uno ${{ matrix.example }} 2>&1 | tee output.log
           result_code=${PIPESTATUS[0]}
           if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
           echo ::endgroup::
-          if [ "$result_code" -eq "0" ]; then echo -e "\e[32mMega successfully compiled\e[0m"; else echo -e "\e[31mMega failed to compile\e[0m"; fi
+          if [ "$result_code" -eq "0" ]; then echo -e "\e[32marduino:avr:uno successfully compiled\e[0m"; else echo -e "\e[31marduino:avr:uno failed to compile\e[0m"; fi
 
-          echo ::group::ArduinoZero
-          arduino-cli compile --fqbn arduino:samd:mzero_bl --format text --warnings more --verbose --config-file continuous_integration/arduino_cli.yaml  ${{ matrix.example }} 2>&1 | tee output.log
+          echo ::group::arduino:avr:mega
+          arduino-cli compile --warnings more --config-file continuous_integration/arduino_cli.yaml --format text --fqbn arduino:avr:mega ${{ matrix.example }} 2>&1 | tee output.log
           result_code=${PIPESTATUS[0]}
           if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
           echo ::endgroup::
-          if [ "$result_code" -eq "0" ]; then echo -e "\e[32mArduinoZero successfully compiled\e[0m"; else echo -e "\e[31mArduinoZero failed to compile\e[0m"; fi
+          if [ "$result_code" -eq "0" ]; then echo -e "\e[32marduino:avr:mega successfully compiled\e[0m"; else echo -e "\e[31marduino:avr:mega failed to compile\e[0m"; fi
 
-          echo ::group::FeatherM0
-          arduino-cli compile --fqbn adafruit:samd:adafruit_feather_m0 --format text --warnings more --verbose --config-file continuous_integration/arduino_cli.yaml  ${{ matrix.example }} 2>&1 | tee output.log
+          echo ::group::arduino:avr:leonardo
+          arduino-cli compile --warnings more --config-file continuous_integration/arduino_cli.yaml --format text --fqbn arduino:avr:leonardo ${{ matrix.example }} 2>&1 | tee output.log
           result_code=${PIPESTATUS[0]}
           if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
           echo ::endgroup::
-          if [ "$result_code" -eq "0" ]; then echo -e "\e[32mFeatherM0 successfully compiled\e[0m"; else echo -e "\e[31mFeatherM0 failed to compile\e[0m"; fi
+          if [ "$result_code" -eq "0" ]; then echo -e "\e[32marduino:avr:leonardo successfully compiled\e[0m"; else echo -e "\e[31marduino:avr:leonardo failed to compile\e[0m"; fi
 
-          echo ::group::FeatherM4
-          arduino-cli compile --fqbn adafruit:samd:adafruit_feather_m4 --format text --warnings more --verbose --config-file continuous_integration/arduino_cli.yaml  ${{ matrix.example }} 2>&1 | tee output.log
+          echo ::group::arduino:sam:arduino_due_x
+          arduino-cli compile --warnings more --config-file continuous_integration/arduino_cli.yaml --format text --fqbn arduino:sam:arduino_due_x ${{ matrix.example }} 2>&1 | tee output.log
           result_code=${PIPESTATUS[0]}
           if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
           echo ::endgroup::
-          if [ "$result_code" -eq "0" ]; then echo -e "\e[32mFeatherM0 successfully compiled\e[0m"; else echo -e "\e[31mFeatherM0 failed to compile\e[0m"; fi
+          if [ "$result_code" -eq "0" ]; then echo -e "\e[32marduino:sam:arduino_due_x successfully compiled\e[0m"; else echo -e "\e[31marduino:sam:arduino_due_x failed to compile\e[0m"; fi
 
-          echo ::group::Mayfly
-          arduino-cli compile --fqbn EnviroDIY:avr:envirodiy_mayfly --format text --warnings more --verbose --config-file continuous_integration/arduino_cli.yaml  ${{ matrix.example }} 2>&1 | tee output.log
+          echo ::group::arduino:samd:mzero_bl
+          arduino-cli compile --warnings more --config-file continuous_integration/arduino_cli.yaml --format text --fqbn arduino:samd:mzero_bl ${{ matrix.example }} 2>&1 | tee output.log
           result_code=${PIPESTATUS[0]}
           if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
           echo ::endgroup::
-          if [ "$result_code" -eq "0" ]; then echo -e "\e[32mMayfly successfully compiled\e[0m"; else echo -e "\e[31mMayfly failed to compile\e[0m"; fi
+          if [ "$result_code" -eq "0" ]; then echo -e "\e[32marduino:samd:mzero_bl successfully compiled\e[0m"; else echo -e "\e[31marduino:samd:mzero_bl failed to compile\e[0m"; fi
+
+          echo ::group::arduino:samd:mkrvidor4000
+          arduino-cli compile --warnings more --config-file continuous_integration/arduino_cli.yaml --format text --fqbn arduino:samd:mkrvidor4000 ${{ matrix.example }} 2>&1 | tee output.log
+          result_code=${PIPESTATUS[0]}
+          if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
+          echo ::endgroup::
+          if [ "$result_code" -eq "0" ]; then echo -e "\e[32marduino:samd:mkrvidor4000 successfully compiled\e[0m"; else echo -e "\e[31marduino:samd:mkrvidor4000 failed to compile\e[0m"; fi
+
+          echo ::group::arduino:megaavr:uno2018
+          arduino-cli compile --warnings more --config-file continuous_integration/arduino_cli.yaml --format text --fqbn arduino:megaavr:uno2018 ${{ matrix.example }} 2>&1 | tee output.log
+          result_code=${PIPESTATUS[0]}
+          if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
+          echo ::endgroup::
+          if [ "$result_code" -eq "0" ]; then echo -e "\e[32marduino:megaavr:uno2018 successfully compiled\e[0m"; else echo -e "\e[31marduino:megaavr:uno2018 failed to compile\e[0m"; fi
+
+          echo ::group::arduino:megaavr:nona4809
+          arduino-cli compile --warnings more --config-file continuous_integration/arduino_cli.yaml --format text --fqbn arduino:megaavr:nona4809 ${{ matrix.example }} 2>&1 | tee output.log
+          result_code=${PIPESTATUS[0]}
+          if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
+          echo ::endgroup::
+          if [ "$result_code" -eq "0" ]; then echo -e "\e[32marduino:megaavr:nona4809 successfully compiled\e[0m"; else echo -e "\e[31marduino:megaavr:nona4809 failed to compile\e[0m"; fi
+
+          echo ::group::arduino:esp32:nano_nora
+          arduino-cli compile --warnings more --config-file continuous_integration/arduino_cli.yaml --format text --fqbn arduino:esp32:nano_nora ${{ matrix.example }} 2>&1 | tee output.log
+          result_code=${PIPESTATUS[0]}
+          if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
+          echo ::endgroup::
+          if [ "$result_code" -eq "0" ]; then echo -e "\e[32marduino:esp32:nano_nora successfully compiled\e[0m"; else echo -e "\e[31marduino:esp32:nano_nora failed to compile\e[0m"; fi
+
+          echo ::group::arduino:mbed_rp2040:pico
+          arduino-cli compile --warnings more --config-file continuous_integration/arduino_cli.yaml --format text --fqbn arduino:mbed_rp2040:pico ${{ matrix.example }} 2>&1 | tee output.log
+          result_code=${PIPESTATUS[0]}
+          if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
+          echo ::endgroup::
+          if [ "$result_code" -eq "0" ]; then echo -e "\e[32marduino:mbed_rp2040:pico successfully compiled\e[0m"; else echo -e "\e[31marduino:mbed_rp2040:pico failed to compile\e[0m"; fi
+
+          echo ::group::arduino:renesas_uno:unor4wifi
+          arduino-cli compile --warnings more --config-file continuous_integration/arduino_cli.yaml --format text --fqbn arduino:renesas_uno:unor4wifi ${{ matrix.example }} 2>&1 | tee output.log
+          result_code=${PIPESTATUS[0]}
+          if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
+          echo ::endgroup::
+          if [ "$result_code" -eq "0" ]; then echo -e "\e[32marduino:renesas_uno:unor4wifi successfully compiled\e[0m"; else echo -e "\e[31marduino:renesas_uno:unor4wifi failed to compile\e[0m"; fi
+
+          echo ::group::arduino:mbed_nano:nano33ble
+          arduino-cli compile --warnings more --config-file continuous_integration/arduino_cli.yaml --format text --fqbn arduino:mbed_nano:nano33ble ${{ matrix.example }} 2>&1 | tee output.log
+          result_code=${PIPESTATUS[0]}
+          if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
+          echo ::endgroup::
+          if [ "$result_code" -eq "0" ]; then echo -e "\e[32marduino:mbed_nano:nano33ble successfully compiled\e[0m"; else echo -e "\e[31marduino:mbed_nano:nano33ble failed to compile\e[0m"; fi
+
+          echo ::group::arduino:mbed_portenta:envie_m7
+          arduino-cli compile --warnings more --config-file continuous_integration/arduino_cli.yaml --format text --fqbn arduino:mbed_portenta:envie_m7 ${{ matrix.example }} 2>&1 | tee output.log
+          result_code=${PIPESTATUS[0]}
+          if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
+          echo ::endgroup::
+          if [ "$result_code" -eq "0" ]; then echo -e "\e[32marduino:mbed_portenta:envie_m7 successfully compiled\e[0m"; else echo -e "\e[31marduino:mbed_portenta:envie_m7 failed to compile\e[0m"; fi
+
+          echo ::group::adafruit:avr:feather328p
+          arduino-cli compile --warnings more --config-file continuous_integration/arduino_cli.yaml --format text --fqbn adafruit:avr:feather328p ${{ matrix.example }} 2>&1 | tee output.log
+          result_code=${PIPESTATUS[0]}
+          if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
+          echo ::endgroup::
+          if [ "$result_code" -eq "0" ]; then echo -e "\e[32madafruit:avr:feather328p successfully compiled\e[0m"; else echo -e "\e[31madafruit:avr:feather328p failed to compile\e[0m"; fi
+
+          echo ::group::adafruit:avr:feather32u4
+          arduino-cli compile --warnings more --config-file continuous_integration/arduino_cli.yaml --format text --fqbn adafruit:avr:feather32u4 ${{ matrix.example }} 2>&1 | tee output.log
+          result_code=${PIPESTATUS[0]}
+          if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
+          echo ::endgroup::
+          if [ "$result_code" -eq "0" ]; then echo -e "\e[32madafruit:avr:feather32u4 successfully compiled\e[0m"; else echo -e "\e[31madafruit:avr:feather32u4 failed to compile\e[0m"; fi
+
+          echo ::group::adafruit:samd:adafruit_feather_m0
+          arduino-cli compile --warnings more --config-file continuous_integration/arduino_cli.yaml --format text --fqbn adafruit:samd:adafruit_feather_m0 ${{ matrix.example }} 2>&1 | tee output.log
+          result_code=${PIPESTATUS[0]}
+          if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
+          echo ::endgroup::
+          if [ "$result_code" -eq "0" ]; then echo -e "\e[32madafruit:samd:adafruit_feather_m0 successfully compiled\e[0m"; else echo -e "\e[31madafruit:samd:adafruit_feather_m0 failed to compile\e[0m"; fi
+
+          echo ::group::adafruit:samd:adafruit_feather_m4
+          arduino-cli compile --warnings more --config-file continuous_integration/arduino_cli.yaml --format text --fqbn adafruit:samd:adafruit_feather_m4 ${{ matrix.example }} 2>&1 | tee output.log
+          result_code=${PIPESTATUS[0]}
+          if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
+          echo ::endgroup::
+          if [ "$result_code" -eq "0" ]; then echo -e "\e[32madafruit:samd:adafruit_feather_m4 successfully compiled\e[0m"; else echo -e "\e[31madafruit:samd:adafruit_feather_m4 failed to compile\e[0m"; fi
+
+          echo ::group::adafruit:samd:adafruit_grandcentral_m4
+          arduino-cli compile --warnings more --config-file continuous_integration/arduino_cli.yaml --format text --fqbn adafruit:samd:adafruit_grandcentral_m4 ${{ matrix.example }} 2>&1 | tee output.log
+          result_code=${PIPESTATUS[0]}
+          if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
+          echo ::endgroup::
+          if [ "$result_code" -eq "0" ]; then echo -e "\e[32madafruit:samd:adafruit_grandcentral_m4 successfully compiled\e[0m"; else echo -e "\e[31madafruit:samd:adafruit_grandcentral_m4 failed to compile\e[0m"; fi
+
+          echo ::group::esp8266:esp8266:huzzah
+          arduino-cli compile --warnings more --config-file continuous_integration/arduino_cli.yaml --format text --fqbn esp8266:esp8266:huzzah ${{ matrix.example }} 2>&1 | tee output.log
+          result_code=${PIPESTATUS[0]}
+          if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
+          echo ::endgroup::
+          if [ "$result_code" -eq "0" ]; then echo -e "\e[32mesp8266:esp8266:huzzah successfully compiled\e[0m"; else echo -e "\e[31mesp8266:esp8266:huzzah failed to compile\e[0m"; fi
+
+          echo ::group::esp32:esp32:featheresp32
+          arduino-cli compile --warnings more --config-file continuous_integration/arduino_cli.yaml --format text --fqbn esp32:esp32:featheresp32 ${{ matrix.example }} 2>&1 | tee output.log
+          result_code=${PIPESTATUS[0]}
+          if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
+          echo ::endgroup::
+          if [ "$result_code" -eq "0" ]; then echo -e "\e[32mesp32:esp32:featheresp32 successfully compiled\e[0m"; else echo -e "\e[31mesp32:esp32:featheresp32 failed to compile\e[0m"; fi
+
+          echo ::group::STMicroelectronics:stm32:GenF4
+          arduino-cli compile --warnings more --config-file continuous_integration/arduino_cli.yaml --format text --fqbn STMicroelectronics:stm32:GenF4 ${{ matrix.example }} 2>&1 | tee output.log
+          result_code=${PIPESTATUS[0]}
+          if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
+          echo ::endgroup::
+          if [ "$result_code" -eq "0" ]; then echo -e "\e[32mSTMicroelectronics:stm32:GenF4 successfully compiled\e[0m"; else echo -e "\e[31mSTMicroelectronics:stm32:GenF4 failed to compile\e[0m"; fi
+
+          echo ::group::esp8266:esp8266:nodemcu
+          arduino-cli compile --warnings more --config-file continuous_integration/arduino_cli.yaml --format text --fqbn esp8266:esp8266:nodemcu ${{ matrix.example }} 2>&1 | tee output.log
+          result_code=${PIPESTATUS[0]}
+          if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
+          echo ::endgroup::
+          if [ "$result_code" -eq "0" ]; then echo -e "\e[32mesp8266:esp8266:nodemcu successfully compiled\e[0m"; else echo -e "\e[31mesp8266:esp8266:nodemcu failed to compile\e[0m"; fi
+
+          echo ::group::esp8266:esp8266:nodemcuv2
+          arduino-cli compile --warnings more --config-file continuous_integration/arduino_cli.yaml --format text --fqbn esp8266:esp8266:nodemcuv2 ${{ matrix.example }} 2>&1 | tee output.log
+          result_code=${PIPESTATUS[0]}
+          if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
+          echo ::endgroup::
+          if [ "$result_code" -eq "0" ]; then echo -e "\e[32mesp8266:esp8266:nodemcuv2 successfully compiled\e[0m"; else echo -e "\e[31mesp8266:esp8266:nodemcuv2 failed to compile\e[0m"; fi
+
+          echo ::group::esp32:esp32:esp32
+          arduino-cli compile --warnings more --config-file continuous_integration/arduino_cli.yaml --format text --fqbn esp32:esp32:esp32 ${{ matrix.example }} 2>&1 | tee output.log
+          result_code=${PIPESTATUS[0]}
+          if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
+          echo ::endgroup::
+          if [ "$result_code" -eq "0" ]; then echo -e "\e[32mesp32:esp32:esp32 successfully compiled\e[0m"; else echo -e "\e[31mesp32:esp32:esp32 failed to compile\e[0m"; fi
+
+          echo ::group::esp32:esp32:esp32c3
+          arduino-cli compile --warnings more --config-file continuous_integration/arduino_cli.yaml --format text --fqbn esp32:esp32:esp32c3 ${{ matrix.example }} 2>&1 | tee output.log
+          result_code=${PIPESTATUS[0]}
+          if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
+          echo ::endgroup::
+          if [ "$result_code" -eq "0" ]; then echo -e "\e[32mesp32:esp32:esp32c3 successfully compiled\e[0m"; else echo -e "\e[31mesp32:esp32:esp32c3 failed to compile\e[0m"; fi
+
+          echo ::group::esp32:esp32:esp32c6
+          arduino-cli compile --warnings more --config-file continuous_integration/arduino_cli.yaml --format text --fqbn esp32:esp32:esp32c6 ${{ matrix.example }} 2>&1 | tee output.log
+          result_code=${PIPESTATUS[0]}
+          if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
+          echo ::endgroup::
+          if [ "$result_code" -eq "0" ]; then echo -e "\e[32mesp32:esp32:esp32c6 successfully compiled\e[0m"; else echo -e "\e[31mesp32:esp32:esp32c6 failed to compile\e[0m"; fi
+
+          echo ::group::esp32:esp32:esp32s3
+          arduino-cli compile --warnings more --config-file continuous_integration/arduino_cli.yaml --format text --fqbn esp32:esp32:esp32s3 ${{ matrix.example }} 2>&1 | tee output.log
+          result_code=${PIPESTATUS[0]}
+          if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
+          echo ::endgroup::
+          if [ "$result_code" -eq "0" ]; then echo -e "\e[32mesp32:esp32:esp32s3 successfully compiled\e[0m"; else echo -e "\e[31mesp32:esp32:esp32s3 failed to compile\e[0m"; fi
+
+          echo ::group::teensy:avr:teensy36
+          arduino-cli compile --warnings more --config-file continuous_integration/arduino_cli.yaml --format text --fqbn teensy:avr:teensy36 ${{ matrix.example }} 2>&1 | tee output.log
+          result_code=${PIPESTATUS[0]}
+          if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
+          echo ::endgroup::
+          if [ "$result_code" -eq "0" ]; then echo -e "\e[32mteensy:avr:teensy36 successfully compiled\e[0m"; else echo -e "\e[31mteensy:avr:teensy36 failed to compile\e[0m"; fi
+
+          echo ::group::teensy:avr:teensy40
+          arduino-cli compile --warnings more --config-file continuous_integration/arduino_cli.yaml --format text --fqbn teensy:avr:teensy40 ${{ matrix.example }} 2>&1 | tee output.log
+          result_code=${PIPESTATUS[0]}
+          if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
+          echo ::endgroup::
+          if [ "$result_code" -eq "0" ]; then echo -e "\e[32mteensy:avr:teensy40 successfully compiled\e[0m"; else echo -e "\e[31mteensy:avr:teensy40 failed to compile\e[0m"; fi
 
           exit $status
 
-      - name: Uninstall testing version of Modular Sensors before caching
+      - name: Uninstall testing version of the library before caching
         run: |
-          arduino-cli --config-file continuous_integration/arduino_cli.yaml lib uninstall LoRa_AT
+          arduino-cli --config-file continuous_integration/arduino_cli.yaml lib uninstall ${GITHUB_REPOSITORY#*/}
+
+      - name: Cache Arduino platforms
+        uses: actions/cache/save@v4
+        id: cache_platforms
+        if: ${{ always() }}
+        with:
+          path: |
+            home/arduino/data
+          key: ${{ steps.restore_platforms.outputs.cache-primary-key }}
+
+      - name: Cache Arduino libraries
+        uses: actions/cache/save@v4
+        id: cache_libraries
+        if: ${{ always() && steps.check_lib_install.outputs.valid_lib_dep_script == 'true'}}
+        with:
+          path: |
+            home/arduino/user
+          key: ${{ steps.restore_libraries.outputs.cache-primary-key }}
 
   build_pio:
     name: PlatformIO ${{ matrix.example }} ${{ matrix.modem }}
@@ -179,44 +356,54 @@ jobs:
         modem: [LORA_AT_MDOT, LORA_AT_LORAE5]
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.x'
-          cache: 'pip'
+      - name: Setup PlatformIO
+        uses: EnviroDIY/setup-platformio-action@v1.0.2
 
-      # This should be pulled from cache, if there's not a new version
-      - name: Install PlatformIO
-        run: |
-          python -m pip install --upgrade pip
-          pip install --upgrade platformio
-
-      - name: Restore PlatformIO platforms and libraries
-        uses: actions/cache@v4
-        id: cache_libraries
+      - name: Restore PlatformIO platforms
+        uses: actions/cache/restore@v4
+        id: restore_platforms
         with:
           path: |
-            ~/.platformio
-          # if nothing in the example_dependencies.json file has changed, then it will
-          # be a "cache hit" and we can restore libraries from cache and not
-          # download them.  If it has changed we have to re-download.
-          key: ${{ hashFiles('./examples/example_dependencies.json') }}
+            ~/.platformio/packages
+            ~/.platformio/platforms
+            ~/.platformio/caches
+          key: ${{ hashFiles('continuous_integration/install-platforms-platformio.sh') }}
 
-      # Install the dependencies for PlatformIO
-      - name: Install the PlatformIO dependencies at global level
-        if: steps.cache_libraries.outputs.cache-hit != 'true'
+      # Install the PlatformIO platforms at global level, iff no cache
+      - name: Install PlatformIO platforms
+        id: install_platforms
+        if: steps.restore_platforms.outputs.cache-hit != 'true'
         run: |
-          chmod +x continuous_integration/install-deps-platformio.sh
-          sh continuous_integration/install-deps-platformio.sh
+          chmod +x continuous_integration/install-platforms-platformio.sh
+          sh continuous_integration/install-platforms-platformio.sh
+
+      - name: Restore PlatformIO libraries
+        uses: actions/cache/restore@v4
+        id: restore_libraries
+        if: ${{ steps.check_lib_install.outputs.valid_lib_dep_script == 'true'}}
+        with:
+          path: |
+            ~/.platformio/lib
+            $GITHUB_WORKSPACE/lib
+          key: ${{ hashFiles('continuous_integration/install-libraries-platformio.sh') }}
+
+      # Install any library dependencies with PlatformIO at the global level, iff no cache
+      - name: Install PlatformIO libraries
+        id: install_libraries
+        if: ${{ (steps.check_lib_install.outputs.valid_lib_dep_script == 'true') && (steps.restore_libraries.outputs.cache-hit != 'true') }}
+        run: |
+          chmod +x continuous_integration/install-libraries-platformio.sh
+          sh continuous_integration/install-libraries-platformio.sh
           cp -a /home/runner/.platformio/lib/. $GITHUB_WORKSPACE/lib/
 
-      # Install LoRa_AT at the Global level for PlatformIO
-      # Force install to get the right version
-      - name: Install the testing version of LoRa_AT for PlatformIO
+      # Install the library at the Global level for PlatformIO
+      - name: Install the testing version of the library for PlatformIO
+        id: install_test_library
         run: |
-          pio pkg install -g --library ${{ env.LIBRARY_INSTALL_GIT }}
+          pio pkg install --skip-dependencies -g --library ${{ env.LIBRARY_INSTALL_GIT }}
           pio pkg list -g --only-libraries
 
       - name: Include problem matcher
@@ -227,9 +414,139 @@ jobs:
           PLATFORMIO_CI_SRC: ${{ matrix.example }}
           LORA_AT_MODEM_TO_USE: ${{ matrix.modem }}
         run: |
-          sed -i 's/#define LORA_AT_MDOT/\/\/ #define LORA_AT_MDOT/g' ${{ matrix.example }}/*
-          platformio ci --verbose --project-option='build_flags=-D ${{ env.LORA_AT_MODEM_TO_USE }}' --project-option='framework=arduino' --board=mayfly --board=uno --board=leonardo --board=yun --board=megaatmega2560 --board=nano_every --board=uno_wifi_rev2 --board=genuino101 --board=uno_r4_wifi --board=dueUSB --board=mkr1000USB --board=mkrvidor4000 --board=zero --board=adafruit_feather_m0 --board=adafruit_feather_m4 --board=teensy31 --board=bluepill_f103c8 --board=uno_pic32 --board=esp01 --board=nodemcuv2 --board=esp32dev --board=featheresp32 --board=adafruit_feather_esp32s2 --board=esp32-c3-devkitm-1 --board=pico
+          set -e # Exit with nonzero exit code if anything fails
+          if [ "$RUNNER_DEBUG" = "1" ]; then
+              echo "Enabling debugging!"
+              set -v # Prints shell input lines as they are read.
+              set -x # Print command traces before executing command.
+          fi
 
-      - name: Uninstall testing version of Modular Sensors before caching
+          status=0
+
+          sed -i 's/#define LORA_AT_/\/\/ #define LORA_AT_/g' ${{ matrix.example }}/*
+          sed -i '1s/^/#define ${{ matrix.modem }} /' ${{ matrix.example }}/*
+
+          echo ::group::mayfly
+          pio ci --project-conf "continuous_integration/platformio.ini" --environment mayfly ${{ matrix.example }} 2>&1 | tee output.log
+          result_code=${PIPESTATUS[0]}
+          if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
+          echo ::endgroup::
+          if [ "$result_code" -eq "0" ]; then echo -e "\e[32mmayfly successfully compiled\e[0m"; else echo -e "\e[31mmayfly failed to compile\e[0m"; fi
+
+          echo ::group::uno
+          pio ci --project-conf "continuous_integration/platformio.ini" --environment uno ${{ matrix.example }} 2>&1 | tee output.log
+          result_code=${PIPESTATUS[0]}
+          if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
+          echo ::endgroup::
+          if [ "$result_code" -eq "0" ]; then echo -e "\e[32muno successfully compiled\e[0m"; else echo -e "\e[31muno failed to compile\e[0m"; fi
+
+          echo ::group::mega
+          pio ci --project-conf "continuous_integration/platformio.ini" --environment mega ${{ matrix.example }} 2>&1 | tee output.log
+          result_code=${PIPESTATUS[0]}
+          if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
+          echo ::endgroup::
+          if [ "$result_code" -eq "0" ]; then echo -e "\e[32mmega successfully compiled\e[0m"; else echo -e "\e[31mmega failed to compile\e[0m"; fi
+
+          echo ::group::leonardo
+          pio ci --project-conf "continuous_integration/platformio.ini" --environment leonardo ${{ matrix.example }} 2>&1 | tee output.log
+          result_code=${PIPESTATUS[0]}
+          if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
+          echo ::endgroup::
+          if [ "$result_code" -eq "0" ]; then echo -e "\e[32mleonardo successfully compiled\e[0m"; else echo -e "\e[31mleonardo failed to compile\e[0m"; fi
+
+          echo ::group::zero
+          pio ci --project-conf "continuous_integration/platformio.ini" --environment zero ${{ matrix.example }} 2>&1 | tee output.log
+          result_code=${PIPESTATUS[0]}
+          if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
+          echo ::endgroup::
+          if [ "$result_code" -eq "0" ]; then echo -e "\e[32mzero successfully compiled\e[0m"; else echo -e "\e[31mzero failed to compile\e[0m"; fi
+
+          echo ::group::nano_esp32
+          pio ci --project-conf "continuous_integration/platformio.ini" --environment nano_esp32 ${{ matrix.example }} 2>&1 | tee output.log
+          result_code=${PIPESTATUS[0]}
+          if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
+          echo ::endgroup::
+          if [ "$result_code" -eq "0" ]; then echo -e "\e[32mnano_esp32 successfully compiled\e[0m"; else echo -e "\e[31mnano_esp32 failed to compile\e[0m"; fi
+
+          echo ::group::feather328p
+          pio ci --project-conf "continuous_integration/platformio.ini" --environment feather328p ${{ matrix.example }} 2>&1 | tee output.log
+          result_code=${PIPESTATUS[0]}
+          if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
+          echo ::endgroup::
+          if [ "$result_code" -eq "0" ]; then echo -e "\e[32mfeather328p successfully compiled\e[0m"; else echo -e "\e[31mfeather328p failed to compile\e[0m"; fi
+
+          echo ::group::feather32u4
+          pio ci --project-conf "continuous_integration/platformio.ini" --environment feather32u4 ${{ matrix.example }} 2>&1 | tee output.log
+          result_code=${PIPESTATUS[0]}
+          if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
+          echo ::endgroup::
+          if [ "$result_code" -eq "0" ]; then echo -e "\e[32mfeather32u4 successfully compiled\e[0m"; else echo -e "\e[31mfeather32u4 failed to compile\e[0m"; fi
+
+          echo ::group::feather_m0
+          pio ci --project-conf "continuous_integration/platformio.ini" --environment feather_m0 ${{ matrix.example }} 2>&1 | tee output.log
+          result_code=${PIPESTATUS[0]}
+          if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
+          echo ::endgroup::
+          if [ "$result_code" -eq "0" ]; then echo -e "\e[32mfeather_m0 successfully compiled\e[0m"; else echo -e "\e[31mfeather_m0 failed to compile\e[0m"; fi
+
+          echo ::group::feather_m4
+          pio ci --project-conf "continuous_integration/platformio.ini" --environment feather_m4 ${{ matrix.example }} 2>&1 | tee output.log
+          result_code=${PIPESTATUS[0]}
+          if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
+          echo ::endgroup::
+          if [ "$result_code" -eq "0" ]; then echo -e "\e[32mfeather_m4 successfully compiled\e[0m"; else echo -e "\e[31mfeather_m4 failed to compile\e[0m"; fi
+
+          echo ::group::huzzah
+          pio ci --project-conf "continuous_integration/platformio.ini" --environment huzzah ${{ matrix.example }} 2>&1 | tee output.log
+          result_code=${PIPESTATUS[0]}
+          if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
+          echo ::endgroup::
+          if [ "$result_code" -eq "0" ]; then echo -e "\e[32mhuzzah successfully compiled\e[0m"; else echo -e "\e[31mhuzzah failed to compile\e[0m"; fi
+
+          echo ::group::featheresp32
+          pio ci --project-conf "continuous_integration/platformio.ini" --environment featheresp32 ${{ matrix.example }} 2>&1 | tee output.log
+          result_code=${PIPESTATUS[0]}
+          if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
+          echo ::endgroup::
+          if [ "$result_code" -eq "0" ]; then echo -e "\e[32mfeatheresp32 successfully compiled\e[0m"; else echo -e "\e[31mfeatheresp32 failed to compile\e[0m"; fi
+
+          echo ::group::esp32-c3
+          pio ci --project-conf "continuous_integration/platformio.ini" --environment esp32-c3 ${{ matrix.example }} 2>&1 | tee output.log
+          result_code=${PIPESTATUS[0]}
+          if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
+          echo ::endgroup::
+          if [ "$result_code" -eq "0" ]; then echo -e "\e[32mesp32-c3 successfully compiled\e[0m"; else echo -e "\e[31mesp32-c3 failed to compile\e[0m"; fi
+
+          echo ::group::esp32-s3
+          pio ci --project-conf "continuous_integration/platformio.ini" --environment esp32-s3 ${{ matrix.example }} 2>&1 | tee output.log
+          result_code=${PIPESTATUS[0]}
+          if [ "$result_code" -eq "0" ] && [ "$status" -eq "0" ]; then status=0; else status=1; fi
+          echo ::endgroup::
+          if [ "$result_code" -eq "0" ]; then echo -e "\e[32mesp32-s3 successfully compiled\e[0m"; else echo -e "\e[31mesp32-s3 failed to compile\e[0m"; fi
+
+          exit $status
+
+      - name: Uninstall testing version before caching
         run: |
-          pio pkg uninstall -g --library LoRa_AT
+          pio pkg uninstall --skip-dependencies -g --library LoRa_AT
+
+      - name: Cache PlatformIO platforms
+        uses: actions/cache/save@v4
+        id: cache_platforms
+        if: ${{ always() }}
+        with:
+          path: |
+            ~/.platformio/packages
+            ~/.platformio/platforms
+            ~/.platformio/caches
+          key: ${{ steps.restore_platforms.outputs.cache-primary-key }}
+
+      - name: Cache PlatformIO libraries
+        uses: actions/cache/save@v4
+        id: cache_libraries
+        if: ${{ always() && steps.check_lib_install.outputs.valid_lib_dep_script == 'true'}}
+        with:
+          path: |
+            ~/.platformio/lib
+            $GITHUB_WORKSPACE/lib
+          key: ${{ steps.restore_libraries.outputs.cache-primary-key }}

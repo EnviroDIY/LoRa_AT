@@ -790,13 +790,18 @@ class LoRa_AT_LoRaE5 : public LoRa_AT_Modem<LoRa_AT_LoRaE5>,
     size_t bytesSent = 0;
 
     GsmConstStr at_msg_cmd;
+#ifdef LORA_AT_SEND_HEX
+    at_msg_cmd = GF("+MSGHEX");
+#else
     if (_requireConfirmation && len > 0) {
       at_msg_cmd = GF("+CMSG");  // cannot carry 0 payload
     } else if (_requireConfirmation) {
+      // must use CMSGHEX to have confirmation and 0 payload
       at_msg_cmd = GF("+CMSGHEX");
     } else {
       at_msg_cmd = GF("+MSG");
     }
+#endif
 
     do {
       // make no more than 5 attempts at the single send command
@@ -838,8 +843,13 @@ class LoRa_AT_LoRaE5 : public LoRa_AT_Modem<LoRa_AT_LoRaE5>,
           stream.write("AT");
           stream.print(at_msg_cmd);
           stream.write("=\"");
+#ifdef LORA_AT_SEND_HEX
+          // write everything as hex characters
+          writeHex(txPtr, sendLength);
+#else
           // write out the number of bytes that are available for this uplink
           stream.write(reinterpret_cast<const uint8_t*>(txPtr), sendLength);
+#endif
           stream.write('"');
           // finish with a new line
           stream.println();

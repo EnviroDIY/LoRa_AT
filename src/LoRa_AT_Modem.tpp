@@ -1157,6 +1157,36 @@ class LoRa_AT_Modem {
     return thisModem().stream.find(const_cast<char*>(&target), 1);
   }
 
+#if !defined(LORA_AT_SEND_PLAIN)
+/**
+ * @brief A flag to force data to be sent as characters instead of as hex
+ * values.
+ *
+ * When using AT commands, writing data as charaters can cause the AT command to
+ * fail if there's a new line or carriage return in the message. The CR/NL is
+ * interpreted as the end of the send command rather than as part of the
+ * message. Because LoRa messages are compressed, there may be NL/CR returns in
+ * the text.
+ */
+#define LORA_AT_SEND_HEX
+  // A function to convert a character/uint8_t buffer to hex
+  void writeHex(const uint8_t* buf, size_t size) {
+    for (size_t i = 0; i < size; i++) {
+      if (buf[i] < 16) thisModem().stream.print('0');
+      thisModem().stream.print(buf[i], HEX);
+    }
+  }
+  // A function to convert a character/uint8_t buffer to hex
+  void writeHex(uint8_t* buf, size_t size) {
+    for (size_t i = 0; i < size; i++) {
+      if (buf[i] < 16) thisModem().stream.print('0');
+      thisModem().stream.print(buf[i], HEX);
+    }
+  }
+#else
+#define writeHex(...)
+#endif
+
   void parseChannelMask(const char* mask, uint8_t* channelsMask) {
     // the input mask must be MSB - most significant first
     if (strlen(mask) > 0) {
