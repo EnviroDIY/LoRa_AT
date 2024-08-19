@@ -245,7 +245,7 @@ class LoRa_AT_Modem {
                       GsmConstStr r3 = nullptr, GsmConstStr r4 = nullptr,
                       GsmConstStr r5 = nullptr, GsmConstStr r6 = nullptr,
                       GsmConstStr r7 = nullptr) {
-    return waitResponse(1000L, r1, r2, r3, r4, r5, r6, r7);
+    return waitResponse(5000L, r1, r2, r3, r4, r5, r6, r7);
   }
 
   /**

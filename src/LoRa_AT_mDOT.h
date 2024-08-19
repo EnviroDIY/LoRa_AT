@@ -601,7 +601,7 @@ class LoRa_AT_mDOT : public LoRa_AT_Modem<LoRa_AT_mDOT>,
       String epoch_str = "";
       epoch_str.reserve(16);
       // Wait for final OK
-      bool got_ok = waitResponse(5000L, epoch_str) == 1;
+      bool got_ok = waitResponse(15000L, epoch_str) == 1;
       if (got_ok) {
         epoch_str.replace(AT_NL "OK" AT_NL, "");
         epoch_str.trim();
@@ -618,8 +618,10 @@ class LoRa_AT_mDOT : public LoRa_AT_Modem<LoRa_AT_mDOT>,
         epoch_time = epoch_str.toInt();
       } else {
         // delay before the next attempt
-        DBG(GF("Delay 5s before next time request attempt"));
-        delay(5000L);
+        DBG(GF("Delay 10s before next time request attempt"));
+        delay(10000L);
+        // dump out anything, in case the time came in after the ok
+        loraStream->dumpModemBuffer(10000L);
       }
     }
 
