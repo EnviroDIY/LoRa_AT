@@ -6,6 +6,12 @@ on:
     paths:
       - 'VERSION' # Push events when the VERSION file changes
   workflow_dispatch:
+    inputs:
+      include_dependencies:
+        description: 'True to include a zip file with dependencies in the release'
+        required: false
+        type: boolean
+        default: true
 
 name: Create a New Release
 
@@ -21,7 +27,6 @@ jobs:
           [
             verify_library_structure.yaml,
             build_examples.yaml,
-            build_documentation.yaml,
           ]
     name: Wait for Checks to complete
     runs-on: ubuntu-latest
@@ -45,5 +50,4 @@ jobs:
     uses: EnviroDIY/workflows/.github/workflows/prepare_release.yaml@main
     secrets: inherit
     with:
-      library-manager: 'update'
-      library-compliance: 'strict'
+      include_dependencies: ${{ inputs.include_dependencies }}
