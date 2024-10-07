@@ -60,7 +60,8 @@
   __attribute__((error("Not available on this modem type")))
 #define LORA_AT_ATTR_NOT_IMPLEMENTED __attribute__((error("Not implemented")))
 
-#if defined(__AVR__) && !defined(__AVR_ATmega4809__)
+#if (defined(__AVR__) || defined(ARDUINO_ARCH_AVR)) && \
+    !defined(__AVR_ATmega4809__)
 #define LORA_AT_PROGMEM PROGMEM
 typedef const __FlashStringHelper* GsmConstStr;
 #define GFP(x) (reinterpret_cast<GsmConstStr>(x))

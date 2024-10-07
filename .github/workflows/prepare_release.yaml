@@ -50,4 +50,4 @@ jobs:
     uses: EnviroDIY/workflows/.github/workflows/prepare_release.yaml@main
     secrets: inherit
     with:
-      include_dependencies: ${{ inputs.include_dependencies }}
+      include_dependencies: ${{ ( true ) || (github.event_name == 'workflow_dispatch' && github.event.inputs.publish == 'true') }}

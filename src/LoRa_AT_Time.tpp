@@ -22,7 +22,7 @@ enum LoRa_AT_EpochStart {
   Y2K = 1,   ///< Use an epoch starting 1/1/2000, as some RTC's and Arduinos do
             ///< (946684800s ahead of UNIX epoch, 630806400s ahead of GPS epoch)
   GPS = 2  ///< Use the GPS epoch starting Jan 5, 1980 (315878400s ahead of UNIX
-           ///< epoch, 630806400s behind of GPS epoch)
+           ///< epoch, 630806400s behind of Y2K epoch)
 };
 
 template <class modemType>
