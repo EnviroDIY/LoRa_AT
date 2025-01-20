@@ -23,7 +23,8 @@
       "README.md",
       "keywords.txt",
       "src/*",
-      "examples/*"
+      "examples/*",
+      "extras/*"
     ]
   },
   "frameworks": ["arduino", "energia", "wiringpi"],

@@ -301,7 +301,7 @@ class LoRa_AT_LoRaE5 : public LoRa_AT_Modem<LoRa_AT_LoRaE5>,
   bool joinABPImpl(const char* devAddr, const char* nwkSKey,
                    const char* appSKey, int uplinkCounter = 1,
                    int      downlinkCounter = 0,
-                   uint32_t timeout         = DEFAULT_JOIN_TIMEOUT) {
+                   uint32_t= DEFAULT_JOIN_TIMEOUT) {
     sendAT(GF("+ID=DevAddr, \""), devAddr, '"');  // set the device address
     waitResponse(GF("+ID: DevAddr"));             // echos the set command
     streamFind('\n');  // throw away the echoed Device Address
@@ -745,7 +745,7 @@ class LoRa_AT_LoRaE5 : public LoRa_AT_Modem<LoRa_AT_LoRaE5>,
     return (int8_t)((resp / 255.) * 100.);
   }
 
-  bool getBattStatsImpl(int8_t& chargeState, int8_t& percent,
+  bool getBattStatsImpl(int8_t& , int8_t& percent,
                         int16_t& milliVolts) {
     sendAT(GF("+LW=BAT"));
     bool wasOk = waitResponse(GF("+LW: BAT,")) == 1;
