@@ -1086,8 +1086,9 @@ EXCLUDE                = ../home\
                          ../lib \
                          ../boards \
                          ../variants \
-                           /css\
-                         ../continuous_integration_artifacts
+                           /css \
+                         ../continuous_integration_artifacts \
+                         ../AT Manuals
 
 # The EXCLUDE_SYMLINKS tag can be used to select whether or not files or
 # directories that are symbolic links (a Unix file system feature) are excluded
