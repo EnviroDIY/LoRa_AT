@@ -20,6 +20,15 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ***
 
+## [0.3.1] 2025-01-21
+
+### Fixed
+
+- Fixed overly greedy consumption of module debug output.
+- Fixed some unused var warnings
+
+***
+
 ## [0.3.0] 2024-08-19
 
 ### Changed
@@ -51,7 +60,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ***
 
-[Unreleased]: https://github.com/EnviroDIY/LoRa_AT/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/EnviroDIY/LoRa_AT/compare/v0.3.1...HEAD
+[0.3.1]: https://github.com/EnviroDIY/LoRa_AT/releases/tag/v0.3.1
 [0.3.0]: https://github.com/EnviroDIY/LoRa_AT/releases/tag/v0.3.0
 [0.2.0]: https://github.com/EnviroDIY/LoRa_AT/releases/tag/v0.2.0
 [0.1.0]: https://github.com/EnviroDIY/LoRa_AT/releases/tag/v0.1.0
