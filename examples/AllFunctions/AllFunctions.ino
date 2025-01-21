@@ -30,7 +30,7 @@ SoftwareSerial SerialAT(2, 3);  // RX, TX
 #endif
 
 // See all AT commands, if wanted
-// #define DUMP_AT_COMMANDS
+// #define DUMP_LORA_AT_COMMANDS
 
 // Define the serial console for debug prints, if needed
 // #define LORA_AT_DEBUG SerialMon
@@ -104,7 +104,7 @@ int8_t lora_wake_edge = 0;
 #define LORA_AT_TEST_ABP false
 #endif
 
-#ifdef DUMP_AT_COMMANDS
+#ifdef DUMP_LORA_AT_COMMANDS
 #include <StreamDebugger.h>
 StreamDebugger debugger(SerialAT, SerialMon);
 LoRa_AT        modem(debugger);

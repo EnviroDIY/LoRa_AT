@@ -145,12 +145,16 @@ class LoRa_AT_LoRaE5 : public LoRa_AT_Modem<LoRa_AT_LoRaE5>,
     DBG(GF("### LoRa_AT Version:"), LORA_AT_VERSION);
     DBG(GF("### LoRa_AT Compiled Module:  LoRa_AT_LoRaE5"));
 
-    if (!testAT()) { return false; }
+    if (!testAT(15000L)) { return false; }
+    // After reset, it may take >15s to wake
 
 #ifdef LORA_AT_DEBUG
     sendAT(GF("+LOG=DEBUG"));  // turn on verbose error codes
-    waitResponse(GF("+LOG: DEBUG"));
-    streamFind('\n');  // throw away the new line
+    // waitResponse(GF("+LOG: DEBUG"));
+    // ^^ NOTE: the response would be eaten by waitResponse without returning
+    // before the timeout, because the response starts with AT_VERBOSE="+LOG"
+    // instead, just read and throw away up to the next new line
+    LORA_AT_DEBUG.print(stream.readStringUntil('\n'));
 #else
     sendAT(GF("+LOG=QUIET"));  // turn off verbose error codes
     waitResponse(GF("+LOG: QUIET"));
@@ -204,7 +208,10 @@ class LoRa_AT_LoRaE5 : public LoRa_AT_Modem<LoRa_AT_LoRaE5>,
     if (!testAT()) { return false; }
     sendAT(GF("+RESET"));  // Reset (restart) the CPU
     bool resp = waitResponse(GF("+RESET: OK")) == 1;
-    if (resp) { return init(); };
+    if (resp) {
+      delay(5000L);  // give it a chance to reset
+      return init();
+    };
     return false;
   }
 

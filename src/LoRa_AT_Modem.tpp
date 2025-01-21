@@ -926,14 +926,17 @@ class LoRa_AT_Modem {
           // should be either 1 ('\r' or '\n') or 2 ("\r\n"))
           int len_atnl = strnlen(AT_NL, 3);
           // Read out the verbose message, until the last character of the new
-          // line
-          data += thisModem().stream.readStringUntil(AT_NL[len_atnl]);
-#ifdef TINY_GSM_DEBUG_DEEP
+          // line.  Use AT_NL[len_atnl-1], not AT_NL[len_atnl], because we're
+          // looking for the last character, not the closing '\0' of the string
+          // buffer.
+          data += thisModem().stream.readStringUntil(AT_NL[len_atnl - 1]);
+#if defined(LORA_AT_DEBUG) and !defined(DUMP_LORA_AT_COMMANDS)
           data.trim();
           DBG(GF("Verbose details <<<"), data, GF(">>>"));
 #endif
           data = "";
-          goto finish;
+          // NOTE: Do **NOT** go to finish!  Keep listening for the requested
+          // response!
         }
 #endif
         else if (thisModem().handleURCs(data)) {
