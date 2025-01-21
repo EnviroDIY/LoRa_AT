@@ -93,6 +93,8 @@ filters/*
 
 # Other Stuff
 home
+generateKeywords.bat
 runDoxygen.bat
+runDoxygen_archive.bat
 docs/Makefile
 AT Manuals
