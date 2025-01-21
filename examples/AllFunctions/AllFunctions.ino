@@ -1,9 +1,15 @@
-/**************************************************************
- * NOTE:
- * Some of the functions may be unavailable for your modem.
- * Just comment them out.
+/** =========================================================================
+ * @example{lineno} AllFunctions.ino
+ * @author Sara Damiano <sdamiano@stroudcenter.org>
+ * @copyright Stroud Water Research Center
+ * @license This example is published under the BSD-3 license.
  *
- **************************************************************/
+ * @brief This example demonstrates almost all possible functionality of the library.
+ *
+ * @note Some of the functions may be unavailable for your modem - just comment them out.
+ *
+ * @m_examplenavigation{example_all_functions,}
+ * ======================================================================= */
 
 // Select your modem:
 // #define LORA_AT_MDOT

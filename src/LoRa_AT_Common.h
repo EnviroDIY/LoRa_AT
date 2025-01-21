@@ -21,38 +21,42 @@
 #endif
 #endif
 
-#ifndef LORA_AT_YIELD_MS
 /**
+ * @def LORA_AT_YIELD_MS
  * @brief The length of time in milliseconds to "yield" waiting for a new
  * character to arrive from the modem stream. This may be needed for slow baud
  * rates.
  */
+#ifndef LORA_AT_YIELD_MS
 #define LORA_AT_YIELD_MS 0
 #endif
 
-#ifndef LORA_AT_YIELD
 /**
+ * @def LORA_AT_YIELD
  * @brief A function to yield by delaying #LORA_AT_YIELD_MS.
  */
+#ifndef LORA_AT_YIELD
 #define LORA_AT_YIELD() \
   { delay(LORA_AT_YIELD_MS); }
 #endif
 
-#if !defined(LORA_AT_RX_BUFFER)
 /**
+ * @def LORA_AT_RX_BUFFER
  * @brief The length of the receiving buffer.
  */
+#if !defined(LORA_AT_RX_BUFFER)
 #define LORA_AT_RX_BUFFER 256
 #endif
 
-#if !defined(LORA_AT_DL_CHECK)
 /**
+ * @def LORA_AT_DL_CHECK
  * @brief How frequently to check for downlinks in the maintain function.
  *
  * @warning It is NOT good practice in LoRaWAN to check frequently for
  * downlinks.  For this reason, the maintain function should not be regularly
  * used.
  */
+#if !defined(LORA_AT_DL_CHECK)
 #define LORA_AT_DL_CHECK 30000L
 #endif
 

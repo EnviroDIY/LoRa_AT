@@ -1,4 +1,4 @@
-# LoRa_AT
+# LoRa_AT<!--!{#mainpage}-->
 
 A small Arduino library for AT command based LoRa modules, that just works.
 
@@ -10,6 +10,6 @@ I may merge it in later.
 
 __________
 
-## License
+## License<!--!{#mainpage_license}-->
 This project is released under
 The GNU Lesser General Public License (LGPL-3.0)
