@@ -251,7 +251,7 @@ class LoRa_AT_mDOT : public LoRa_AT_Modem<LoRa_AT_mDOT>,
   }
 
   bool joinOTAAImpl(const char* appEui, const char* appKey, const char* devEui,
-                    uint32_t timeout, bool useHex) {
+                    bool useHex, int8_t attempts, uint32_t initialBackoff) {
     sendAT(GF("+NJM=1"));  // Configure mDot for OTAA join mode (default)
     waitResponse();
     sendAT(GF("+NI="), !useHex, ',', appEui);  // set the app EUI (network id)
@@ -263,14 +263,13 @@ class LoRa_AT_mDOT : public LoRa_AT_Modem<LoRa_AT_mDOT>,
       waitResponse();
     }
     committSettings();            // save configuration changes
-    join(5, timeout);             // join the network
+    join(attempts, initialBackoff);  // join the network
     return isNetworkConnected();  // verify that we're connected
   }
 
-  bool joinABPImpl(const char* devAddr, const char* nwkSKey,
-                   const char* appSKey, int uplinkCounter = 1,
-                   int      downlinkCounter = 0,
-                   uint32_t timeout         = DEFAULT_JOIN_TIMEOUT) {
+  bool joinABPImpl(String devAddr, String nwkSKey, String appSKey,
+                   int uplinkCounter, int downlinkCounter, int8_t attempts,
+                   uint32_t initialBackoff) {
     sendAT(GF("+NJM=0"));  // Configure mDot for manual provisioning (ABP)
     waitResponse();
     sendAT(GF("+NA="), devAddr);  // set the network address (device address)
@@ -289,10 +288,11 @@ class LoRa_AT_mDOT : public LoRa_AT_Modem<LoRa_AT_mDOT>,
       waitResponse();
     }
     committSettings();            // save configuration changes
-    return isNetworkConnected();  // verify that we're connected
+    return isNetworkConnected(attempts,
+                              initialBackoff);  // verify that we're connected
   }
 
-  bool isNetworkConnectedImpl() {
+  bool isNetworkConnectedImpl(int8_t attempts, uint32_t initialBackoff) {
     // NOTE: The network join status depends on the link check count and the
     // link check threshold to look for previous ACK's or network link checks
     // and decide if the module is on the network or not. It may not be
@@ -305,12 +305,14 @@ class LoRa_AT_mDOT : public LoRa_AT_Modem<LoRa_AT_mDOT>,
     // _networkConnected = resp;
     // if (!resp) {
 
-    int8_t tries_remaining = 10;
+    int8_t tries_remaining = attempts;
+    int8_t attempts_made   = 0;
     int    _link_margin    = 255;
     while (_link_margin == 255 && tries_remaining) {
       DBG(GF("Sending LinkCheckReq"), tries_remaining, GF("tries remaining"));
       sendAT(GF("+NLC"));
       tries_remaining--;
+      attempts_made++;
 
       // If there is downlink data available, it will be returned before the
       // "OK" from the NLC command.  Unfortunately, there will be no warning
@@ -351,8 +353,8 @@ class LoRa_AT_mDOT : public LoRa_AT_Modem<LoRa_AT_mDOT>,
         waitResponse();  // catch the "ERROR"
       } else {
         // delay before the next attempt
-        DBG(GF("Delay 5s before next LinkCheckReq attempt"));
-        delay(5000L);
+        uint32_t backoff = calculateBackoff(attempts_made - 1, initialBackoff);
+        delay(backoff);
       }
     }
     if (_link_margin != 255) {
@@ -402,7 +404,7 @@ class LoRa_AT_mDOT : public LoRa_AT_Modem<LoRa_AT_mDOT>,
 
   // This is not configurable on the mDOT.  It's set at the factory based on the
   // module type.
-  bool setBandImpl(const char* band) {
+  bool setBandImpl(const char*) {
     return false;
   }
   String getBandImpl() {
@@ -669,6 +671,9 @@ class LoRa_AT_mDOT : public LoRa_AT_Modem<LoRa_AT_mDOT>,
     // Wait for final OK
     bool wasOk = waitResponse() == 1;
     percent    = (int8_t)((resp / 255.) * 100.);
+    // Charge state and millivolts aren't returned by this module
+    chargeState = -1;
+    milliVolts  = -9999;
     return wasOk;
   }
 
@@ -846,18 +851,22 @@ class LoRa_AT_mDOT : public LoRa_AT_Modem<LoRa_AT_mDOT>,
     return resp;
   }
 
-  bool join(uint8_t attempts, uint32_t timeout, bool force = false) {
+  bool join(uint8_t attempts, uint32_t initialBackoff, bool force = false) {
     // try multiple times to join
     bool    success            = false;
     uint8_t attempts_remaining = attempts;
+    int8_t  attempts_made      = 0;
     while (!success && attempts_remaining) {
 #ifdef LORA_AT_DEBUG
       uint32_t start = millis();
 #endif
       sendAT(force ? GF("+JOIN=1") : GF("+JOIN"));
       attempts_remaining--;
+      attempts_made++;
+      // The maximum settable join delay for non-default connections is 15s, so
+      // hopefully this will return before that.
       int8_t join_resp = waitResponse(
-          timeout, GF("Successfully joined network" AT_NL),
+          15000L, GF("Successfully joined network" AT_NL),
           GF("Failed to join network" AT_NL), GF("Join backoff" AT_NL));
       waitResponse();        // returns an ok or error after the join message
       if (join_resp == 1) {  // if we succeeded
@@ -870,9 +879,13 @@ class LoRa_AT_mDOT : public LoRa_AT_Modem<LoRa_AT_mDOT>,
             attempts_remaining, GF("attempts remaining"));
         // check how long we need to wait for a free channel before next attempt
         uint32_t transmit_wait = getNextTransmit();
-        DBG(GF("Waiting"), transmit_wait,
+        // calculate backoff
+        uint32_t backoff = calculateBackoff(attempts_made - 1, initialBackoff);
+        // Delay at least until the next channel is free, or to the calculated
+        // backoff, whichever is larger.
+        DBG(GF("Waiting"), max(transmit_wait + 100L, backoff),
             GF("ms for a free channel before next join attempt."));
-        delay(transmit_wait + 100L);
+        delay(max(transmit_wait + 100L, backoff));
       }
     }
     return success;

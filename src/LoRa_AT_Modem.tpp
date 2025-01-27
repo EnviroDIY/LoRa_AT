@@ -10,8 +10,12 @@
 
 #include "LoRa_AT_Common.h"
 
-#ifndef DEFAULT_JOIN_TIMEOUT
-#define DEFAULT_JOIN_TIMEOUT 60000L
+#ifndef DEFAULT_JOIN_ATTEMPTS
+#define DEFAULT_JOIN_ATTEMPTS 10
+#endif
+
+#ifndef DEFAULT_INITIAL_BACKOFF
+#define DEFAULT_INITIAL_BACKOFF 5000L
 #endif
 
 #ifndef DEFAULT_MESSAGE_TIMEOUT
@@ -383,14 +387,20 @@ class LoRa_AT_Modem {
    * false. If using 16 bytes of hex data, set useHex to true.
    * @param devEui The device EUI. This must be 16 bytes of hex data.
    * @param useHex True if the appKey and appEUI are in hex; false for standard
-   * strings
-   * @param timeout A timeout to wait for successful join
-   * @return *true* The network join was successful
-   * @return *false* The network join failed
+   * strings; optional with a default value of false.
+   * @param attempts The number of attempts to make for successful join;
+   * optional with a default value of #DEFAULT_JOIN_ATTEMPTS.
+   * @param backoff The initial backoff delay before retrying after a failed
+   * join attempt. After the first failure, the delay will be increased
+   * exponentially, with a 20% jitter to avoid collisions. Optional, with a
+   * default value of #DEFAULT_INITIAL_BACKOFF
+   * @return True if the network join was successful; false if it failed.
    */
   bool joinOTAA(const char* appEui, const char* appKey, const char* devEui,
-                uint32_t timeout = DEFAULT_JOIN_TIMEOUT, bool useHex = true) {
-    return thisModem().joinOTAAImpl(appEui, appKey, devEui, timeout, useHex);
+                bool useHex = true, int8_t attempts = DEFAULT_JOIN_ATTEMPTS,
+                uint32_t initialBackoff = DEFAULT_INITIAL_BACKOFF) {
+    return thisModem().joinOTAAImpl(appEui, appKey, devEui, useHex, attempts,
+                                    initialBackoff);
   }
 
   /**
@@ -404,14 +414,21 @@ class LoRa_AT_Modem {
    * @param appKey The app key (Network key). If using a string, set useHex to
    * false. If using 8 bytes of hex data, set useHex to true.
    * @param useHex True if the appKey and appEUI are in hex; false for standard
-   * strings
-   * @param timeout A timeout to wait for successful join
+   * strings; optional with a default value of false.
+   * @param attempts The number of attempts to make for successful join;
+   * optional with a default value of #DEFAULT_JOIN_ATTEMPTS.
+   * @param backoff The initial backoff delay before retrying after a failed
+   * join attempt. After the first failure, the delay will be increased
+   * exponentially, with a 20% jitter to avoid collisions. Optional, with a
+   * default value of #DEFAULT_INITIAL_BACKOFF
    * @return True if the network join was successful; false if the network join
    * failed
    */
-  bool joinOTAA(String appEui, String appKey,
-                uint32_t timeout = DEFAULT_JOIN_TIMEOUT, bool useHex = true) {
-    return joinOTAA(appEui.c_str(), appKey.c_str(), nullptr, timeout, useHex);
+  bool joinOTAA(String appEui, String appKey, bool useHex = true,
+                int8_t   attempts       = DEFAULT_JOIN_ATTEMPTS,
+                uint32_t initialBackoff = DEFAULT_INITIAL_BACKOFF) {
+    return joinOTAA(appEui.c_str(), appKey.c_str(), nullptr, useHex, attempts,
+                    initialBackoff);
   }
 
 
@@ -421,13 +438,23 @@ class LoRa_AT_Modem {
    *
    * @param appEui The app EUI (Network ID)
    * @param appKey The app key (Network key)
+   * @param devEui The device EUI. This must be 16 bytes of hex data.
+   * @param useHex True if the appKey and appEUI are in hex; false for standard
+   * strings; optional with a default value of false.
+   * @param attempts The number of attempts to make for successful join;
+   * optional with a default value of #DEFAULT_JOIN_ATTEMPTS.
+   * @param backoff The initial backoff delay before retrying after a failed
+   * join attempt. After the first failure, the delay will be increased
+   * exponentially, with a 20% jitter to avoid collisions. Optional, with a
+   * default value of #DEFAULT_INITIAL_BACKOFF
    * @return True if the network join was successful; false if the network join
    * failed
    */
-  bool joinOTAA(String appEui, String appKey, String devEui,
-                uint32_t timeout = DEFAULT_JOIN_TIMEOUT, bool useHex = false) {
-    return joinOTAA(appEui.c_str(), appKey.c_str(), devEui.c_str(), timeout,
-                    useHex);
+  bool joinOTAA(String appEui, String appKey, String devEui, bool useHex = true,
+                int8_t   attempts       = DEFAULT_JOIN_ATTEMPTS,
+                uint32_t initialBackoff = DEFAULT_INITIAL_BACKOFF) {
+    return joinOTAA(appEui.c_str(), appKey.c_str(), devEui.c_str(), useHex,
+                    attempts, initialBackoff);
   }
 
   /**
@@ -438,15 +465,29 @@ class LoRa_AT_Modem {
    * @param nwkSKey The network session key. This must be 16 bytes of hex data.
    * @param appSKey The app session key (data session key). This must be 16
    * bytes of hex data.
-   * @param timeout A timeout to wait for successful join
+   * @param uplinkCounter The number of prior uplinks by the device using these
+   * ABP credentials. If the number of prior uplinks listed in the join attempt
+   * does not line up with what the server reports, the join will probably fail.
+   * Optional with a default value of 1.
+   * @param downlinkCounter The number of prior downlinks by the device using
+   * these ABP credentials. If the number of prior downlinks listed in the join
+   * attempt does not line up with what the server reports, the join will
+   * probably fail. Optional with a default value of 0.
+   * @param attempts The number of attempts to make for successful join;
+   * optional with a default value of #DEFAULT_JOIN_ATTEMPTS.
+   * @param backoff The initial backoff delay before retrying after a failed
+   * join attempt. After the first failure, the delay will be increased
+   * exponentially, with a 20% jitter to avoid collisions. Optional, with a
+   * default value of #DEFAULT_INITIAL_BACKOFF
    * @return True if the network join was successful; false if the network join
    * failed
    */
   bool joinABP(const char* devAddr, const char* nwkSKey, const char* appSKey,
                int uplinkCounter = 1, int downlinkCounter = 0,
-               uint32_t timeout = DEFAULT_JOIN_TIMEOUT) {
+               int8_t   attempts       = DEFAULT_JOIN_ATTEMPTS,
+               uint32_t initialBackoff = DEFAULT_INITIAL_BACKOFF) {
     return thisModem().joinABPImpl(devAddr, nwkSKey, appSKey, uplinkCounter,
-                                   downlinkCounter, timeout);
+                                   downlinkCounter, attempts, initialBackoff);
   }
 
   /**
@@ -458,14 +499,29 @@ class LoRa_AT_Modem {
    * @param nwkSKey The network session key. This must be 16 bytes of hex data.
    * @param appSKey The app session key (data session key). This must be 16
    * bytes of hex data.
+   * @param uplinkCounter The number of prior uplinks by the device using these
+   * ABP credentials. If the number of prior uplinks listed in the join attempt
+   * does not line up with what the server reports, the join will probably fail.
+   * Optional with a default value of 1.
+   * @param downlinkCounter The number of prior downlinks by the device using
+   * these ABP credentials. If the number of prior downlinks listed in the join
+   * attempt does not line up with what the server reports, the join will
+   * probably fail. Optional with a default value of 0.
+   * @param attempts The number of attempts to make for successful join;
+   * optional with a default value of #DEFAULT_JOIN_ATTEMPTS.
+   * @param backoff The initial backoff delay before retrying after a failed
+   * join attempt. After the first failure, the delay will be increased
+   * exponentially, with a 20% jitter to avoid collisions. Optional, with a
+   * default value of #DEFAULT_INITIAL_BACKOFF
    * @return True if the network join was successful; false if the network join
    * failed
    */
   bool joinABP(String devAddr, String nwkSKey, String appSKey,
                int uplinkCounter = 1, int downlinkCounter = 0,
-               uint32_t timeout = DEFAULT_JOIN_TIMEOUT) {
+               int8_t   attempts       = DEFAULT_JOIN_ATTEMPTS,
+               uint32_t initialBackoff = DEFAULT_INITIAL_BACKOFF) {
     return joinABP(devAddr.c_str(), nwkSKey.c_str(), appSKey.c_str(),
-                   uplinkCounter, downlinkCounter, timeout);
+                   uplinkCounter, downlinkCounter, attempts, initialBackoff);
   }
   /**
    * @brief Confirm whether the module is currently connected to the LoRaWAN
@@ -474,8 +530,10 @@ class LoRa_AT_Modem {
    * @return True if the module is connected to the network; false if the module
    * is not connected to the network
    */
-  bool isNetworkConnected() {
-    bool isConnected  = thisModem().isNetworkConnectedImpl();
+  bool isNetworkConnected(int8_t   attempts       = DEFAULT_JOIN_ATTEMPTS,
+                          uint32_t initialBackoff = DEFAULT_INITIAL_BACKOFF) {
+    bool isConnected  = thisModem().isNetworkConnectedImpl(attempts,
+                                                           initialBackoff);
     _networkConnected = isConnected;
     return isConnected;
   }
@@ -862,7 +920,7 @@ class LoRa_AT_Modem {
     return thisModem().waitResponse() == 1;
   }
 
-  bool testATImpl(uint32_t timeout_ms = 10000L) {
+  bool testATImpl(uint32_t timeout_ms) {
     for (uint32_t start = millis(); millis() - start < timeout_ms;) {
       thisModem().sendAT(GF(""));
       if (thisModem().waitResponse(200) == 1) { return true; }
@@ -872,12 +930,9 @@ class LoRa_AT_Modem {
   }
 
   // TODO(vshymanskyy): Optimize this!
-  int8_t waitResponseImpl(uint32_t timeout_ms, String& data,
-                          GsmConstStr r1 = GFP(LORA_OK),
-                          GsmConstStr r2 = GFP(LORA_ERROR),
-                          GsmConstStr r3 = nullptr, GsmConstStr r4 = nullptr,
-                          GsmConstStr r5 = nullptr, GsmConstStr r6 = nullptr,
-                          GsmConstStr r7 = nullptr) {
+  int8_t waitResponseImpl(uint32_t timeout_ms, String& data, GsmConstStr r1,
+                          GsmConstStr r2, GsmConstStr r3, GsmConstStr r4,
+                          GsmConstStr r5, GsmConstStr r6, GsmConstStr r7) {
     data.reserve(LORA_AT_RX_BUFFER);
 #ifdef LORA_AT_DEBUG_DEEP
     DBG(GF("r1 <"), r1 ? r1 : GF("NULL"), GF("> r2 <"), r2 ? r2 : GF("NULL"),
@@ -1001,13 +1056,14 @@ class LoRa_AT_Modem {
   int8_t getConfirmationRetriesImpl() LORA_AT_ATTR_NOT_IMPLEMENTED;
 
   bool joinOTAAImpl(const char* appEui, const char* appKey, const char* devEui,
-                    uint32_t timeout, bool useHex) LORA_AT_ATTR_NOT_IMPLEMENTED;
+                    bool useHex, int8_t attempts,
+                    uint32_t initialBackoff) LORA_AT_ATTR_NOT_IMPLEMENTED;
 
-  bool joinABPImpl(
-      const char* devAddr, const char* nwkSKey, const char* appSKey,
-      int uplinkCounter = 1, int downlinkCounter = 0,
-      uint32_t timeout = DEFAULT_JOIN_TIMEOUT) LORA_AT_ATTR_NOT_IMPLEMENTED;
-  bool isNetworkConnectedImpl() LORA_AT_ATTR_NOT_IMPLEMENTED;
+  bool joinABPImpl(String devAddr, String nwkSKey, String appSKey,
+                   int uplinkCounter, int downlinkCounter, int8_t attempts,
+                   uint32_t initialBackoff) LORA_AT_ATTR_NOT_IMPLEMENTED;
+  bool isNetworkConnectedImpl(int8_t attempts, uint32_t initialBackoff)
+      LORA_AT_ATTR_NOT_IMPLEMENTED;
 
   int8_t getSignalQualityImpl() LORA_AT_ATTR_NOT_IMPLEMENTED;
 
@@ -1160,22 +1216,18 @@ class LoRa_AT_Modem {
    * and https://en.wikipedia.org/wiki/Exponential_backoff
    *
    * @param failures The number of prior failed events
-   * @param initialDelay The initial delay before the first retry in
-   * milliseconds; optional with a default value of 5000ms (5s)
-   * @param maxDelay The maximum backoff delay; if the calculated backoff would
-   * be longer than this, returns 0.
+   * @param initialBackoff The initial delay before the first retry in
+   * milliseconds; optional with a default value of #DEFAULT_INITIAL_BACKOFF
    * @return The suggested backoff time, in milliseconds.
    */
-  uint32_t calculateBackoff(int8_t failures, uint32_t initialDelay = 5000L,
-                            uint32_t maxDelay = DEFAULT_JOIN_TIMEOUT) {
+  uint32_t calculateBackoff(int8_t   failures,
+                            uint32_t initialBackoff = DEFAULT_INITIAL_BACKOFF) {
     // set the random seed by reading noise on pin 0
     randomSeed(analogRead(0));
     // get the exponential multiplier
-    uint32_t backoff_multipler = 2 ^ (attempts_made - 1);
+    uint32_t backoff_multiplier = 2 ^ (failures - 1);
     // get backoff without jitter
-    uint32_t un_jittered_backoff = backoff_multipler * initialDelay;
-    // if the backoff would be longer than the max delay, return 0
-    if (un_jittered_backoff > DEFAULT_JOIN_TIMEOUT) { return 0; }
+    uint32_t un_jittered_backoff = backoff_multiplier * initialBackoff;
     // jitter the back off by +/- 20%
     uint32_t backoff = random(un_jittered_backoff * 0.8,
                               un_jittered_backoff * 1.2);

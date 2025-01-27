@@ -287,7 +287,7 @@ class LoRa_AT_LoRaE5 : public LoRa_AT_Modem<LoRa_AT_LoRaE5>,
   }
 
   bool joinOTAAImpl(const char* appEui, const char* appKey, const char* devEui,
-                    uint32_t timeout, bool) {
+                    bool useHex, int8_t attempts, uint32_t initialBackoff) {
     // The App EUI must be a hex value
     sendAT(GF("+ID=AppEui, \""), appEui, '"');
     waitResponse(GF("+ID: AppEui"));  // echos the set command
@@ -302,13 +302,12 @@ class LoRa_AT_LoRaE5 : public LoRa_AT_Modem<LoRa_AT_LoRaE5>,
       streamFind('\n');  // throw away the echoed Device EUI
     }
     changeModes(OTAA);
-    return join(5, timeout);  // join the network
+    return join(attempts, initialBackoff);  // join the network
   }
 
-  bool joinABPImpl(const char* devAddr, const char* nwkSKey,
-                   const char* appSKey, int uplinkCounter = 1,
-                   int      downlinkCounter = 0,
-                   uint32_t= DEFAULT_JOIN_TIMEOUT) {
+  bool joinABPImpl(String devAddr, String nwkSKey, String appSKey,
+                   int uplinkCounter, int downlinkCounter, int8_t attempts,
+                   uint32_t initialBackoff) {
     sendAT(GF("+ID=DevAddr, \""), devAddr, '"');  // set the device address
     waitResponse(GF("+ID: DevAddr"));             // echos the set command
     streamFind('\n');  // throw away the echoed Device Address
@@ -328,11 +327,13 @@ class LoRa_AT_LoRaE5 : public LoRa_AT_Modem<LoRa_AT_LoRaE5>,
       streamFind('\n');               // throw away the echoed counters
     }
     changeModes(ABP);
-    return isNetworkConnected();  // verify that we're connected
+    return isNetworkConnected(attempts,
+                              initialBackoff);  // verify that we're connected
   }
 
-  bool isNetworkConnectedImpl() {
-    int8_t tries_remaining = 10;
+  bool isNetworkConnectedImpl(int8_t attempts, uint32_t initialBackoff) {
+    int8_t tries_remaining = attempts;
+    int8_t attempts_made   = 0;
     _link_margin           = 255;
     while (_link_margin == 255 && tries_remaining) {
       sendAT(GF("+LW=LCR"));
@@ -342,10 +343,13 @@ class LoRa_AT_LoRaE5 : public LoRa_AT_Modem<LoRa_AT_LoRaE5>,
           GF("tries remaining"));
       modemSend(nullptr, 0);
       tries_remaining--;
+      attempts_made++;
       // delay before the next attempt
       if (_link_margin == 255) {
-        DBG(GF("Delay 5s before next LinkCheckReq attempt"));
-        delay(5000L);
+        // delay before the next attempt
+        uint32_t backoff = calculateBackoff(attempts_made - 1, initialBackoff);
+        DBG(GF("Delay"), backoff, GF("ms before next LinkCheckReq attempt"));
+        delay(backoff);
       }
     }
     if (_link_margin != 255) {
@@ -999,18 +1003,21 @@ class LoRa_AT_LoRaE5 : public LoRa_AT_Modem<LoRa_AT_LoRaE5>,
     return false;
   }
 
-  bool join(uint8_t attempts, uint32_t timeout, bool force = false) {
+  bool join(uint8_t attempts, uint32_t initialBackoff, bool force = false) {
     // try multiple times to join
     bool    success            = false;
     uint8_t attempts_remaining = attempts;
+    int8_t  attempts_made      = 0;
     while (!success && attempts_remaining) {
 #ifdef LORA_AT_DEBUG
       uint32_t start = millis();
 #endif
       sendAT(force ? GF("+JOIN=FORCE") : GF("+JOIN"));
       attempts_remaining--;
+      attempts_made++;
+      // I don't know how long this might take, but it's slow
       int8_t join_resp = waitResponse(
-          timeout, GF("+JOIN: Network joined"), GF("+JOIN: Join failed"),
+          60000L, GF("+JOIN: Network joined"), GF("+JOIN: Join failed"),
           GF("+JOIN: Joined already"), GF("+JOIN: LoRaWAN modem is busy"),
           GF("+JOIN: Not in OTAA mode"));
       if (join_resp == 1 || join_resp == 3) {
@@ -1026,16 +1033,20 @@ class LoRa_AT_LoRaE5 : public LoRa_AT_Modem<LoRa_AT_LoRaE5>,
       } else {
         DBG(GF("Join attempted failed after"), millis() - start, GF("ms with"),
             attempts_remaining, GF("attempts remaining"));
-        // TODO: Implement join backoff
       }
       if (join_resp != 3 && join_resp != 4) {
-        if (waitResponse(timeout, GF("+JOIN: Done")) == 1) {
+        if (waitResponse(15000L, GF("+JOIN: Done")) == 1) {
           DBG(GF("Join finished after"), millis() - start, GF("ms"));
         } else {
           DBG(GF("Join timed out after"), millis() - start, GF("ms"));
         };
       }
       streamFind('\n');  // throw away the new line
+      if (!success) {
+        // delay before the next attempt
+        uint32_t backoff = calculateBackoff(attempts_made - 1, initialBackoff);
+        delay(backoff);
+      }
     }
     return success;
   }
