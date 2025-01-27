@@ -20,6 +20,26 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ***
 
+## [0.4.0]
+
+### Changed
+
+- **Breaking** Removed timeout from join and get connection functions; replaced with a number of join/check attempts and the initial backoff.
+  - This changes the inputs for the `joinOTAA(...)`, `joinABP(...)`, and `isNetworkConnected()` functions - although if you were previously accepting defaults for not required arguments, you do not need to change your code.
+  - After the initial backoff, further backoff delays will be calculated using exponential calculation with jitter.
+  - The default number of attempts is 10, the default initial backoff is 5s, and the default backoff factor is 1.5. If all attempts are used, the total delay will be (approximately) 9.5 minutes. The real delay will vary because of a random jitter of up to 20% added to or subtracted from each delay.
+    - The default backoff parameters can be changed with the following defines:
+      - `DEFAULT_JOIN_ATTEMPTS`
+      - `DEFAULT_INITIAL_BACKOFF`
+      - `DEFAULT_BACKOFF_FACTOR`
+    - The number of join attempts and the initial backoff can also be changed in all functions that use it, but the backoff factor can only be changed with the define.
+
+### Added
+
+- Added a function to calculate backoff using exponential calculation with jitter.
+
+***
+
 ## [0.3.1] 2025-01-21
 
 ### Fixed
@@ -60,7 +80,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ***
 
-[Unreleased]: https://github.com/EnviroDIY/LoRa_AT/compare/v0.3.1...HEAD
+[Unreleased]: https://github.com/EnviroDIY/LoRa_AT/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/EnviroDIY/LoRa_AT/releases/tag/v0.4.0
 [0.3.1]: https://github.com/EnviroDIY/LoRa_AT/releases/tag/v0.3.1
 [0.3.0]: https://github.com/EnviroDIY/LoRa_AT/releases/tag/v0.3.0
 [0.2.0]: https://github.com/EnviroDIY/LoRa_AT/releases/tag/v0.2.0
