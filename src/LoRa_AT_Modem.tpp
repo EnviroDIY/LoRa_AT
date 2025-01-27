@@ -1242,7 +1242,7 @@ class LoRa_AT_Modem {
     // set the random seed by reading noise on pin 0
     randomSeed(analogRead(0));
     // get the exponential multiplier
-    uint32_t backoff_multiplier = 2 ^ (failures - 1);
+    uint32_t backoff_multiplier = pow(2, max(failures - 1, 0));
     // get backoff without jitter
     uint32_t un_jittered_backoff = backoff_multiplier * initialBackoff;
     // jitter the back off by +/- 20%

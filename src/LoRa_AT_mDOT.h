@@ -353,7 +353,7 @@ class LoRa_AT_mDOT : public LoRa_AT_Modem<LoRa_AT_mDOT>,
         waitResponse();  // catch the "ERROR"
       } else {
         // delay before the next attempt
-        uint32_t backoff = calculateBackoff(attempts_made - 1, initialBackoff);
+        uint32_t backoff = calculateBackoff(attempts_made, initialBackoff);
         delay(backoff);
       }
     }
@@ -880,7 +880,7 @@ class LoRa_AT_mDOT : public LoRa_AT_Modem<LoRa_AT_mDOT>,
         // check how long we need to wait for a free channel before next attempt
         uint32_t transmit_wait = getNextTransmit();
         // calculate backoff
-        uint32_t backoff = calculateBackoff(attempts_made - 1, initialBackoff);
+        uint32_t backoff = calculateBackoff(attempts_made, initialBackoff);
         // Delay at least until the next channel is free, or to the calculated
         // backoff, whichever is larger.
         DBG(GF("Waiting"), max(transmit_wait + 100L, backoff),

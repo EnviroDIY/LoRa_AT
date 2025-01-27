@@ -347,7 +347,7 @@ class LoRa_AT_LoRaE5 : public LoRa_AT_Modem<LoRa_AT_LoRaE5>,
       // delay before the next attempt
       if (_link_margin == 255) {
         // delay before the next attempt
-        uint32_t backoff = calculateBackoff(attempts_made - 1, initialBackoff);
+        uint32_t backoff = calculateBackoff(attempts_made, initialBackoff);
         DBG(GF("Delay"), backoff, GF("ms before next LinkCheckReq attempt"));
         delay(backoff);
       }
@@ -1044,7 +1044,7 @@ class LoRa_AT_LoRaE5 : public LoRa_AT_Modem<LoRa_AT_LoRaE5>,
       streamFind('\n');  // throw away the new line
       if (!success) {
         // delay before the next attempt
-        uint32_t backoff = calculateBackoff(attempts_made - 1, initialBackoff);
+        uint32_t backoff = calculateBackoff(attempts_made, initialBackoff);
         delay(backoff);
       }
     }
