@@ -251,7 +251,7 @@ class LoRa_AT_mDOT : public LoRa_AT_Modem<LoRa_AT_mDOT>,
   }
 
   bool joinOTAAImpl(const char* appEui, const char* appKey, const char* devEui,
-                    bool useHex, int8_t attempts, uint32_t initialBackoff) {
+                    int8_t attempts, uint32_t initialBackoff, bool useHex) {
     sendAT(GF("+NJM=1"));  // Configure mDot for OTAA join mode (default)
     waitResponse();
     sendAT(GF("+NI="), !useHex, ',', appEui);  // set the app EUI (network id)

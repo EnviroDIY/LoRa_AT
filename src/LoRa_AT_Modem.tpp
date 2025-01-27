@@ -378,83 +378,100 @@ class LoRa_AT_Modem {
    * @brief Join a network using OTAA (Over The Air Activation)
    *
    * @note The useHex parameter applies to both the appEUI and the appKey.
-   * Either both or neither should be hex.
+   * Either both or neither should be hex.  Many modules do not support using an
+   * appEUI and appKey in any format other than hex.
    *
-   * @param appEui The App EUI (aka JoinEUI or Network ID). If using a string -
-   * and supported by the module - set useHex to false. If using 8 bytes of hex
-   * data, set useHex to true.
-   * @param appKey The app key (Network key). If using a string, set useHex to
-   * false. If using 16 bytes of hex data, set useHex to true.
-   * @param devEui The device EUI. This must be 16 bytes of hex data.
-   * @param useHex True if the appKey and appEUI are in hex; false for standard
-   * strings; optional with a default value of false.
+   * @param appEui The App EUI (aka JoinEUI or Network ID). If using 8 bytes of
+   * hex data (ie, "8A598335072D2776"), set useHex to true. If using some other
+   * string - and it is supported by the module - set useHex to false.
+   * @param appKey The app key (Network key). If using 16 bytes of hex data (ie,
+   * "DD8F3881F180151C739534C4EC56216F"), set useHex to true. If using a some
+   * other string - and it is supported by the module - set useHex to false.
+   * @param devEui The device EUI. This must be 16 bytes of hex data (ie,
+   * "15C3202192A4504A8BC11D51EBFEDD65").
    * @param attempts The number of attempts to make for successful join;
    * optional with a default value of #DEFAULT_JOIN_ATTEMPTS.
    * @param backoff The initial backoff delay before retrying after a failed
    * join attempt. After the first failure, the delay will be increased
    * exponentially, with a 20% jitter to avoid collisions. Optional, with a
    * default value of #DEFAULT_INITIAL_BACKOFF
+   * @param useHex True if the appKey and appEUI are in hex; false for standard
+   * strings; optional with a default value of true.
    * @return True if the network join was successful; false if it failed.
    */
   bool joinOTAA(const char* appEui, const char* appKey, const char* devEui,
-                bool useHex = true, int8_t attempts = DEFAULT_JOIN_ATTEMPTS,
-                uint32_t initialBackoff = DEFAULT_INITIAL_BACKOFF) {
-    return thisModem().joinOTAAImpl(appEui, appKey, devEui, useHex, attempts,
-                                    initialBackoff);
+                int8_t   attempts       = DEFAULT_JOIN_ATTEMPTS,
+                uint32_t initialBackoff = DEFAULT_INITIAL_BACKOFF,
+                bool     useHex         = true) {
+    return thisModem().joinOTAAImpl(appEui, appKey, devEui, attempts,
+                                    initialBackoff, useHex);
   }
 
   /**
    * @brief Join a network using OTAA (Over The Air Activation)
    *
    * @note The useHex parameter applies to both the appEUI and the appKey.
-   * Either both or neither should be hex.
+   * Either both or neither should be hex.  Many modules do not support using an
+   * appEUI and appKey in any format other than hex.
    *
-   * @param appEui The app EUI (Network ID). If using a string, set useHex to
-   * false. If using 8 bytes of hex data, set useHex to true.
-   * @param appKey The app key (Network key). If using a string, set useHex to
-   * false. If using 8 bytes of hex data, set useHex to true.
-   * @param useHex True if the appKey and appEUI are in hex; false for standard
-   * strings; optional with a default value of false.
+   * @param appEui The App EUI (aka JoinEUI or Network ID). If using 8 bytes of
+   * hex data (ie, "8A598335072D2776"), set useHex to true. If using some other
+   * string - and it is supported by the module - set useHex to false.
+   * @param appKey The app key (Network key). If using 16 bytes of hex data (ie,
+   * "DD8F3881F180151C739534C4EC56216F"), set useHex to true. If using a some
+   * other string - and it is supported by the module - set useHex to false.
    * @param attempts The number of attempts to make for successful join;
    * optional with a default value of #DEFAULT_JOIN_ATTEMPTS.
    * @param backoff The initial backoff delay before retrying after a failed
    * join attempt. After the first failure, the delay will be increased
    * exponentially, with a 20% jitter to avoid collisions. Optional, with a
    * default value of #DEFAULT_INITIAL_BACKOFF
+   * @param useHex True if the appKey and appEUI are in hex; false for standard
+   * strings; optional with a default value of true.
    * @return True if the network join was successful; false if the network join
    * failed
    */
-  bool joinOTAA(String appEui, String appKey, bool useHex = true,
+  bool joinOTAA(String appEui, String appKey,
                 int8_t   attempts       = DEFAULT_JOIN_ATTEMPTS,
-                uint32_t initialBackoff = DEFAULT_INITIAL_BACKOFF) {
-    return joinOTAA(appEui.c_str(), appKey.c_str(), nullptr, useHex, attempts,
-                    initialBackoff);
+                uint32_t initialBackoff = DEFAULT_INITIAL_BACKOFF,
+                bool     useHex         = true) {
+    return joinOTAA(appEui.c_str(), appKey.c_str(), nullptr, attempts,
+                    initialBackoff, useHex);
   }
 
 
   /**
-   * @brief Join a network using OTAA (Over The Air Activation), waiting the
-   * default timeout.
+   * @brief Join a network using OTAA (Over The Air Activation)
    *
-   * @param appEui The app EUI (Network ID)
-   * @param appKey The app key (Network key)
-   * @param devEui The device EUI. This must be 16 bytes of hex data.
-   * @param useHex True if the appKey and appEUI are in hex; false for standard
-   * strings; optional with a default value of false.
+   * @note The useHex parameter applies to both the appEUI and the appKey.
+   * Either both or neither should be hex.  Many modules do not support using an
+   * appEUI and appKey in any format other than hex.
+   *
+   * @param appEui The App EUI (aka JoinEUI or Network ID). If using 8 bytes of
+   * hex data (ie, "8A598335072D2776"), set useHex to true. If using some other
+   * string - and it is supported by the module - set useHex to false.
+   * @param appKey The app key (Network key). If using 16 bytes of hex data (ie,
+   * "DD8F3881F180151C739534C4EC56216F"), set useHex to true. If using a some
+   * other string - and it is supported by the module - set useHex to false.
+   * @param devEui The device EUI. This must be 16 bytes of hex data (ie,
+   * "15C3202192A4504A8BC11D51EBFEDD65").
    * @param attempts The number of attempts to make for successful join;
    * optional with a default value of #DEFAULT_JOIN_ATTEMPTS.
    * @param backoff The initial backoff delay before retrying after a failed
    * join attempt. After the first failure, the delay will be increased
    * exponentially, with a 20% jitter to avoid collisions. Optional, with a
    * default value of #DEFAULT_INITIAL_BACKOFF
+   * @param useHex True if the appKey and appEUI are in hex; false for standard
+   * strings; optional with a default value of true.
    * @return True if the network join was successful; false if the network join
    * failed
    */
-  bool joinOTAA(String appEui, String appKey, String devEui, bool useHex = true,
+  bool joinOTAA(String appEui, String appKey, String devEui,
                 int8_t   attempts       = DEFAULT_JOIN_ATTEMPTS,
-                uint32_t initialBackoff = DEFAULT_INITIAL_BACKOFF) {
-    return joinOTAA(appEui.c_str(), appKey.c_str(), devEui.c_str(), useHex,
-                    attempts, initialBackoff);
+                uint32_t initialBackoff = DEFAULT_INITIAL_BACKOFF,
+                bool     useHex         = true) {
+    return joinOTAA(appEui.c_str(), appKey.c_str(), devEui.c_str(), attempts,
+                    initialBackoff, useHex);
   }
 
   /**
@@ -1056,8 +1073,8 @@ class LoRa_AT_Modem {
   int8_t getConfirmationRetriesImpl() LORA_AT_ATTR_NOT_IMPLEMENTED;
 
   bool joinOTAAImpl(const char* appEui, const char* appKey, const char* devEui,
-                    bool useHex, int8_t attempts,
-                    uint32_t initialBackoff) LORA_AT_ATTR_NOT_IMPLEMENTED;
+                    int8_t attempts, uint32_t initialBackoff,
+                    bool useHex) LORA_AT_ATTR_NOT_IMPLEMENTED;
 
   bool joinABPImpl(String devAddr, String nwkSKey, String appSKey,
                    int uplinkCounter, int downlinkCounter, int8_t attempts,

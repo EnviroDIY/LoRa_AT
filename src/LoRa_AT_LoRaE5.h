@@ -287,7 +287,7 @@ class LoRa_AT_LoRaE5 : public LoRa_AT_Modem<LoRa_AT_LoRaE5>,
   }
 
   bool joinOTAAImpl(const char* appEui, const char* appKey, const char* devEui,
-                    bool useHex, int8_t attempts, uint32_t initialBackoff) {
+                    int8_t attempts, uint32_t initialBackoff, bool) {
     // The App EUI must be a hex value
     sendAT(GF("+ID=AppEui, \""), appEui, '"');
     waitResponse(GF("+ID: AppEui"));  // echos the set command
