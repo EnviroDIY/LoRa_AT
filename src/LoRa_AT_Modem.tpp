@@ -18,6 +18,10 @@
 #define DEFAULT_INITIAL_BACKOFF 5000L
 #endif
 
+#ifndef DEFAULT_BACKOFF_FACTOR
+#define DEFAULT_BACKOFF_FACTOR 1.5
+#endif
+
 #ifndef DEFAULT_MESSAGE_TIMEOUT
 #define DEFAULT_MESSAGE_TIMEOUT 10000L
 #endif
@@ -1242,7 +1246,8 @@ class LoRa_AT_Modem {
     // set the random seed by reading noise on pin 0
     randomSeed(analogRead(0));
     // get the exponential multiplier
-    uint32_t backoff_multiplier = pow(2, max(failures - 1, 0));
+    uint32_t backoff_multiplier = pow(DEFAULT_BACKOFF_FACTOR,
+                                      max(failures - 1, 0));
     // get backoff without jitter
     uint32_t un_jittered_backoff = backoff_multiplier * initialBackoff;
     // jitter the back off by +/- 20%
