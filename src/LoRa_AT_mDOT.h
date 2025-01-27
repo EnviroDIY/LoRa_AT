@@ -885,7 +885,7 @@ class LoRa_AT_mDOT : public LoRa_AT_Modem<LoRa_AT_mDOT>,
         // backoff, whichever is larger.
         DBG(GF("Waiting"), max(transmit_wait + 100L, backoff),
             GF("ms for a free channel before next join attempt."));
-        delay(max(transmit_wait + 100L, backoff));
+        delay(max(transmit_wait + static_cast<uint32_t>(100), backoff));
       }
     }
     return success;
