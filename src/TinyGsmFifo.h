@@ -26,8 +26,8 @@ class TinyGsmFifo {
   /**
    * @brief Check if the buffer is writable - that is if it has any space left
    *
-   * @return *true* The buffer has free space.
-   * @return *false* There is no space left in the buffer.
+   * @return True if the buffer has free space; false if there is no space left
+   * in the buffer.
    */
   bool writeable(void) {
     return free() > 0;
@@ -36,7 +36,7 @@ class TinyGsmFifo {
   /**
    * @brief Check the number of free positions in the buffer.
    *
-   * @return *int*  The number number of free positions in the buffer
+   * @return The number number of free positions in the buffer
    */
   int free(void) {
     int s = _r - _w;     // Check if the read is ahead of the write
@@ -48,8 +48,8 @@ class TinyGsmFifo {
    * @brief Add a single item to the buffer. This is non-blocking.
    *
    * @param c Reference of the item of type 'T' to add to the buffer
-   * @return *true* The item was successfully added to the buffer
-   * @return *false* Nothing was added to the buffer
+   * @return True if the item was successfully added to the buffer; false if
+   * nothing was added to the buffer
    */
   bool put(const T& c) {
     int i = _w;       // check the write position
@@ -70,7 +70,7 @@ class TinyGsmFifo {
    * @param n The number of items to add
    * @param t Whether to block while waiting for space enough space to clear to
    * add all items
-   * @return *int* The number of items successfully added
+   * @return The number of items successfully added
    */
   int put(const T* p, int n, bool t = false) {
     int c = n;
@@ -153,7 +153,7 @@ class TinyGsmFifo {
    *
    * @param i
    * @param n
-   * @return *int*
+   * @return
    */
   int _inc(int i, int n = 1) {
     return (i + n) % N;

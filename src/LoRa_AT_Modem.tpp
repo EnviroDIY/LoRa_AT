@@ -110,8 +110,8 @@ class LoRa_AT_Modem {
   /**
    * @brief Sets up the LoRa module
    *
-   * @return *true* The module was set up as expected
-   * @return *false* Something failed in module set up
+   * @return True if the module was set up as expected; false if something
+   * failed in module set up
    */
   bool begin() {
     return thisModem().initImpl();
@@ -153,8 +153,8 @@ class LoRa_AT_Modem {
    *
    * @param timeout_ms The the amount of time to test for; optional with a
    * default value of 10s.
-   * @return *true*  The module responeded to AT commands
-   * @return *false*  The module failed to respond
+   * @return True if the module responded to AT commands; false if the module
+   * failed to respond
    */
   bool testAT(uint32_t timeout_ms = 10000L) {
     return thisModem().testATImpl(timeout_ms);
@@ -179,7 +179,7 @@ class LoRa_AT_Modem {
    * of NULL
    * @param r7 The seventh output to test against, optional with a default value
    * of NULL
-   * @return *int8_t* the index of the response input
+   * @return The index of the response input
    */
   int8_t waitResponse(uint32_t timeout_ms, String& data,
                       GsmConstStr r1 = GFP(LORA_OK),
@@ -209,7 +209,7 @@ class LoRa_AT_Modem {
    * of NULL
    * @param r7 The seventh output to test against, optional with a default value
    * of NULL
-   * @return *int8_t* the index of the response input
+   * @return The index of the response input
    */
   int8_t waitResponse(uint32_t timeout_ms, GsmConstStr r1 = GFP(LORA_OK),
                       GsmConstStr r2 = GFP(LORA_ERROR),
@@ -238,7 +238,7 @@ class LoRa_AT_Modem {
    * of NULL
    * @param r7 The seventh output to test against, optional with a default value
    * of NULL
-   * @return *int8_t* the index of the response input
+   * @return The index of the response input
    */
   int8_t waitResponse(GsmConstStr r1 = GFP(LORA_OK),
                       GsmConstStr r2 = GFP(LORA_ERROR),
@@ -252,7 +252,7 @@ class LoRa_AT_Modem {
    * @brief Get the LoRa module's device EUI - this is unique and set at the
    * factory.
    *
-   * @return *String*  The device EUI
+   * @return The device EUI
    */
   String getDevEUI() {
     return thisModem().getDevEUIImpl();
@@ -262,7 +262,7 @@ class LoRa_AT_Modem {
    * @brief Get information about the LoRa module
    *
    * @note  The actual value and style of the response is quite varied
-   * @return *String* Some info about the LoRa module.
+   * @return Some info about the LoRa module.
    */
   String getModuleInfo() {
     return thisModem().getModuleInfoImpl();
@@ -273,8 +273,8 @@ class LoRa_AT_Modem {
    *
    * This generally restarts the module as well.
    *
-   * @return *true* The module successfully reset to default.
-   * @return *false* The module failed to reset to default.
+   * @return True if the module successfully reset to default; false if the
+   * module failed to reset to default.
    */
   bool factoryDefault() {
     return thisModem().factoryDefaultImpl();
@@ -290,8 +290,8 @@ class LoRa_AT_Modem {
   /**
    * @brief Restart the module
    *
-   * @return *true* The module was successfully restarted.
-   * @return *false* There was an error in restarting the module.
+   * @return True if the module was successfully restarted; false if there was
+   * an error in restarting the module.
    */
   bool restart() {
     return thisModem().restartImpl();
@@ -299,8 +299,8 @@ class LoRa_AT_Modem {
   /**
    * @brief Power off the module
    *
-   * @return *true* The module was successfully powered down.
-   * @return *false* There was an error in powering down module.
+   * @return True if the module was successfully powered down; false if there
+   * was an error in powering down module.
    */
   bool poweroff() {
     return thisModem().powerOffImpl();
@@ -308,8 +308,8 @@ class LoRa_AT_Modem {
   /**
    * @brief Turn off the module radio
    *
-   * @return *true* The module radio was successfully turned off.
-   * @return *false* There was an error in turning off the radio.
+   * @return True if the module radio was successfully turned off; false if
+   * there was an error in turning off the radio.
    */
   bool radioOff() {
     return thisModem().radioOffImpl();
@@ -328,8 +328,8 @@ class LoRa_AT_Modem {
    * @param isPublic **TRUE** for a public network, **FALSE** for private MTS
    * network
    *
-   * @return *true* The module accepted the command to set the network mode
-   * @return *false* The module failed to set the network mode
+   * @return True if the module accepted the command to set the network mode;
+   * false if the module failed to set the network mode
    */
   bool setPublicNetwork(bool isPublic) {
     return thisModem().setPublicNetworkImpl(isPublic);
@@ -337,8 +337,8 @@ class LoRa_AT_Modem {
   /**
    * @brief Report whether the module is using public network mode
    *
-   * @return *true*  The module is set up to connect to a public network
-   * @return *false*  The module is set up to connect to a private MTS network
+   * @return True if the module is set up to connect to a public network; false
+   * if the module is set up to connect to a private MTS network
    */
   bool getPublicNetwork() {
     return thisModem().getPublicNetworkImpl();
@@ -353,8 +353,8 @@ class LoRa_AT_Modem {
    *
    * @param numAckRetries The number of retries to attempt to
    * get acknowledgement [0-15].
-   * @return *true* The module accepting the acknowledgement setting.
-   * @return *false* There was an error in setting the acknowledgement setting.
+   * @return True if the module accepting the acknowledgement setting; false if
+   * there was an error in setting the acknowledgement setting.
    */
   bool setConfirmationRetries(int8_t numAckRetries) {
     return thisModem().setConfirmationRetriesImpl(numAckRetries);
@@ -406,8 +406,8 @@ class LoRa_AT_Modem {
    * @param useHex True if the appKey and appEUI are in hex; false for standard
    * strings
    * @param timeout A timeout to wait for successful join
-   * @return *true* The network join was successful
-   * @return *false* The network join failed
+   * @return True if the network join was successful; false if the network join
+   * failed
    */
   bool joinOTAA(String appEui, String appKey,
                 uint32_t timeout = DEFAULT_JOIN_TIMEOUT, bool useHex = true) {
@@ -421,8 +421,8 @@ class LoRa_AT_Modem {
    *
    * @param appEui The app EUI (Network ID)
    * @param appKey The app key (Network key)
-   * @return *true* The network join was successful
-   * @return *false* The network join failed
+   * @return True if the network join was successful; false if the network join
+   * failed
    */
   bool joinOTAA(String appEui, String appKey, String devEui,
                 uint32_t timeout = DEFAULT_JOIN_TIMEOUT, bool useHex = false) {
@@ -439,8 +439,8 @@ class LoRa_AT_Modem {
    * @param appSKey The app session key (data session key). This must be 16
    * bytes of hex data.
    * @param timeout A timeout to wait for successful join
-   * @return *true* The network join was successful
-   * @return *false* The network join failed
+   * @return True if the network join was successful; false if the network join
+   * failed
    */
   bool joinABP(const char* devAddr, const char* nwkSKey, const char* appSKey,
                int uplinkCounter = 1, int downlinkCounter = 0,
@@ -458,8 +458,8 @@ class LoRa_AT_Modem {
    * @param nwkSKey The network session key. This must be 16 bytes of hex data.
    * @param appSKey The app session key (data session key). This must be 16
    * bytes of hex data.
-   * @return *true* The network join was successful
-   * @return *false* The network join failed
+   * @return True if the network join was successful; false if the network join
+   * failed
    */
   bool joinABP(String devAddr, String nwkSKey, String appSKey,
                int uplinkCounter = 1, int downlinkCounter = 0,
@@ -471,8 +471,8 @@ class LoRa_AT_Modem {
    * @brief Confirm whether the module is currently connected to the LoRaWAN
    * network.
    *
-   * @return *true* The module is connected to the network
-   * @return *false* The module is not connected to the network
+   * @return True if the module is connected to the network; false if the module
+   * is not connected to the network
    */
   bool isNetworkConnected() {
     bool isConnected  = thisModem().isNetworkConnectedImpl();
@@ -483,7 +483,7 @@ class LoRa_AT_Modem {
   /**
    * @brief Get the signal quality report
    *
-   * @return *int16_t* A measure of the signal quality (probably the RSSI)
+   * @return A measure of the signal quality (probably the RSSI)
    */
   int16_t getSignalQuality() {
     return thisModem().getSignalQualityImpl();
@@ -502,8 +502,8 @@ class LoRa_AT_Modem {
    * @see https://lora.readthedocs.io/en/latest/#lorawan-device-classes
    *
    * @param _class The device class; must be A, B, or C
-   * @return *true* The device class was successfully configured
-   * @return *false* The module did not accept the device class
+   * @return True if the device class was successfully configured; false if the
+   * module did not accept the device class
    */
   bool setClass(_lora_class _class) {
     return thisModem().setClassImpl(_class);
@@ -511,7 +511,7 @@ class LoRa_AT_Modem {
   /**
    * @brief Get the modules current LoRaWAN device class
    *
-   * @return *_lora_class* The device class from the ::_lora_class enum
+   * @return The device class from the ::_lora_class enum
    */
   _lora_class getClass() {
     return thisModem().getClassImpl();
@@ -524,8 +524,8 @@ class LoRa_AT_Modem {
    * application use, and port 233-255 are reserved for future LoRaWAN use.
    *
    * @param uint8_t The outgoing application port, must be a number from 1-255
-   * @return *true* The port was successfully configured
-   * @return *false* The module did not accept the port
+   * @return True if the port was successfully configured; false if the module
+   * did not accept the port
    */
   bool setPort(uint8_t _port) {
     return thisModem().setPortImpl(_port);
@@ -533,7 +533,7 @@ class LoRa_AT_Modem {
   /**
    * @brief Get the LoRaWAN outgoing application port
    *
-   * @return *uint8_t* The outgoing application port
+   * @return The outgoing application port
    */
   uint8_t getPort() {
     return thisModem().getPortImpl();
@@ -545,8 +545,8 @@ class LoRa_AT_Modem {
    *
    * @param band The band to use, must be one of the bands available for your
    * module. Check your datasheet.
-   * @return *true* The device band was successfully configured
-   * @return *false* The module did not accept the device band
+   * @return True if the device band was successfully configured; false if the
+   * module did not accept the device band
    */
   bool setBand(const char* band) {
     return thisModem().setBandImpl(band);
@@ -557,8 +557,8 @@ class LoRa_AT_Modem {
    *
    * @param band The band to use, must be one of the bands available for your
    * module. Check your datasheet.
-   * @return *true* The device band was successfully configured
-   * @return *false* The module did not accept the device band
+   * @return True if the device band was successfully configured; false if the
+   * module did not accept the device band
    */
   bool setBand(String band) {
     return setBand(band.c_str());
@@ -578,17 +578,17 @@ class LoRa_AT_Modem {
    *
    * @param subBand An int representing the sub-band, per the module
    * documentation
-   * @return *true* The device sub-band was successfully configured
-   * @return *false* The module did not accept the device sub-band
+   * @return True if the device sub-band was successfully configured; false if
+   * the module did not accept the device sub-band
    */
   bool setFrequencySubBand(int8_t subBand) {
     return thisModem().setFrequencySubBandImpl(subBand);
   }
   /**
    * @brief Get the  frequency sub-band the module is operating on. This only
-   * appolies to US 915 MHz modules.
+   * applies to US 915 MHz modules.
    *
-   * @return *int8_t* An int representing the sub-band, per the module
+   * @return An int representing the sub-band, per the module
    * documentation
    */
   int8_t getFrequencySubBand() {
@@ -598,8 +598,7 @@ class LoRa_AT_Modem {
   /**
    * @brief Get the 16 or 72 bit channel mask
    *
-   * @return *String* The 16 or 72 bit channel mask - most significant byte
-   * first (MSB)
+   * @return The 16 or 72 bit channel mask - most significant bytefirst (MSB)
    */
   String getChannelMask() {
     return thisModem().getChannelMaskImpl();
@@ -609,8 +608,8 @@ class LoRa_AT_Modem {
    * @brief Check if a particular channel is enabled
    *
    * @param pos The channel number
-   * @return *true* The channel was successfully enabled.
-   * @return *false* The channel was not enabled.
+   * @return True if the channel was successfully enabled; false if the channel
+   * was not enabled.
    */
   bool isChannelEnabled(int pos) {
     return thisModem().isChannelEnabledImpl(pos);
@@ -620,8 +619,8 @@ class LoRa_AT_Modem {
    * @brief Enables or disables a channel
    *
    * @param pos The channel number
-   * @return *true* The channel was successfully enabled.
-   * @return *false* The channel was not enabled.
+   * @return True if the channel was successfully enabled; false if the channel
+   * was not enabled.
    */
   bool enableChannel(int pos, bool enable = true) {
     return thisModem().enableChannelImpl(pos, enable);
@@ -631,8 +630,8 @@ class LoRa_AT_Modem {
    * @brief Disables a channel
    *
    * @param pos The channel number
-   * @return *true* The channel was successfully disabled.
-   * @return *false* The channel was not disabled.
+   * @return True if the channel was successfully disabled; false if the channel
+   * was not disabled.
    */
   bool disableChannel(int pos) {
     return thisModem().enableChannelImpl(pos, false);
@@ -642,8 +641,8 @@ class LoRa_AT_Modem {
    * @brief Sends a new channel mask to the device
    *
    * @param newMask A full new channel mask; most significant byte first (MSB)
-   * @return *true* The module accepted the new channel mask.
-   * @return *false* There was an error in changing the channel mask.
+   * @return True if the module accepted the new channel mask; false if there
+   * was an error in changing the channel mask.
    */
   bool setChannelMask(const char* newMask) {
     return thisModem().setChannelMaskImpl(newMask);
@@ -652,8 +651,8 @@ class LoRa_AT_Modem {
    * @brief Sends a new channel mask to the device
    *
    * @param newMask A full new channel mask
-   * @return *true* The module accepted the new channel mask.
-   * @return *false* There was an error in changing the channel mask.
+   * @return True if the module accepted the new channel mask; false if there
+   * was an error in changing the channel mask.
    */
   bool setChannelMask(String newMask) {
     return setChannelMask(newMask.c_str());
@@ -673,9 +672,9 @@ class LoRa_AT_Modem {
    * function.
    *
    * @param dutyCycle True to enable duty cycle limitations; false to disable
-   * @return *true* The module successfully enabled or disabled duty cycle
-   * limitations.
-   * @return *false* There was an error in enabling or disabling the duty cycle.
+   * @return True if the module successfully enabled or disabled duty cycle
+   * limitations; false if there was an error in enabling or disabling the duty
+   * cycle.
    */
   bool enableDutyCycle(bool dutyCycle) {
     return thisModem().enableDutyCycleImpl(dutyCycle);
@@ -683,8 +682,8 @@ class LoRa_AT_Modem {
   /**
    * @brief Checks if duty cycle limitations are enabled
    *
-   * @return *true* Duty cycle limitations are enabled
-   * @return *false* Duty cycle limitations are not enabled
+   * @return True if duty cycle limitations are enabled; false if duty cycle
+   * limitations are not enabled
    */
   bool isDutyCycleEnabled() {
     return thisModem().isDutyCycleEnabledImpl();
@@ -700,8 +699,8 @@ class LoRa_AT_Modem {
    *
    * @param dutyCycle An int representing the maximum duty cycle, per the module
    * documentation
-   * @return *true* The module accepted the new maximum duty cycle.
-   * @return *false* There was an error in changing the maxiumum duty cycle.
+   * @return True if the module accepted the new maximum duty cycle; false if
+   * there was an error in changing the maxiumum duty cycle.
    */
   bool setMaxDutyCycle(int8_t maxDutyCycle) {
     return thisModem().setMaxDutyCycleImpl(maxDutyCycle);
@@ -711,8 +710,7 @@ class LoRa_AT_Modem {
    *
    * @see https://lora.readthedocs.io/en/latest/#duty-cycle-time-on-air-toa
    *
-   * @return *int8_t* An int representing the duty cycle, per the module
-   * documentation
+   * @return An int representing the duty cycle, per the module documentation
    */
   int8_t getMaxDutyCycle() {
     return thisModem().getMaxDutyCycleImpl();
@@ -723,8 +721,8 @@ class LoRa_AT_Modem {
    *
    * @param dataRate An int representing the Tx data rate, per the module
    * documentation
-   * @return *true* The module accepted the new data rate.
-   * @return *false* There was an error in changing the data rate.
+   * @return True if the module accepted the new data rate; false if there was
+   * an error in changing the data rate.
    */
   bool setDataRate(uint8_t dataRate) {
     return thisModem().setDataRateImpl(dataRate);
@@ -732,8 +730,7 @@ class LoRa_AT_Modem {
   /**
    * @brief Get the current Tx data rate for the LoRa module
    *
-   * @return *int8_t* int representing the Tx data rate, per the module
-   * documentation
+   * @return An int representing the Tx data rate, per the module documentation
    */
   int8_t getDataRate() {
     return thisModem().getDataRateImpl();
@@ -746,9 +743,8 @@ class LoRa_AT_Modem {
    * https://lora-developers.semtech.com/documentation/tech-papers-and-guides/understanding-adr
    *
    * @param useADR True to enable adaptive data rate, false to disable
-   * @return *true* The module accepted the new adaptive data rate setting.
-   * @return *false* There was an error in changing the adaptive data rate
-   * setting.
+   * @return True if the module accepted the new adaptive data rate setting;
+   * false if there was an error in changing the adaptive data rate setting.
    */
   bool setAdaptiveDataRate(bool useADR) {
     return thisModem().setAdaptiveDataRateImpl(useADR);
@@ -760,8 +756,8 @@ class LoRa_AT_Modem {
    * @see
    * https://lora-developers.semtech.com/documentation/tech-papers-and-guides/understanding-adr
    *
-   * @return *true* Adaptive data rate is enabled
-   * @return *false* Adaptive data rate is disabled
+   * @return True if adaptive data rate is enabled; false if adaptive data rate
+   * is disabled
    */
   bool getAdaptiveDataRate() {
     return thisModem().getAdaptiveDataRateImpl();
@@ -778,7 +774,7 @@ class LoRa_AT_Modem {
    *
    * This only applies when the LoRa module is in ABP mode.
    *
-   * @return *String* The device address (network address)
+   * @return The device address (network address)
    */
   String getDevAddr() {
     return thisModem().getDevAddrImpl();
@@ -789,7 +785,7 @@ class LoRa_AT_Modem {
    *
    * This only applies when the LoRa module is in ABP mode.
    *
-   * @return *String* The network session key
+   * @return The network session key
    */
   String getNwkSKey() {
     return thisModem().getNwkSKeyImpl();
@@ -800,7 +796,7 @@ class LoRa_AT_Modem {
    *
    * This only applies when the LoRa module is in ABP mode.
    *
-   * @return *String* The App Session Key (data session key)
+   * @return The App Session Key (data session key)
    */
   String getAppSKey() {
     return thisModem().getAppSKeyImpl();
@@ -817,7 +813,7 @@ class LoRa_AT_Modem {
    *
    * This only applies when the LoRa module is in OTAA  mode.
    *
-   * @return *String* The App EUI
+   * @return The App EUI
    */
   String getAppEUI() {
     return thisModem().getAppEUIImpl();
@@ -827,7 +823,7 @@ class LoRa_AT_Modem {
    *
    * This only applies when the LoRa module is in OTAA  mode.
    *
-   * @return *String* The App Key
+   * @return The App Key
    */
   String getAppKey() {
     return thisModem().getAppKeyImpl();

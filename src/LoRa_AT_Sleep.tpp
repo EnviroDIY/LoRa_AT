@@ -31,8 +31,8 @@ class LoRa_AT_Sleep {
    * @param pullupMode The pin's pullup mode (0=NOPULL, 1=PULLUP, 2=PULLDOWN)
    * @param trigger The wake trigger (ie, 0=ANY, 1=RISE, 2=FALL)
    *
-   * @return *true* The module accepted the sleep mode setting.
-   * @return *false* There was an error in setting the sleep mode.
+   * @return True if the module accepted the sleep mode setting; false if there
+   * was an error in setting the sleep mode.
    */
   bool pinSleep(int8_t pin, int8_t pullupMode = -1, int8_t trigger = -1) {
     return thisModem().pinSleepImpl(pin, pullupMode, trigger);
@@ -44,8 +44,8 @@ class LoRa_AT_Sleep {
    *
    * What "sleep" means varies by module; check your documentation.
    *
-   * @return *true* The module accepted the sleep mode setting.
-   * @return *false* There was an error in setting the sleep mode.
+   * @return True if the module accepted the sleep mode setting; false if there
+   * was an error in setting the sleep mode.
    */
   bool uartSleep() {
     return thisModem().uartSleepImpl();
@@ -58,8 +58,8 @@ class LoRa_AT_Sleep {
    *
    * What "sleep" means varies by module; check your documentation.
    *
-   * @return *true* The module accepted the sleep mode setting.
-   * @return *false* There was an error in setting the sleep mode.
+   * @return True if the module accepted the sleep mode setting; false if there
+   * was an error in setting the sleep mode.
    */
   bool sleep(bool uart_wake = true) {
     if (uart_wake) { return thisModem().uartSleepImpl(); }
@@ -73,8 +73,8 @@ class LoRa_AT_Sleep {
    * What "sleep" means varies by module; check your documentation.
    *
    * @param sleepTimer The time for the module to sleep, in milliseconds.
-   * @return *true* The module accepted the sleep mode setting.
-   * @return *false* There was an error in setting the sleep mode.
+   * @return True if the module accepted the sleep mode setting; false if there
+   * was an error in setting the sleep mode.
    */
   bool sleep(uint32_t sleepTimer) {
     return thisModem().sleepImpl(sleepTimer);
@@ -88,8 +88,8 @@ class LoRa_AT_Sleep {
    * the UART and will go back to sleep as soon as UART communication stops.
    *
    * @param enable True to enable automatic sleep mode, false to disable it.
-   * @return *true* The module accepted the automatic sleep mode setting.
-   * @return *false* There was an error in setting the automatic sleep mode.
+   * @return True if the module accepted the automatic sleep mode setting; false
+   * if there was an error in setting the automatic sleep mode.
    */
   bool enableAutoSleep(bool enable = true) {
     return thisModem().enableAutoSleepImpl(enable);

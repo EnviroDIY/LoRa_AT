@@ -31,7 +31,7 @@ class LoRa_AT_Battery {
    * this will be the input voltage going to the module from your main processor
    * board, not the battery voltage of your main processor.
    *
-   * @return *int16_t*  The battery voltage measured by the modem module.
+   * @return The battery voltage measured by the modem module.
    */
   int16_t getBattVoltage() {
     return thisModem().getBattVoltageImpl();
@@ -44,7 +44,7 @@ class LoRa_AT_Battery {
    * this will be the percent from the input voltage going to the module from
    * your main processor board, not the battery percent of your main processor.
    *
-   * @return *int8_t*  The current battery percent.
+   * @return The current battery percent.
    */
   int8_t getBattPercent() {
     return thisModem().getBattPercentImpl();
@@ -53,7 +53,7 @@ class LoRa_AT_Battery {
   /**
    * @brief Get the battery charging state.
    *
-   * @return *int8_t* The battery charge state.
+   * @return The battery charge state.
    */
   int8_t getBattChargeState() {
     return thisModem().getBattChargeStateImpl();
@@ -65,9 +65,8 @@ class LoRa_AT_Battery {
    * @param chargeState A reference to an int to set to the battery charge state
    * @param percent A reference to an int to set to the battery percent
    * @param milliVolts A reference to an int to set to the battery voltage
-   * @return *true* The battery stats were updated by the module.
-   * @return *false* There was a failure in updating the battery stats from the
-   * module.
+   * @return True if the battery stats were updated by the module; false if
+   * there was a failure in updating the battery stats from the module.
    */
   bool getBattStats(int8_t& chargeState, int8_t& percent, int16_t& milliVolts) {
     return thisModem().getBattStatsImpl(chargeState, percent, milliVolts);

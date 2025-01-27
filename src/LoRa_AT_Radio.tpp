@@ -57,8 +57,8 @@ class LoRa_AT_Radio {
    * @brief Check whether the module is asking for confirmation of uplink
    * messages or not.
    *
-   * @return *true* Confirmation is being requested for all uplinks.
-   * @return *false* Confirmation is NOT being requested for all uplinks.
+   * @return True if confirmation is being requested for all uplinks; false if
+   * confirmation is NOT being requested for all uplinks.
    */
   bool isConfrirmationRequired() {
     return _requireConfirmation;

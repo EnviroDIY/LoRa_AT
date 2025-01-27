@@ -42,7 +42,7 @@ class LoRa_AT_Time {
    *
    * @param format The date or time part to get: DATE_FULL,
    * DATE_TIME, or DATE_DATE
-   * @return *String*  The date and/or time from the module
+   * @return The date and/or time from the module
    */
   String getDateTimeString(LoRa_AT_DateTimeFormat format) {
     return thisModem().getDateTimeStringImpl(format);
@@ -58,9 +58,9 @@ class LoRa_AT_Time {
    * @param minute Reference to an int for the minute
    * @param second Reference to an int for the second
    * @param timezone Reference to a float for the timezone
-   * @return *true*  The references have been filled with valid values from the
-   * LoRa module.
-   * @return *false*  There was a problem getting the time from the module.
+   * @return True if the references have been filled with valid values from the
+   * LoRa module.; false if there was a problem getting the time from the
+   * module.
    */
   bool getDateTimeParts(int* year, int* month, int* day, int* hour, int* minute,
                         int* second, float* timezone) {
@@ -71,7 +71,7 @@ class LoRa_AT_Time {
   /**
    * @brief Get the Date Time as an epoch value
    * @param epoch The epoch start to use.
-   * @return *uint32_t* The offset from the start of the epoch
+   * @return The offset from the start of the epoch
    */
   uint32_t getDateTimeEpoch(LoRa_AT_EpochStart epoch = UNIX) {
     return thisModem().getDateTimeEpochImpl(epoch);

@@ -147,8 +147,8 @@ class LoRa_AT_mDOT : public LoRa_AT_Modem<LoRa_AT_mDOT>,
    * @param pin The pin number
    * @param pullupMode The pin's pullup mode (0=NOPULL, 1=PULLUP, 2=PULLDOWN)
    * @param trigger The wake trigger (ie, 0=ANY, 1=RISE, 2=FALL)
-   * @return *true* The module accepted the wake pin setting.
-   * @return *false* There was an error in setting the wake.
+   * @return True if the module accepted the wake pin setting; false if there
+   * was an error in setting the wake.
    */
   bool setWakePin(int8_t pin, int8_t pullupMode, int8_t trigger) {
     if (pullupMode == -1) {
