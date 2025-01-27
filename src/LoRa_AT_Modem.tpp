@@ -1151,6 +1151,38 @@ class LoRa_AT_Modem {
     }
   }
 
+  /**
+   * @brief Calculates how long to backoff using exponential backoff with
+   * jitter.
+   *
+   * @see
+   * https://www.thethingsindustries.com/docs/hardware/devices/concepts/best-practices/#backoff
+   * and https://en.wikipedia.org/wiki/Exponential_backoff
+   *
+   * @param failures The number of prior failed events
+   * @param initialDelay The initial delay before the first retry in
+   * milliseconds; optional with a default value of 5000ms (5s)
+   * @param maxDelay The maximum backoff delay; if the calculated backoff would
+   * be longer than this, returns 0.
+   * @return The suggested backoff time, in milliseconds.
+   */
+  uint32_t calculateBackoff(int8_t failures, uint32_t initialDelay = 5000L,
+                            uint32_t maxDelay = DEFAULT_JOIN_TIMEOUT) {
+    // set the random seed by reading noise on pin 0
+    randomSeed(analogRead(0));
+    // get the exponential multiplier
+    uint32_t backoff_multipler = 2 ^ (attempts_made - 1);
+    // get backoff without jitter
+    uint32_t un_jittered_backoff = backoff_multipler * initialDelay;
+    // if the backoff would be longer than the max delay, return 0
+    if (un_jittered_backoff > DEFAULT_JOIN_TIMEOUT) { return 0; }
+    // jitter the back off by +/- 20%
+    uint32_t backoff = random(un_jittered_backoff * 0.8,
+                              un_jittered_backoff * 1.2);
+    DBG(GF("Backoff by"), backoff, GF("ms"));
+    return backoff;
+  }
+
  protected:
   inline bool streamFind(char target) {
     return thisModem().stream.find(const_cast<char*>(&target), 1);
