@@ -5,8 +5,8 @@
  * @date       May 2024
  */
 
-#ifndef SRC_TINYLORATEMPERATURE_H_
-#define SRC_TINYLORATEMPERATURE_H_
+#ifndef SRC_LORA_AT_TEMPERATURE_H_
+#define SRC_LORA_AT_TEMPERATURE_H_
 
 #include "LoRa_AT_Common.h"
 
@@ -61,4 +61,4 @@ class LoRa_AT_Temperature {
   float getTemperatureImpl() LORA_AT_ATTR_NOT_IMPLEMENTED;
 };
 
-#endif  // SRC_TINYLORATEMPERATURE_H_
+#endif  // SRC_LORA_AT_TEMPERATURE_H_

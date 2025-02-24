@@ -5,8 +5,8 @@
  * @date       May 2024
  */
 
-#ifndef SRC_TINYLORAMODEM_H_
-#define SRC_TINYLORAMODEM_H_
+#ifndef SRC_LORA_AT_MODEM_H_
+#define SRC_LORA_AT_MODEM_H_
 
 #include "LoRa_AT_Common.h"
 
@@ -1385,4 +1385,4 @@ class LoRa_AT_Modem {
   bool _networkConnected;
 };
 
-#endif  // SRC_TINYLORAMODEM_H_
+#endif  // SRC_LORA_AT_MODEM_H_

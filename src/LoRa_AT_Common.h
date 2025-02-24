@@ -5,8 +5,8 @@
  * @date       May 2024
  */
 
-#ifndef SRC_TINYLORACOMMON_H_
-#define SRC_TINYLORACOMMON_H_
+#ifndef SRC_LORA_AT_COMMON_H_
+#define SRC_LORA_AT_COMMON_H_
 
 // The current library version number
 #define LORA_AT_VERSION "0.4.0"
@@ -144,4 +144,4 @@ uint32_t LoRa_AT_AutoBaud(T& SerialAT, uint32_t minimum = 9600,
   return 0;
 }
 
-#endif  // SRC_TINYLORACOMMON_H_
+#endif  // SRC_LORA_AT_COMMON_H_

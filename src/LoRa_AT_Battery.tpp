@@ -5,8 +5,8 @@
  * @date       May 2024
  */
 
-#ifndef SRC_TINYLORABATTERY_H_
-#define SRC_TINYLORABATTERY_H_
+#ifndef SRC_LORA_AT_BATTERY_H_
+#define SRC_LORA_AT_BATTERY_H_
 
 #include "LoRa_AT_Common.h"
 
@@ -108,4 +108,4 @@ class LoRa_AT_Battery {
                         int16_t& milliVolts) LORA_AT_ATTR_NOT_IMPLEMENTED;
 };
 
-#endif  // SRC_TINYLORABATTERY_H_
+#endif  // SRC_LORA_AT_BATTERY_H_

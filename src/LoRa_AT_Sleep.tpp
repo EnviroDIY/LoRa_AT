@@ -5,8 +5,8 @@
  * @date       May 2024
  */
 
-#ifndef SRC_TINYLORASLEEP_H_
-#define SRC_TINYLORASLEEP_H_
+#ifndef SRC_LORA_AT_SLEEP_H_
+#define SRC_LORA_AT_SLEEP_H_
 
 #include "LoRa_AT_Common.h"
 
@@ -128,4 +128,4 @@ class LoRa_AT_Sleep {
   bool enableAutoSleepImpl(bool enable = true) LORA_AT_ATTR_NOT_IMPLEMENTED;
 };
 
-#endif  // SRC_TINYLORASLEEP_H_
+#endif  // SRC_LORA_AT_SLEEP_H_

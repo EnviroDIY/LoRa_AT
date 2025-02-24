@@ -5,8 +5,8 @@
  * @date       May 2024
  */
 
-#ifndef SRC_TINYLORATIME_H_
-#define SRC_TINYLORATIME_H_
+#ifndef SRC_LORA_AT_TIME_H_
+#define SRC_LORA_AT_TIME_H_
 
 #include "LoRa_AT_Common.h"
 
@@ -205,4 +205,4 @@ class LoRa_AT_Time {
       LORA_AT_ATTR_NOT_IMPLEMENTED;
 };
 
-#endif  // SRC_TINYLORATIME_H_
+#endif  // SRC_LORA_AT_TIME_H_

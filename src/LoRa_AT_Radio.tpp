@@ -5,8 +5,8 @@
  * @date       May 2024
  */
 
-#ifndef SRC_TINYLORARADIO_H_
-#define SRC_TINYLORARADIO_H_
+#ifndef SRC_LORA_AT_RADIO_H_
+#define SRC_LORA_AT_RADIO_H_
 
 #include "LoRa_AT_Common.h"
 
@@ -220,4 +220,4 @@ class LoRa_AT_Radio {
   bool     _requireConfirmation;
 };
 
-#endif  // SRC_TINYLORARADIO_H_
+#endif  // SRC_LORA_AT_RADIO_H_
