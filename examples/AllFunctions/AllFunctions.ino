@@ -519,6 +519,7 @@ void loop() {
 
 
 #if LORA_AT_TEST_TIME && defined LORA_AT_HAS_TIME
+  uint32_t last_time_check = millis();
 #ifndef LORA_AT_MDOT  // mDot only does epoch time
   int   year3    = 0;
   int   month3   = 0;
@@ -671,5 +672,16 @@ void loop() {
       while (loraStream.available()) { SerialMon.write(loraStream.read()); }
       SerialMon.println(F(">>>"));
     }
+
+#if LORA_AT_TEST_TIME && defined LORA_AT_HAS_TIME
+    // check the time every 2 minutes
+    if (millis() - last_time_check > 120000L) {
+      SerialMon.println(F("Retrieving time as an offset from the epoch"));
+      uint32_t epochTime = modem.getDateTimeEpoch();
+      SerialMon.print(F("  Current Epoch Time: "));
+      SerialMon.println(epochTime);
+      last_time_check = millis();
+    }
+#endif
   }
 }

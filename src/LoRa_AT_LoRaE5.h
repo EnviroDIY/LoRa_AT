@@ -712,18 +712,20 @@ class LoRa_AT_LoRaE5 : public LoRa_AT_Modem<LoRa_AT_LoRaE5>,
     if (waitResponse(2000L, GF("+RTC: ")) != 1) { return 0; }
     streamFind(',');  // Skip the text string
 
-    uint32_t resp = stream.parseInt();
+    uint32_t gps_time = stream.parseInt();
     streamFind('\n');  // throw away age
 
-    if (resp != 0) {
+    // The epoch date/time returned by the LoRa E5 uses the GPS epoch - with
+    // accounting for leap seconds!
+    if (gps_time != 0) {
       switch (epoch) {
-        case UNIX: resp += 315878400; break;
-        case Y2K: resp -= 630806400; break;
-        case GPS: resp += 0; break;
+        case UNIX: return GPSTimeConversion::gps2unix(gps_time);
+        case Y2K: return GPSTimeConversion::gps2unix(gps_time) + 946684800;
+        case GPS: return gps_time;
       }
     }
 
-    return resp;
+    return gps_time;
   }
 
 

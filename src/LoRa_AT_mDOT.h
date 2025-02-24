@@ -591,33 +591,33 @@ class LoRa_AT_mDOT : public LoRa_AT_Modem<LoRa_AT_mDOT>,
   // NOTE: This module only returns epoch time! If you need to convert from
   // Epoch time to a human readable time, use a date library.
   uint32_t getDateTimeEpochImpl(LoRa_AT_EpochStart epoch = UNIX) {
-    uint32_t epoch_time      = 0;
+    uint32_t gps_time        = 0;
     int8_t   tries_remaining = 5;
-    while (epoch_time == 0 && tries_remaining) {
+    while (gps_time == 0 && tries_remaining) {
       sendAT(GF("+GPSTIME"));  // Use this to retrieve GPC synchronized time in
                                // milliseconds.
       tries_remaining--;
 
       // NOTE: We can't use parseInt or sendATGetString here because the return
       // is slow!
-      String epoch_str = "";
-      epoch_str.reserve(16);
+      String gps_time_str = "";
+      gps_time_str.reserve(16);
       // Wait for final OK
-      bool got_ok = waitResponse(15000L, epoch_str) == 1;
+      bool got_ok = waitResponse(15000L, gps_time_str) == 1;
       if (got_ok) {
-        epoch_str.replace(AT_NL "OK" AT_NL, "");
-        epoch_str.trim();
+        gps_time_str.replace(AT_NL "OK" AT_NL, "");
+        gps_time_str.trim();
 
         // the epoch time is returned in MILLISECONDS which is too large for a
         // 32-bit unsigned into.  I'm chopping off the milliseconds and only
         // keeping the seconds.
-        int endSeconds = epoch_str.length() - 3;
+        int endSeconds = gps_time_str.length() - 3;
         // subset text before the first carriage return, if it's there
-        int firstCR = epoch_str.indexOf('\r');
+        int firstCR = gps_time_str.indexOf('\r');
         if (firstCR > 0) { endSeconds = firstCR - 3; }
-        epoch_str = epoch_str.substring(0, endSeconds);
-        epoch_str.trim();
-        epoch_time = epoch_str.toInt();
+        gps_time_str = gps_time_str.substring(0, endSeconds);
+        gps_time_str.trim();
+        gps_time = gps_time_str.toInt();
       } else {
         // delay before the next attempt
         DBG(GF("Delay 10s before next time request attempt"));
@@ -627,15 +627,17 @@ class LoRa_AT_mDOT : public LoRa_AT_Modem<LoRa_AT_mDOT>,
       }
     }
 
-    if (epoch_time != 0) {
+    // The epoch date/time returned by the mDOT uses the GPS epoch - with
+    // accounting for leap seconds!
+    if (gps_time != 0) {
       switch (epoch) {
-        case UNIX: epoch_time += 315878400; break;
-        case Y2K: epoch_time -= 630806400; break;
-        case GPS: epoch_time += 0; break;
+        case UNIX: return GPSTimeConversion::gps2unix(gps_time);
+        case Y2K: return GPSTimeConversion::gps2unix(gps_time) + 946684800;
+        case GPS: return gps_time;
       }
     }
 
-    return epoch_time;
+    return gps_time;
   }
 
 
