@@ -4,9 +4,11 @@
  * @copyright Stroud Water Research Center
  * @license This example is published under the BSD-3 license.
  *
- * @brief This example demonstrates almost all possible functionality of the library.
+ * @brief This example demonstrates almost all possible functionality of the
+ * library.
  *
- * @note Some of the functions may be unavailable for your modem - just comment them out.
+ * @note Some of the functions may be unavailable for your modem - just comment
+ * them out.
  *
  * @m_examplenavigation{example_all_functions,}
  * ======================================================================= */
@@ -109,7 +111,7 @@ int8_t lora_wake_edge = 0;
 StreamDebugger debugger(SerialAT, SerialMon);
 LoRa_AT        modem(debugger);
 #else
-LoRa_AT        modem(SerialAT);
+LoRa_AT modem(SerialAT);
 #endif
 
 LoRaStream loraStream(modem);
@@ -253,7 +255,7 @@ void loop() {
     SerialMon.println(F("--Failed to set LoRa channel mask"));
   }
   delay(2000L);
-  // Itterate through the 72 channels to check single channel enable
+  // Iterate through the 72 channels to check single channel enable
   // functionality
   bool channel_success = true;
   for (uint8_t i = 0; i < MAX_LORA_CHANNELS; i += 9) {
@@ -480,6 +482,7 @@ void loop() {
     SerialMon.println(F(">>>"));
   }
   delay(2000L);
+  /* cSpell:disable */
   String super_long_message =
       "This is a really long message that I'm using to test and ensure that "
       "packets are being broken up correctly by the send function.  Lorem "
@@ -495,6 +498,7 @@ void loop() {
       "fringilla auctor metus faucibus non. Nulla blandit mauris a quam "
       "tincidunt commodo. Duis dapibus lorem eget augue ornare, id lobortis "
       "quam volutpat.";
+  /* cSpell:enable */
   SerialMon.println(F("Sending a super long message without confirmation"));
   if (loraStream.print(super_long_message) == super_long_message.length()) {
     SerialMon.println(F("  Successfully sent super long message"));

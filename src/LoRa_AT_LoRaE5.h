@@ -449,7 +449,7 @@ class LoRa_AT_LoRaE5 : public LoRa_AT_Modem<LoRa_AT_LoRaE5>,
       streamFind(',');  // skip the ,
       streamFind(';');  // skip the channel data rates
 
-      // get the channel possition in the array
+      // get the channel position in the array
       int row = getChannelOffset(active_channel_num);
       // convert the channel position into a mask
       uint8_t mask = getChannelBitMask(active_channel_num);
@@ -474,7 +474,7 @@ class LoRa_AT_LoRaE5 : public LoRa_AT_Modem<LoRa_AT_LoRaE5>,
     waitResponse(GF("+CH: "));
     // if enabled, it will return the frequency and data rate
     // +CH: 1,902500000,DR0:DR3
-    // if disabled, the retur frequency will be 0
+    // if disabled, the return frequency will be 0
     // +CH: 1,0,DR0:DR0
     uint8_t ret_channel = stream.parseInt();
     // DBG(GF("Returned channel:"), ret_channel);
@@ -507,7 +507,7 @@ class LoRa_AT_LoRaE5 : public LoRa_AT_Modem<LoRa_AT_LoRaE5>,
 
     // iterate through max of 72 channels
     for (uint8_t i = 0; i < 72; i++) {
-      // get the channel possition in the array
+      // get the channel position in the array
       int row = getChannelOffset(i);
       // convert the channel position into a mask
       uint8_t channel = getChannelBitMask(i);
@@ -758,8 +758,7 @@ class LoRa_AT_LoRaE5 : public LoRa_AT_Modem<LoRa_AT_LoRaE5>,
     return (int8_t)((resp / 255.) * 100.);
   }
 
-  bool getBattStatsImpl(int8_t& , int8_t& percent,
-                        int16_t& milliVolts) {
+  bool getBattStatsImpl(int8_t&, int8_t& percent, int16_t& milliVolts) {
     sendAT(GF("+LW=BAT"));
     bool wasOk = waitResponse(GF("+LW: BAT,")) == 1;
     // Read battery charge level
@@ -797,10 +796,10 @@ class LoRa_AT_LoRaE5 : public LoRa_AT_Modem<LoRa_AT_LoRaE5>,
  protected:
   int16_t modemSend(const uint8_t* buff, size_t len) {
     // Pointer to where in the buffer we're up to
-    // A const cast is need to cast-away the constantness of the buffer (ie,
+    // A const cast is need to cast-away the constant-ness of the buffer (ie,
     // modify it).
     uint8_t* txPtr     = const_cast<uint8_t*>(buff);
-    size_t bytesSent = 0;
+    size_t   bytesSent = 0;
 
     GsmConstStr at_msg_cmd;
 #ifdef LORA_AT_SEND_HEX
@@ -1070,7 +1069,7 @@ class LoRa_AT_LoRaE5 : public LoRa_AT_Modem<LoRa_AT_LoRaE5>,
   }
 
   bool deviceTimeRequest() {
-    // Bufferer DeviceTimeReq MAC command for AT modem, the MAC command will
+    // Buffered DeviceTimeReq MAC command for AT modem, the MAC command will
     // be sent in next LoRaWAN transaction controlled by command
     // MSG/CMSG/MSGHEX/CMSGHEX. It is recommended to use MSGHEX and CMSGHEX to
     // carry this command if there is no application payload to send.

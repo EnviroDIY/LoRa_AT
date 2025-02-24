@@ -60,7 +60,7 @@ class LoRa_AT_Radio {
    * @return True if confirmation is being requested for all uplinks; false if
    * confirmation is NOT being requested for all uplinks.
    */
-  bool isConfrirmationRequired() {
+  bool isConfirmationRequired() {
     return _requireConfirmation;
   }
 

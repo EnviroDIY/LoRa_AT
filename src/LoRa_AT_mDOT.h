@@ -109,7 +109,7 @@ class LoRa_AT_mDOT : public LoRa_AT_Modem<LoRa_AT_mDOT>,
     bool resp = true;
     sendAT(GF("&F"));  // Factory default settings
     resp &= waitResponse() == 1;
-    resp &= committSettings();
+    resp &= commitSettings();
     sendAT(GF("Z"));  // Reset (restart) the CPU
     resp &= waitResponse() == 1;
     delay(3000);  // mDOT takes about 3 seconds to reset
@@ -262,9 +262,9 @@ class LoRa_AT_mDOT : public LoRa_AT_Modem<LoRa_AT_mDOT>,
       sendAT(GF("+DI="), devEui);  // set the device EUI
       waitResponse();
     }
-    committSettings();            // save configuration changes
+    commitSettings();                // save configuration changes
     join(attempts, initialBackoff);  // join the network
-    return isNetworkConnected();  // verify that we're connected
+    return isNetworkConnected();     // verify that we're connected
   }
 
   bool joinABPImpl(String devAddr, String nwkSKey, String appSKey,
@@ -287,7 +287,7 @@ class LoRa_AT_mDOT : public LoRa_AT_Modem<LoRa_AT_mDOT>,
       sendAT(GF("+DLC="), downlinkCounter);  // set the downlink counter
       waitResponse();
     }
-    committSettings();            // save configuration changes
+    commitSettings();  // save configuration changes
     return isNetworkConnected(attempts,
                               initialBackoff);  // verify that we're connected
   }
@@ -693,7 +693,7 @@ class LoRa_AT_mDOT : public LoRa_AT_Modem<LoRa_AT_mDOT>,
  protected:
   int16_t modemSend(const uint8_t* buff, size_t len) {
     // Pointer to where in the buffer we're up to
-    // A const cast is need to cast-away the constantness of the buffer (ie,
+    // A const cast is need to cast-away the constant-ness of the buffer (ie,
     // modify it).
     uint8_t* txPtr     = const_cast<uint8_t*>(buff);
     size_t   bytesSent = 0;
@@ -766,7 +766,7 @@ class LoRa_AT_mDOT : public LoRa_AT_Modem<LoRa_AT_mDOT>,
         // setting.
         // With +ACK=[1-15], there is a random 1-3s delay before a retransmit if
         // an ACK has not been received.  The theoretical max time with 8
-        // re-transmitts requiring acknowledgements is 42.2 seconds.
+        // re-transmits requiring acknowledgements is 42.2 seconds.
         // With +ACK=0 and no response from the network server, the time has
         // been observed at about 2.5 seconds.
         uint32_t sendTimeout;
@@ -841,7 +841,7 @@ class LoRa_AT_mDOT : public LoRa_AT_Modem<LoRa_AT_mDOT>,
   }
 
 
-  bool committSettings() {
+  bool commitSettings() {
     sendAT(GF("&W"));  // Write configurations
     return waitResponse() == 1;
   }

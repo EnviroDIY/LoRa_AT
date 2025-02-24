@@ -652,7 +652,7 @@ class LoRa_AT_Modem {
   }
 
   /**
-   * @brief Set the frequency sub-band. This only appolies to US 915 MHz
+   * @brief Set the frequency sub-band. This only applies to US 915 MHz
    * modules.
    *
    * @param subBand An int representing the sub-band, per the module
@@ -779,7 +779,7 @@ class LoRa_AT_Modem {
    * @param dutyCycle An int representing the maximum duty cycle, per the module
    * documentation
    * @return True if the module accepted the new maximum duty cycle; false if
-   * there was an error in changing the maxiumum duty cycle.
+   * there was an error in changing the maximum duty cycle.
    */
   bool setMaxDutyCycle(int8_t maxDutyCycle) {
     return thisModem().setMaxDutyCycleImpl(maxDutyCycle);
@@ -816,7 +816,7 @@ class LoRa_AT_Modem {
   }
 
   /**
-   * @brief Enable or diable adaptive data rate for the LoRa module
+   * @brief Enable or disable adaptive data rate for the LoRa module
    *
    * @see
    * https://lora-developers.semtech.com/documentation/tech-papers-and-guides/understanding-adr
@@ -1120,7 +1120,7 @@ class LoRa_AT_Modem {
     uint8_t channelsMask[LORA_CHANNEL_BYTES];
     // parse the hex mask into a bit array
     parseChannelMask(channel_mask_str.c_str(), channelsMask);
-    // get the channel possition in the array
+    // get the channel position in the array
     int row = getChannelOffset(pos);
     // convert the channel position into a mask
     uint8_t channel = getChannelBitMask(pos);
@@ -1145,7 +1145,7 @@ class LoRa_AT_Modem {
     // parse the hex mask into a bit array
     parseChannelMask(channel_mask_str.c_str(), channelsMask);
 
-    // get the channel possition in the array
+    // get the channel position in the array
     int row = getChannelOffset(pos);
     // convert the channel position into a mask
     uint8_t mask = getChannelBitMask(pos);
@@ -1267,8 +1267,8 @@ class LoRa_AT_Modem {
  * @brief A flag to force data to be sent as characters instead of as hex
  * values.
  *
- * When using AT commands, writing data as charaters can cause the AT command to
- * fail if there's a new line or carriage return in the message. The CR/NL is
+ * When using AT commands, writing data as characters can cause the AT command
+ * to fail if there's a new line or carriage return in the message. The CR/NL is
  * interpreted as the end of the send command rather than as part of the
  * message. Because LoRa messages are compressed, there may be NL/CR returns in
  * the text.
@@ -1343,7 +1343,7 @@ class LoRa_AT_Modem {
   }
 
   uint8_t getChannelBitMask(uint8_t channelNumber) {
-    // get the channel possition in the array
+    // get the channel position in the array
     int col = channelNumber % 8;
     // convert the channel position into a mask
     uint8_t channel = (uint8_t)(1 << col);
@@ -1367,7 +1367,7 @@ class LoRa_AT_Modem {
   }
 
   uint8_t getChannelOffset(uint8_t channelNumber) {
-    // get the channel possition in the array
+    // get the channel position in the array
     int row = channelNumber / 8;
     return row;
   }
