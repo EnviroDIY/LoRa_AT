@@ -20,7 +20,20 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ***
 
-## [0.4.0]
+## [0.4.1] 2025-02-24
+
+### Added
+
+- Added functions for proper conversion between GPS time and Unix time.
+  - Functionality taken from [GPS Time Conversion Algorithm](https://www.andrews.edu/~tzs/timeconv/timealgorithm.html)
+
+### Fixed
+
+- Corrected offsets with GPS epoch times and other epoch starts
+
+***
+
+## [0.4.0] 2025-01-27
 
 ### Changed
 
@@ -80,7 +93,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ***
 
-[Unreleased]: https://github.com/EnviroDIY/LoRa_AT/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/EnviroDIY/LoRa_AT/compare/v0.4.1...HEAD
+[0.4.1]: https://github.com/EnviroDIY/LoRa_AT/releases/tag/v0.4.1
 [0.4.0]: https://github.com/EnviroDIY/LoRa_AT/releases/tag/v0.4.0
 [0.3.1]: https://github.com/EnviroDIY/LoRa_AT/releases/tag/v0.3.1
 [0.3.0]: https://github.com/EnviroDIY/LoRa_AT/releases/tag/v0.3.0
