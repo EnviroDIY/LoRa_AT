@@ -9,7 +9,7 @@
 #define SRC_LORA_AT_COMMON_H_
 
 // The current library version number
-#define LORA_AT_VERSION "0.4.1"
+#define LORA_AT_VERSION "0.4.2"
 
 #if defined(SPARK) || defined(PARTICLE)
 #include "Particle.h"

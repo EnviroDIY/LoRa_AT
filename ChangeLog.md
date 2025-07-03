@@ -18,6 +18,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Fixed
 
+***
+
+## [0.4.2]
+
+### Fixed
+
 - Fixed conflicting defines with TinyGSM
 
 ***
@@ -95,7 +101,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ***
 
-[Unreleased]: https://github.com/EnviroDIY/LoRa_AT/compare/v0.4.1...HEAD
+[Unreleased]: https://github.com/EnviroDIY/LoRa_AT/compare/v0.4.2...HEAD
+[0.4.2]: https://github.com/EnviroDIY/LoRa_AT/releases/tag/v0.4.2
 [0.4.1]: https://github.com/EnviroDIY/LoRa_AT/releases/tag/v0.4.1
 [0.4.0]: https://github.com/EnviroDIY/LoRa_AT/releases/tag/v0.4.0
 [0.3.1]: https://github.com/EnviroDIY/LoRa_AT/releases/tag/v0.3.1
