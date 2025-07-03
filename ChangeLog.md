@@ -18,6 +18,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Fixed
 
+- Fixed conflicting defines with TinyGSM
+
 ***
 
 ## [0.4.1] 2025-02-24
