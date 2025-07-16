@@ -8,7 +8,7 @@
 
 // Select your modem:
 #define LORA_AT_MDOT
-// #define LORA_AT_LORAE5
+// #define LORA_AT_WIOE5
 
 #include <LoRa_AT.h>
 

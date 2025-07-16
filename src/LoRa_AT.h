@@ -13,10 +13,10 @@
 typedef LoRa_AT_mDOT                  LoRa_AT;
 typedef LoRa_AT_mDOT::LoRaStream_mDOT LoRaStream;
 
-#elif defined(LORA_AT_LORAE5)
-#include "LoRa_AT_LoRaE5.h"
-typedef LoRa_AT_LoRaE5                    LoRa_AT;
-typedef LoRa_AT_LoRaE5::LoRaStream_LoRaE5 LoRaStream;
+#elif defined(LORA_AT_WIOE5) || defined(LORA_AT_LORAE5)
+#include "LoRa_AT_WioE5.h"
+typedef LoRa_AT_WioE5                   LoRa_AT;
+typedef LoRa_AT_WioE5::LoRaStream_WioE5 LoRaStream;
 
 #else
 #error "Please define LoRa Radio model"

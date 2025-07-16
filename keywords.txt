@@ -15,7 +15,7 @@ TinyGsmFifo	KEYWORD1
 # Methods (KEYWORD2)
 #######################################
 
-LoRa_AT_LoRaE5	KEYWORD2
+LoRa_AT_WioE5	KEYWORD2
 sendAT	KEYWORD2
 testAT	KEYWORD2
 init	KEYWORD2

@@ -1,13 +1,13 @@
 /**
- * @file       LoRa_AT_LoRaE5.h
+ * @file       LoRa_AT_WioE5.h
  * @author     Sara Damiano
  * @copyright  Copyright (c) 2024 Sara Damiano
  * @date       April 2024
  */
 
-#ifndef SRC_LORA_AT_LORAE5_H_
-#define SRC_LORA_AT_LORAE5_H_
-// #pragma message("LoRa_AT:  LoRa_AT_LoRaE5")
+#ifndef SRC_LORA_AT_WIOE5_H_
+#define SRC_LORA_AT_WIOE5_H_
+// #pragma message("LoRa_AT:  LoRa_AT_WioE5")
 
 // #define LORA_AT_DEBUG Serial
 
@@ -39,34 +39,34 @@
 #include "LoRa_AT_Temperature.tpp"
 #include "LoRa_AT_Sleep.tpp"
 
-class LoRa_AT_LoRaE5 : public LoRa_AT_Modem<LoRa_AT_LoRaE5>,
-                       public LoRa_AT_Time<LoRa_AT_LoRaE5>,
-                       public LoRa_AT_Radio<LoRa_AT_LoRaE5>,
-                       public LoRa_AT_Battery<LoRa_AT_LoRaE5>,
-                       public LoRa_AT_Temperature<LoRa_AT_LoRaE5>,
-                       public LoRa_AT_Sleep<LoRa_AT_LoRaE5> {
-  friend class LoRa_AT_Modem<LoRa_AT_LoRaE5>;
-  friend class LoRa_AT_Time<LoRa_AT_LoRaE5>;
-  friend class LoRa_AT_Radio<LoRa_AT_LoRaE5>;
-  friend class LoRa_AT_Battery<LoRa_AT_LoRaE5>;
-  friend class LoRa_AT_Temperature<LoRa_AT_LoRaE5>;
-  friend class LoRa_AT_Sleep<LoRa_AT_LoRaE5>;
+class LoRa_AT_WioE5 : public LoRa_AT_Modem<LoRa_AT_WioE5>,
+                      public LoRa_AT_Time<LoRa_AT_WioE5>,
+                      public LoRa_AT_Radio<LoRa_AT_WioE5>,
+                      public LoRa_AT_Battery<LoRa_AT_WioE5>,
+                      public LoRa_AT_Temperature<LoRa_AT_WioE5>,
+                      public LoRa_AT_Sleep<LoRa_AT_WioE5> {
+  friend class LoRa_AT_Modem<LoRa_AT_WioE5>;
+  friend class LoRa_AT_Time<LoRa_AT_WioE5>;
+  friend class LoRa_AT_Radio<LoRa_AT_WioE5>;
+  friend class LoRa_AT_Battery<LoRa_AT_WioE5>;
+  friend class LoRa_AT_Temperature<LoRa_AT_WioE5>;
+  friend class LoRa_AT_Sleep<LoRa_AT_WioE5>;
 
   /*
    * Inner Client
    */
  public:
-  class LoRaStream_LoRaE5 : public LoRaStream {
-    friend class LoRa_AT_LoRaE5;
+  class LoRaStream_WioE5 : public LoRaStream {
+    friend class LoRa_AT_WioE5;
 
    public:
-    LoRaStream_LoRaE5() {}
+    LoRaStream_WioE5() {}
 
-    explicit LoRaStream_LoRaE5(LoRa_AT_LoRaE5& modem) {
+    explicit LoRaStream_WioE5(LoRa_AT_WioE5& modem) {
       init(&modem);
     }
 
-    bool init(LoRa_AT_LoRaE5* modem) {
+    bool init(LoRa_AT_WioE5* modem) {
       this->at       = modem;
       sock_available = 0;
       at->loraStream = this;
@@ -83,7 +83,7 @@ class LoRa_AT_LoRaE5 : public LoRa_AT_Modem<LoRa_AT_LoRaE5>,
    * Constructor
    */
  public:
-  explicit LoRa_AT_LoRaE5(Stream& stream) : stream(stream) {
+  explicit LoRa_AT_WioE5(Stream& stream) : stream(stream) {
     prev_dl_check        = 0;
     inLowestPowerMode    = false;
     _requireConfirmation = false;
@@ -100,7 +100,7 @@ class LoRa_AT_LoRaE5 : public LoRa_AT_Modem<LoRa_AT_LoRaE5>,
   /**
    * @brief Recursive variadic template to send AT commands
    *
-   * This is re-written for the LoRa E5 to handle lowest power mode
+   * This is re-written for the Wio-E5 to handle lowest power mode
    *
    * @tparam Args
    * @param cmd The commands to send
@@ -131,7 +131,7 @@ class LoRa_AT_LoRaE5 : public LoRa_AT_Modem<LoRa_AT_LoRaE5>,
     for (uint32_t start = millis(); millis() - start < timeout_ms;) {
       sendAT(GF(""));
       if (waitResponse(200) == 1) {
-        DBG("### LoRa E5 is in auto low power mode.");
+        DBG("### Wio-E5 is in auto low power mode.");
         return true;
       }
       delay(100);
@@ -143,7 +143,7 @@ class LoRa_AT_LoRaE5 : public LoRa_AT_Modem<LoRa_AT_LoRaE5>,
  protected:
   bool initImpl() {
     DBG(GF("### LoRa_AT Version:"), LORA_AT_VERSION);
-    DBG(GF("### LoRa_AT Compiled Module:  LoRa_AT_LoRaE5"));
+    DBG(GF("### LoRa_AT Compiled Module:  LoRa_AT_WioE5"));
 
     if (!testAT(15000L)) { return false; }
     // After reset, it may take >15s to wake
@@ -715,7 +715,7 @@ class LoRa_AT_LoRaE5 : public LoRa_AT_Modem<LoRa_AT_LoRaE5>,
     uint32_t gps_time = stream.parseInt();
     streamFind('\n');  // throw away age
 
-    // The epoch date/time returned by the LoRa E5 uses the GPS epoch - with
+    // The epoch date/time returned by the Wio-E5 uses the GPS epoch - with
     // accounting for leap seconds!
     if (gps_time != 0) {
       switch (epoch) {
@@ -1094,10 +1094,10 @@ class LoRa_AT_LoRaE5 : public LoRa_AT_Modem<LoRa_AT_LoRaE5>,
   Stream& stream;
 
  protected:
-  LoRaStream_LoRaE5* loraStream;
-  bool               inLowestPowerMode;
-  int8_t             _msg_quality;
-  uint8_t            _link_margin;
+  LoRaStream_WioE5* loraStream;
+  bool              inLowestPowerMode;
+  int8_t            _msg_quality;
+  uint8_t           _link_margin;
 };
 
-#endif  // SRC_LORA_AT_LORAE5_H_
+#endif  // SRC_LORA_AT_WIOE5_H_

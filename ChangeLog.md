@@ -13,6 +13,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Changed
 
 - Added faster baud rates to auto-baud function
+- Corrected name from LoRa E5 to Wio-E5.
+  - For backwards compatibility, you can defined either `LORA_AT_WIOE5` or `LORA_AT_LORAE5` to ensure the module is loaded.
 
 ### Added
 
@@ -99,7 +101,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Added
 
-- Initial release of the library, supporting LoRa on the mDOT and the LoRa E5
+- Initial release of the library, supporting LoRa on the mDOT and the Wio-E5
 
 ***
 

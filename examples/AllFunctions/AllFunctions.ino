@@ -15,7 +15,7 @@
 
 // Select your modem:
 // #define LORA_AT_MDOT
-// #define LORA_AT_LORAE5
+// #define LORA_AT_WIOE5
 
 // Set serial for debug console (to the Serial Monitor, default speed 115200)
 #define SerialMon Serial
@@ -41,7 +41,7 @@ SoftwareSerial SerialAT(2, 3);  // RX, TX
 // NOTE:  DO NOT AUTOBAUD in production code.  Once you've established
 // communication, set a fixed baud rate using modem.setBaud(#).
 #define LORA_AUTOBAUD_MIN 9600
-#define LORA_AUTOBAUD_MAX 115200
+#define LORA_AUTOBAUD_MAX 921600
 
 // Add a reception delay, if needed.
 // This may be needed for a fast processor at a slow baud rate.
@@ -120,6 +120,13 @@ void setup() {
   // Set console baud rate
   SerialMon.begin(115200);
   delay(10);
+
+// Wait for USB connection to be established by PC
+// NOTE:  Only use this when debugging - if not connected to a PC, this adds an
+// unnecessary startup delay
+#if defined(SERIAL_PORT_USBVIRTUAL)
+  while (!SERIAL_PORT_USBVIRTUAL && (millis() < 10000L));
+#endif
 
   // !!!!!!!!!!!
   // Set your reset, enable, power pins here
@@ -229,7 +236,7 @@ void loop() {
   }
   delay(2000L);
 // get and set the sub-band to test functionality
-#ifndef LORA_AT_LORAE5  // not supported
+#ifndef LORA_AT_WIOE5  // not supported
   int8_t currSubBand = modem.getFrequencySubBand();
   SerialMon.print(F("Device is currently using LoRa sub-band "));
   SerialMon.println(currSubBand);
@@ -605,7 +612,7 @@ void loop() {
   }
 
 
-#ifndef LORA_AT_LORAE5  // LoRaE5 doesn't do pin sleep
+#ifndef LORA_AT_WIOE5  // WioE5 doesn't do pin sleep
   if (arduino_wake_pin >= 0) {
     // test sleeping and waking with the an interrupt pin
     SerialMon.println(

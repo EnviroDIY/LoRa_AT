@@ -21,7 +21,7 @@ jobs:
     strategy:
       matrix:
         example: [examples/AllFunctions]
-        modem: [LORA_AT_MDOT, LORA_AT_LORAE5]
+        modem: [LORA_AT_MDOT, LORA_AT_WIOE5]
 
     steps:
       - name: Checkout code
@@ -353,7 +353,7 @@ jobs:
     strategy:
       matrix:
         example: [examples/AllFunctions]
-        modem: [LORA_AT_MDOT, LORA_AT_LORAE5]
+        modem: [LORA_AT_MDOT, LORA_AT_WIOE5]
 
     steps:
       - name: Checkout code

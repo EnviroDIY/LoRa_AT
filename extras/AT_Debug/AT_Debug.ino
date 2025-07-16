@@ -7,7 +7,7 @@
 
 // Select your modem:
 #define LORA_AT_MDOT
-// #define LORA_AT_LORAE5
+// #define LORA_AT_WIOE5
 
 // Set serial for debug console (to the Serial Monitor, speed 115200)
 #define SerialMon Serial
