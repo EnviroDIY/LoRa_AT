@@ -24,6 +24,25 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ***
 
+## [0.4.3]
+
+### Changed
+
+- Added faster baud rates to auto-baud function
+- Corrected name from LoRa E5 to Wio-E5.
+  - For backwards compatibility, you can defined either `LORA_AT_WIOE5` or `LORA_AT_LORAE5` to ensure the module is loaded.
+
+### Added
+
+- Implemented function to change the default frequency band on the mDot.
+  - While implemented, this should not be used unless you're sure you know what you're doing!
+
+### Fixed
+
+- Correctly handle protected settings on the mDot
+
+***
+
 ## [0.4.2]
 
 ### Fixed
@@ -105,7 +124,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ***
 
-[Unreleased]: https://github.com/EnviroDIY/LoRa_AT/compare/v0.4.2...HEAD
+[Unreleased]: https://github.com/EnviroDIY/LoRa_AT/compare/v0.4.3...HEAD
+[0.4.3]: https://github.com/EnviroDIY/LoRa_AT/releases/tag/v0.4.3
 [0.4.2]: https://github.com/EnviroDIY/LoRa_AT/releases/tag/v0.4.2
 [0.4.1]: https://github.com/EnviroDIY/LoRa_AT/releases/tag/v0.4.1
 [0.4.0]: https://github.com/EnviroDIY/LoRa_AT/releases/tag/v0.4.0

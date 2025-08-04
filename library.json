@@ -1,6 +1,6 @@
 {
   "name": "LoRa_AT",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "A small Arduino library for AT command based LoRa Modules",
   "keywords": "LoRa, LoRaWAN, AT commands, AT, mDOT, Wio-E5",
   "authors": [

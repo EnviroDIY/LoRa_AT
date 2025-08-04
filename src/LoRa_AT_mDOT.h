@@ -261,8 +261,16 @@ class LoRa_AT_mDOT : public LoRa_AT_Modem<LoRa_AT_mDOT>,
     if (devEui != nullptr) {
       sendAT(GF("+DI="), devEui);  // set the device EUI
       waitResponse();
+      commitSettings(true);  // save configuration changes
+      // NOTE: The device EUI is a protected setting and it always has a factory
+      // default value, so we must use the save protected settings command to
+      // change it.
+    } else {
+      commitSettings();  // save configuration changes
+      // The AppEUI and AppKey are also protected settings, but they do not have
+      // factory defaults, so unless someone has set them in flash, the
+      // "standard" write settings command will work.
     }
-    commitSettings();                // save configuration changes
     join(attempts, initialBackoff);  // join the network
     return isNetworkConnected();     // verify that we're connected
   }
@@ -402,10 +410,15 @@ class LoRa_AT_mDOT : public LoRa_AT_Modem<LoRa_AT_mDOT>,
     return resp;
   }
 
-  // This is not configurable on the mDOT.  It's set at the factory based on the
-  // module type.
-  bool setBandImpl(const char*) {
-    return false;
+  // It is a bad idea to change this on the mDOT.  It's set at the factory based
+  // on the module type.
+  bool setBandImpl(const char* band) {
+    sendAT(GF("+DFREQ="), band);  // set the device EUI
+    waitResponse();
+    commitSettings(true);  // Write *protected* configurations
+    // The default frequency band is a protected setting and it always has a
+    // factory default value, so we must use the save protected settings command
+    // to change it.
   }
   String getBandImpl() {
     return sendATGetString(GF("+FREQ?"));
@@ -841,8 +854,12 @@ class LoRa_AT_mDOT : public LoRa_AT_Modem<LoRa_AT_mDOT>,
   }
 
 
-  bool commitSettings() {
-    sendAT(GF("&W"));  // Write configurations
+  bool commitSettings(bool _protected = false) {
+    if (_protected) {
+      sendAT(GF("&WP"));  // Write *protected* configurations
+    } else {
+      sendAT(GF("&W"));  // Write configurations
+    }
     return waitResponse() == 1;
   }
 
