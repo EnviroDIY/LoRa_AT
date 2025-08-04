@@ -6,7 +6,7 @@
   "examples": [],
   "doxyfile": {
     "PROJECT_NAME": "LoRa_AT",
-    "PROJECT_NUMBER": "0.4.2",
+    "PROJECT_NUMBER": "0.4.3",
     "PROJECT_BRIEF": "A small Arduino library for LoRa modules, that just works. Supports modules with AT command interfaces.",
     "PROJECT_LOGO": "gp-desktop-logo.png",
     "OUTPUT_DIRECTORY": "../../LoRa_AT_Doxygen",
@@ -68,7 +68,7 @@
     "VERSION_LABELS": true
   },
   "images": [],
-  "current": "Doxyfile.xml",
+  "current": "index.xml",
   "current_kind": null,
   "current_include": null,
   "current_prefix": [],
