@@ -414,11 +414,12 @@ class LoRa_AT_mDOT : public LoRa_AT_Modem<LoRa_AT_mDOT>,
   // on the module type.
   bool setBandImpl(const char* band) {
     sendAT(GF("+DFREQ="), band);  // set the device EUI
-    waitResponse();
+    bool wasOk = waitResponse() == 1;
     commitSettings(true);  // Write *protected* configurations
     // The default frequency band is a protected setting and it always has a
     // factory default value, so we must use the save protected settings command
     // to change it.
+    return wasOk;
   }
   String getBandImpl() {
     return sendATGetString(GF("+FREQ?"));
