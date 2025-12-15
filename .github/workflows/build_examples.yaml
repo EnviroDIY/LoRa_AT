@@ -48,7 +48,7 @@ jobs:
         uses: arduino/setup-arduino-cli@v2.0.0
 
       - name: Restore Arduino platforms
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         id: restore_platforms
         with:
           path: |
@@ -64,7 +64,7 @@ jobs:
           sh continuous_integration/install-platforms-arduino-cli.sh
 
       - name: Restore Arduino libraries
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         id: restore_libraries
         if: ${{ steps.check_lib_install.outputs.valid_lib_dep_script == 'true'}}
         with:
@@ -327,7 +327,7 @@ jobs:
           arduino-cli --config-file continuous_integration/arduino_cli.yaml lib uninstall ${GITHUB_REPOSITORY#*/}
 
       - name: Cache Arduino platforms
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v5
         id: cache_platforms
         if: ${{ always() }}
         with:
@@ -336,7 +336,7 @@ jobs:
           key: ${{ steps.restore_platforms.outputs.cache-primary-key }}
 
       - name: Cache Arduino libraries
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v5
         id: cache_libraries
         if: ${{ always() && steps.check_lib_install.outputs.valid_lib_dep_script == 'true'}}
         with:
@@ -363,7 +363,7 @@ jobs:
         uses: EnviroDIY/setup-platformio-action@v1.0.2
 
       - name: Restore PlatformIO platforms
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         id: restore_platforms
         with:
           path: |
@@ -381,7 +381,7 @@ jobs:
           sh continuous_integration/install-platforms-platformio.sh
 
       - name: Restore PlatformIO libraries
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         id: restore_libraries
         if: ${{ steps.check_lib_install.outputs.valid_lib_dep_script == 'true'}}
         with:
@@ -531,7 +531,7 @@ jobs:
           pio pkg uninstall --skip-dependencies -g --library LoRa_AT
 
       - name: Cache PlatformIO platforms
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v5
         id: cache_platforms
         if: ${{ always() }}
         with:
@@ -542,7 +542,7 @@ jobs:
           key: ${{ steps.restore_platforms.outputs.cache-primary-key }}
 
       - name: Cache PlatformIO libraries
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v5
         id: cache_libraries
         if: ${{ always() && steps.check_lib_install.outputs.valid_lib_dep_script == 'true'}}
         with:
